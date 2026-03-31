@@ -75,6 +75,32 @@ const enUS = {
       next: 'Next',
     },
     compare: { title: 'Model Comparison' },
+    sync: {
+      title: 'Cloud Sync',
+      upload: 'Upload to Cloud',
+      download: 'Download from Cloud',
+      lastSync: 'Last sync',
+      syncing: 'Syncing...',
+      syncNow: 'Sync Now',
+    },
+    export: {
+      title: 'Export Configuration',
+      exporting: 'Exporting...',
+      export: 'Export',
+    },
+    webhook: {
+      title: 'Webhook Alerts',
+      configured: 'Configured Webhooks',
+      add: 'Add Webhook',
+      guide: 'How to get webhook URL',
+    },
+    setupGuide: {
+      title: 'Setup Guide',
+      back: 'Back',
+      next: 'Next',
+      finish: 'Finish',
+      ready: 'Ready to connect!',
+    },
   },
 };
 
