@@ -21,8 +21,14 @@ interface LatencyChartProps {
   isDark: boolean;
 }
 
-export const LatencyChart: React.FC<LatencyChartProps> = ({ data, range: _range, isDark }) => {
-  const filteredData = data.slice(-288); // Max 288 points
+export const LatencyChart: React.FC<LatencyChartProps> = ({ data, range, isDark }) => {
+  const rangeMs: Record<string, number> = {
+    '24h': 24 * 60 * 60 * 1000,
+    '7d': 7 * 24 * 60 * 60 * 1000,
+    '30d': 30 * 24 * 60 * 60 * 1000,
+  };
+  const cutoff = Date.now() - (rangeMs[range] || rangeMs['24h']);
+  const filteredData = data.filter((d) => new Date(d.timestamp).getTime() >= cutoff);
 
   const labels = filteredData.map((d) => {
     const date = new Date(d.timestamp);

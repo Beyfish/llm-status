@@ -35,8 +35,8 @@ interface StoreState {
   setSelectedProvider: (id: string | null) => void;
   checkLatency: (providerId: string, mode: LatencyMode) => Promise<void>;
   checkAll: (mode: LatencyMode, concurrency: number, timeout: number) => Promise<void>;
-  uploadSync: () => Promise<void>;
-  downloadSync: () => Promise<void>;
+  uploadSync: (protocol: string, connectionConfig: Record<string, string>) => Promise<void>;
+  downloadSync: (protocol: string, connectionConfig: Record<string, string>) => Promise<void>;
   pushToTarget: (target: string, config: Record<string, unknown>) => Promise<void>;
   exportToFile: (target: string, config: Record<string, unknown>) => Promise<void>;
   setViewMode: (mode: ViewMode) => void;
@@ -122,21 +122,22 @@ export const useStore = create<StoreState>()((set, get) => ({
   },
 
   // Sync methods
-  uploadSync: async () => {
+  uploadSync: async (protocol: string, connectionConfig: Record<string, string>) => {
     set({ syncStatus: 'syncing' });
     try {
-      const config = getConfig(get());
-      await window.electronAPI.syncUpload({ protocol: 'webdav', config });
+      const appConfig = getConfig(get());
+      await window.electronAPI.syncUpload({ protocol, config: { ...connectionConfig, ...appConfig } });
+      set({ syncStatus: 'idle', lastSyncAt: new Date().toISOString() });
     } catch {
       set({ syncStatus: 'error' });
     }
   },
-  downloadSync: async () => {
+  downloadSync: async (protocol: string, connectionConfig: Record<string, string>) => {
     set({ syncStatus: 'syncing' });
     try {
-      const result = await window.electronAPI.syncDownload({ protocol: 'webdav', config: {} });
+      const result = await window.electronAPI.syncDownload({ protocol, config: connectionConfig });
       if (result.success) {
-        set({ lastSyncAt: result.timestamp });
+        set({ syncStatus: 'idle', lastSyncAt: result.timestamp });
       }
     } catch {
       set({ syncStatus: 'error' });

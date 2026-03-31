@@ -38,21 +38,30 @@ export const ExportModal: React.FC<ExportModalProps> = ({ onClose }) => {
     setError(null);
     setSuccess(null);
 
-    const exportData = {
-      providers: providers.map((p) => ({
-        name: p.name,
-        type: p.type,
-        baseUrl: p.baseUrl,
-        apiKey: p.credentials.find((c) => c.type === 'api_key')?.value,
-        models: [],
-      })),
-    };
-
     try {
       if (target?.pushMode && targetUrl && targetApiKey) {
-        await pushToTarget(selectedTarget, { ...exportData, url: targetUrl, apiKey: targetApiKey });
+        // Push each provider individually — IPC handler expects flat single-provider data
+        for (const p of providers) {
+          const providerData = {
+            name: p.name,
+            type: p.type,
+            baseUrl: p.baseUrl,
+            apiKey: p.credentials.find((c) => c.type === 'api_key')?.value || '',
+            models: [],
+          };
+          await pushToTarget(selectedTarget, { ...providerData, url: targetUrl, apiKey: targetApiKey });
+        }
         setSuccess(`Pushed to ${target.name} successfully`);
       } else {
+        const exportData = {
+          providers: providers.map((p) => ({
+            name: p.name,
+            type: p.type,
+            baseUrl: p.baseUrl,
+            apiKey: p.credentials.find((c) => c.type === 'api_key')?.value,
+            models: [],
+          })),
+        };
         await exportToFile(selectedTarget, exportData);
         setSuccess(`Exported to ${target?.name || 'file'} successfully`);
       }
