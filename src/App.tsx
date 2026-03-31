@@ -6,6 +6,8 @@ import { LatencyModal } from './components/LatencyModal';
 import { SettingsModal } from './components/SettingsModal';
 import { SmartImportModal } from './components/SmartImportModal';
 import { OnboardingFlow } from './components/OnboardingFlow';
+import { SyncModal } from './components/SyncModal';
+import { ExportModal } from './components/ExportModal';
 import { useStore } from './store';
 import { useTranslation } from 'react-i18next';
 
@@ -159,8 +161,8 @@ const App: React.FC = () => {
       {showLatencyModal && <LatencyModal onClose={() => setShowLatencyModal(false)} />}
       {showSettingsModal && <SettingsModal onClose={() => setShowSettingsModal(false)} />}
       {showSmartImport && <SmartImportModal onClose={() => setShowSmartImport(false)} onImport={(p) => useStore.getState().addProvider(p)} />}
-      {showExportModal && <div className="modal-overlay" onClick={() => setShowExportModal(false)}><div className="modal" onClick={(e) => e.stopPropagation()}><div className="modal__header"><h2>Export</h2><button className="modal__close" onClick={() => setShowExportModal(false)}>✕</button></div><div className="modal__body"><p>Export functionality coming soon.</p></div></div></div>}
-      {showSyncModal && <div className="modal-overlay" onClick={() => setShowSyncModal(false)}><div className="modal" onClick={(e) => e.stopPropagation()}><div className="modal__header"><h2>Cloud Sync</h2><button className="modal__close" onClick={() => setShowSyncModal(false)}>✕</button></div><div className="modal__body"><p>Cloud sync functionality coming soon.</p></div></div></div>}
+      {showExportModal && <ExportModal onClose={() => setShowExportModal(false)} />}
+      {showSyncModal && <SyncModal onClose={() => setShowSyncModal(false)} />}
       {showOnboarding && (
         <OnboardingFlow
           onComplete={(p) => {
