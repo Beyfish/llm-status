@@ -1,6 +1,13 @@
 import { ipcMain, dialog, clipboard } from 'electron';
 import { writeFileSync } from 'fs';
 import axios from 'axios';
+import {
+  exportCherryStudio,
+  exportLobeChat,
+  exportChatGptNextWeb,
+  exportDify,
+  exportAnythingLLM,
+} from './export-adapters';
 
 interface ExportRequest {
   target: string;
@@ -73,6 +80,21 @@ export function registerExportHandlers(): void {
         case 'openrouter':
           await exportToOpenRouter(req);
           return { success: true, message: 'Exported to OpenRouter successfully' };
+        case 'cherry-studio':
+          await exportCherryStudio(req.data as any);
+          return { success: true, message: 'Exported to Cherry Studio successfully' };
+        case 'lobechat':
+          await exportLobeChat(req.data as any);
+          return { success: true, message: 'Exported to LobeChat successfully' };
+        case 'chatgpt-next-web':
+          await exportChatGptNextWeb(req.data as any);
+          return { success: true, message: 'Exported to ChatGPT Next Web successfully' };
+        case 'dify':
+          await exportDify(req.data as any);
+          return { success: true, message: 'Exported to Dify successfully' };
+        case 'anythingllm':
+          await exportAnythingLLM(req.data as any);
+          return { success: true, message: 'Exported to AnythingLLM successfully' };
         default:
           return { success: false, message: `Unknown target: ${req.target}` };
       }

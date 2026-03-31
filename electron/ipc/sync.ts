@@ -1,7 +1,8 @@
 import { ipcMain, dialog } from 'electron';
-import { createClient, FileStat } from 'webdav';
+import { createClient } from 'webdav';
 import { S3Client, PutObjectCommand, GetObjectCommand } from '@aws-sdk/client-s3';
 import { Readable } from 'stream';
+import { google } from 'googleapis';
 
 const REMOTE_PATH = 'llm-status/config.json';
 
@@ -67,22 +68,115 @@ async function s3Download(config: Record<string, string>): Promise<string> {
   return body.toString('utf-8');
 }
 
-// Google Drive (placeholder - requires OAuth setup)
-async function gdriveUpload(_config: Record<string, string>, _data: string): Promise<void> {
-  throw new Error('Google Drive sync requires OAuth setup');
+// Google Drive
+async function gdriveUpload(config: Record<string, string>, data: string): Promise<void> {
+  const oauth2Client = new google.auth.OAuth2(
+    config.clientId,
+    config.clientSecret,
+    config.redirectUri || 'http://localhost:17171/oauth/callback',
+  );
+  oauth2Client.setCredentials({
+    access_token: config.accessToken,
+    refresh_token: config.refreshToken,
+  });
+
+  const drive = google.drive({ version: 'v3', auth: oauth2Client });
+
+  // Find or create app folder
+  const folderRes = await drive.files.list({
+    q: "name='llm-status' and mimeType='application/vnd.google-apps.folder' and trashed=false",
+    fields: 'files(id)',
+  });
+
+  let folderId: string;
+  if (folderRes.data.files && folderRes.data.files.length > 0) {
+    folderId = folderRes.data.files[0].id!;
+  } else {
+    const folder = await drive.files.create({
+      requestBody: { name: 'llm-status', mimeType: 'application/vnd.google-apps.folder' },
+      fields: 'id',
+    });
+    folderId = folder.data.id!;
+  }
+
+  // Find or create config file
+  const fileRes = await drive.files.list({
+    q: `name='config.json' and '${folderId}' in parents and trashed=false`,
+    fields: 'files(id)',
+  });
+
+  if (fileRes.data.files && fileRes.data.files.length > 0) {
+    await drive.files.update({
+      fileId: fileRes.data.files[0].id!,
+      media: { mimeType: 'application/json', body: data },
+    });
+  } else {
+    await drive.files.create({
+      requestBody: { name: 'config.json', parents: [folderId] },
+      media: { mimeType: 'application/json', body: data },
+    });
+  }
 }
 
-async function gdriveDownload(_config: Record<string, string>): Promise<string> {
-  throw new Error('Google Drive sync requires OAuth setup');
+async function gdriveDownload(config: Record<string, string>): Promise<string> {
+  const oauth2Client = new google.auth.OAuth2(
+    config.clientId,
+    config.clientSecret,
+    config.redirectUri || 'http://localhost:17171/oauth/callback',
+  );
+  oauth2Client.setCredentials({
+    access_token: config.accessToken,
+    refresh_token: config.refreshToken,
+  });
+
+  const drive = google.drive({ version: 'v3', auth: oauth2Client });
+  const fileRes = await drive.files.list({
+    q: "name='config.json' and mimeType='application/json' and trashed=false",
+    fields: 'files(id)',
+    orderBy: 'modifiedTime desc',
+    pageSize: 1,
+  });
+
+  if (!fileRes.data.files || fileRes.data.files.length === 0) {
+    throw new Error('Remote config not found');
+  }
+
+  const response = await drive.files.get(
+    { fileId: fileRes.data.files[0].id!, alt: 'media' },
+    { responseType: 'text' },
+  );
+  return response.data as string;
 }
 
-// OneDrive (placeholder - requires OAuth setup)
-async function onedriveUpload(_config: Record<string, string>, _data: string): Promise<void> {
-  throw new Error('OneDrive sync requires OAuth setup');
+// OneDrive
+async function onedriveUpload(config: Record<string, string>, data: string): Promise<void> {
+  const accessToken = config.accessToken;
+  const filePath = '/Apps/llm-status/config.json';
+
+  const response = await fetch(`https://graph.microsoft.com/v1.0/me/drive/root:${encodeURIComponent(filePath)}:/content`, {
+    method: 'PUT',
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+      'Content-Type': 'application/json',
+    },
+    body: data,
+  });
+
+  if (!response.ok) {
+    throw new Error(`OneDrive upload failed: ${response.status} ${response.statusText}`);
+  }
 }
 
-async function onedriveDownload(_config: Record<string, string>): Promise<string> {
-  throw new Error('OneDrive sync requires OAuth setup');
+async function onedriveDownload(config: Record<string, string>): Promise<string> {
+  const accessToken = config.accessToken;
+  const filePath = '/Apps/llm-status/config.json';
+
+  const response = await fetch(`https://graph.microsoft.com/v1.0/me/drive/root:${encodeURIComponent(filePath)}:/content`, {
+    headers: { Authorization: `Bearer ${accessToken}` },
+  });
+
+  if (!response.ok) throw new Error('Remote config not found');
+  return response.text();
 }
 
 export function registerSyncHandlers(): void {
