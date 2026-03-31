@@ -1,6 +1,6 @@
 import { ipcMain, dialog, clipboard } from 'electron';
 import { writeFileSync } from 'fs';
-import { join } from 'path';
+import axios from 'axios';
 
 interface ExportRequest {
   target: string;
@@ -9,78 +9,51 @@ interface ExportRequest {
   apiKey?: string;
 }
 
-// One API / New API adapter
 async function exportToOneApi(req: ExportRequest): Promise<void> {
-  const axios = await import('axios');
   const payload = {
-    name: req.data.name || 'LLM Status Import',
+    name: (req.data.name as string) || 'LLM Status Import',
     type: 1,
-    key: req.data.apiKey,
-    base_url: req.data.baseUrl,
-    models: req.data.models || [],
+    key: (req.data.apiKey as string) || req.apiKey,
+    base_url: (req.data.baseUrl as string) || '',
+    models: (req.data.models as string[]) || [],
   };
-  await axios.default.post(`${req.url}/api/channel`, payload, {
+  await axios.post(`${req.url}/api/channel`, payload, {
     headers: { Authorization: `Bearer ${req.apiKey}` },
   });
 }
 
-// sub2api adapter
 async function exportToSub2api(req: ExportRequest): Promise<void> {
-  const axios = await import('axios');
   const payload = {
-    name: req.data.name || 'LLM Status Import',
-    url: req.data.baseUrl,
-    key: req.data.apiKey,
-    models: req.data.models || [],
+    name: (req.data.name as string) || 'LLM Status Import',
+    url: (req.data.baseUrl as string) || '',
+    key: (req.data.apiKey as string) || req.apiKey,
+    models: (req.data.models as string[]) || [],
   };
-  await axios.default.post(`${req.url}/api/providers`, payload, {
+  await axios.post(`${req.url}/api/providers`, payload, {
     headers: { Authorization: `Bearer ${req.apiKey}` },
   });
 }
 
-// LiteLLM adapter
 async function exportToLiteLLM(req: ExportRequest): Promise<void> {
-  const axios = await import('axios');
   const payload = {
-    model_name: req.data.modelName || 'default',
+    model_name: (req.data.modelName as string) || 'default',
     litellm_params: {
-      model: req.data.model || 'gpt-3.5-turbo',
-      api_key: req.data.apiKey,
-      api_base: req.data.baseUrl,
+      model: (req.data.model as string) || 'gpt-3.5-turbo',
+      api_key: (req.data.apiKey as string) || req.apiKey,
+      api_base: (req.data.baseUrl as string) || '',
     },
   };
-  await axios.default.post(`${req.url}/model/new`, payload, {
+  await axios.post(`${req.url}/model/new`, payload, {
     headers: { Authorization: `Bearer ${req.apiKey}` },
   });
 }
 
-// OpenRouter adapter
 async function exportToOpenRouter(req: ExportRequest): Promise<void> {
-  const axios = await import('axios');
-  await axios.default.post('https://openrouter.ai/api/v1/auth/keys', {
-    name: req.data.name || 'LLM Status Import',
+  await axios.post('https://openrouter.ai/api/v1/auth/keys', {
+    name: (req.data.name as string) || 'LLM Status Import',
   }, {
     headers: { Authorization: `Bearer ${req.apiKey}` },
   });
-}
-
-// Generic JSON export to file
-async function exportToJsonFile(data: Record<string, unknown>): Promise<string> {
-  const result = await dialog.showSaveDialog({
-    title: 'Export Configuration',
-    defaultPath: 'llm-status-config.json',
-    filters: [{ name: 'JSON', extensions: ['json'] }],
-  });
-  if (result.filePath) {
-    writeFileSync(result.filePath, JSON.stringify(data, null, 2), 'utf-8');
-    return result.filePath;
-  }
-  throw new Error('Export cancelled');
-}
-
-// Copy JSON to clipboard
-function exportToClipboard(data: Record<string, unknown>): void {
-  clipboard.writeText(JSON.stringify(data, null, 2));
 }
 
 export function registerExportHandlers(): void {
@@ -111,14 +84,22 @@ export function registerExportHandlers(): void {
 
   ipcMain.handle('export:file', async (_event, req: ExportRequest): Promise<{ success: boolean; message: string }> => {
     try {
-      const filePath = await exportToJsonFile(req.data);
-      return { success: true, message: `Exported to ${filePath}` };
+      const result = await dialog.showSaveDialog({
+        title: 'Export Configuration',
+        defaultPath: 'llm-status-config.json',
+        filters: [{ name: 'JSON', extensions: ['json'] }],
+      });
+      if (result.filePath) {
+        writeFileSync(result.filePath, JSON.stringify(req.data, null, 2), 'utf-8');
+        return { success: true, message: `Exported to ${result.filePath}` };
+      }
+      return { success: false, message: 'Export cancelled' };
     } catch (err: any) {
       return { success: false, message: err.message || 'Export failed' };
     }
   });
 
   ipcMain.handle('export:clipboard', async (_event, data: Record<string, unknown>): Promise<void> => {
-    exportToClipboard(data);
+    clipboard.writeText(JSON.stringify(data, null, 2));
   });
 }

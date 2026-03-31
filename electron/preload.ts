@@ -10,14 +10,20 @@ const electronAPI = {
     ipcRenderer.invoke('latency:check', req),
   latencyCheckAll: (req: { mode: string; concurrency: number; timeout: number }) =>
     ipcRenderer.invoke('latency:checkAll', req),
-  onLatencyProgress: (cb: (data: any) => void) => {
-    ipcRenderer.on('latency:progress', (_e, data) => cb(data));
+  onLatencyProgress: (cb: (data: unknown) => void) => {
+    const handler = (_e: Electron.IpcRendererEvent, data: unknown) => cb(data);
+    ipcRenderer.on('latency:progress', handler);
+    return () => { ipcRenderer.off('latency:progress', handler); };
   },
-  onLatencyComplete: (cb: (data: any) => void) => {
-    ipcRenderer.on('latency:complete', (_e, data) => cb(data));
+  onLatencyComplete: (cb: (data: unknown) => void) => {
+    const handler = (_e: Electron.IpcRendererEvent, data: unknown) => cb(data);
+    ipcRenderer.on('latency:complete', handler);
+    return () => { ipcRenderer.off('latency:complete', handler); };
   },
-  onLatencyError: (cb: (data: any) => void) => {
-    ipcRenderer.on('latency:error', (_e, data) => cb(data));
+  onLatencyError: (cb: (data: unknown) => void) => {
+    const handler = (_e: Electron.IpcRendererEvent, data: unknown) => cb(data);
+    ipcRenderer.on('latency:error', handler);
+    return () => { ipcRenderer.off('latency:error', handler); };
   },
 
   // Sync
@@ -25,11 +31,17 @@ const electronAPI = {
     ipcRenderer.invoke('sync:upload', req),
   syncDownload: (req: { protocol: string; config: object }) =>
     ipcRenderer.invoke('sync:download', req),
-  onSyncStatus: (cb: (data: any) => void) => {
-    ipcRenderer.on('sync:status', (_e, data) => cb(data));
+  syncTest: (req: { protocol: string; config: object }) =>
+    ipcRenderer.invoke('sync:test', req),
+  onSyncStatus: (cb: (data: unknown) => void) => {
+    const handler = (_e: Electron.IpcRendererEvent, data: unknown) => cb(data);
+    ipcRenderer.on('sync:status', handler);
+    return () => { ipcRenderer.off('sync:status', handler); };
   },
-  onSyncError: (cb: (data: any) => void) => {
-    ipcRenderer.on('sync:error', (_e, data) => cb(data));
+  onSyncError: (cb: (data: unknown) => void) => {
+    const handler = (_e: Electron.IpcRendererEvent, data: unknown) => cb(data);
+    ipcRenderer.on('sync:error', handler);
+    return () => { ipcRenderer.off('sync:error', handler); };
   },
 
   // Export
@@ -37,45 +49,65 @@ const electronAPI = {
     ipcRenderer.invoke('export:push', req),
   exportFile: (req: { target: string; data: object }) =>
     ipcRenderer.invoke('export:file', req),
-  onExportError: (cb: (data: any) => void) => {
-    ipcRenderer.on('export:error', (_e, data) => cb(data));
+  exportClipboard: (data: object) =>
+    ipcRenderer.invoke('export:clipboard', data),
+  onExportError: (cb: (data: unknown) => void) => {
+    const handler = (_e: Electron.IpcRendererEvent, data: unknown) => cb(data);
+    ipcRenderer.on('export:error', handler);
+    return () => { ipcRenderer.off('export:error', handler); };
   },
 
   // OAuth
   oauthStart: (req: { provider: string; state: string }) =>
     ipcRenderer.invoke('oauth:start', req),
-  onOAuthCallback: (cb: (data: any) => void) => {
-    ipcRenderer.on('oauth:callback', (_e, data) => cb(data));
+  onOAuthCallback: (cb: (data: unknown) => void) => {
+    const handler = (_e: Electron.IpcRendererEvent, data: unknown) => cb(data);
+    ipcRenderer.on('oauth:callback', handler);
+    return () => { ipcRenderer.off('oauth:callback', handler); };
   },
-  onOAuthComplete: (cb: (data: any) => void) => {
-    ipcRenderer.on('oauth:complete', (_e, data) => cb(data));
+  onOAuthComplete: (cb: (data: unknown) => void) => {
+    const handler = (_e: Electron.IpcRendererEvent, data: unknown) => cb(data);
+    ipcRenderer.on('oauth:complete', handler);
+    return () => { ipcRenderer.off('oauth:complete', handler); };
   },
-  onOAuthError: (cb: (data: any) => void) => {
-    ipcRenderer.on('oauth:error', (_e, data) => cb(data));
+  onOAuthError: (cb: (data: unknown) => void) => {
+    const handler = (_e: Electron.IpcRendererEvent, data: unknown) => cb(data);
+    ipcRenderer.on('oauth:error', handler);
+    return () => { ipcRenderer.off('oauth:error', handler); };
   },
 
   // Notifications
-  onNotify: (cb: (data: any) => void) => {
-    ipcRenderer.on('notify:show', (_e, data) => cb(data));
+  onNotify: (cb: (data: unknown) => void) => {
+    const handler = (_e: Electron.IpcRendererEvent, data: unknown) => cb(data);
+    ipcRenderer.on('notify:show', handler);
+    return () => { ipcRenderer.off('notify:show', handler); };
   },
 
+  // Encryption
+  encryptValue: (value: string) => ipcRenderer.invoke('encrypt:value', value),
+  decryptValue: (encrypted: string) => ipcRenderer.invoke('decrypt:value', encrypted),
+
   // Error channels
-  onUsageError: (cb: (data: any) => void) => {
-    ipcRenderer.on('usage:error', (_e, data) => cb(data));
+  onUsageError: (cb: (data: unknown) => void) => {
+    const handler = (_e: Electron.IpcRendererEvent, data: unknown) => cb(data);
+    ipcRenderer.on('usage:error', handler);
+    return () => { ipcRenderer.off('usage:error', handler); };
   },
 
   // Webhook
-  webhookSend: (config: any, message: any) => ipcRenderer.invoke('webhook:send', config, message),
-  webhookTest: (config: any) => ipcRenderer.invoke('webhook:test', config),
-  notifyDesktop: (message: any) => ipcRenderer.invoke('notify:desktop', message),
-  notifyAll: (webhooks: any[], message: any) => ipcRenderer.invoke('notify:all', webhooks, message),
+  webhookSend: (config: unknown, message: unknown) => ipcRenderer.invoke('webhook:send', config, message),
+  webhookTest: (config: unknown) => ipcRenderer.invoke('webhook:test', config),
+  notifyDesktop: (message: unknown) => ipcRenderer.invoke('notify:desktop', message),
+  notifyAll: (webhooks: unknown[], message: unknown) => ipcRenderer.invoke('notify:all', webhooks, message),
 
   // Usage
-  usageFetch: (req: any) => ipcRenderer.invoke('usage:fetch', req),
+  usageFetch: (req: unknown) => ipcRenderer.invoke('usage:fetch', req),
 
   // Config migration
-  onConfigMigrate: (cb: (data: any) => void) => {
-    ipcRenderer.on('config:migrate', (_e, data) => cb(data));
+  onConfigMigrate: (cb: (data: unknown) => void) => {
+    const handler = (_e: Electron.IpcRendererEvent, data: unknown) => cb(data);
+    ipcRenderer.on('config:migrate', handler);
+    return () => { ipcRenderer.off('config:migrate', handler); };
   },
 };
 

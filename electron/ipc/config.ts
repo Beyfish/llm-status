@@ -37,7 +37,7 @@ function getDefaultConfig(): object {
   };
 }
 
-function readConfig(): object {
+export function readConfig(): object {
   ensureConfigDir();
   if (!existsSync(CONFIG_PATH)) {
     const defaultConfig = getDefaultConfig();
@@ -55,7 +55,7 @@ function readConfig(): object {
   }
 }
 
-function writeConfig(config: object): void {
+export function writeConfig(config: object): void {
   ensureConfigDir();
   // Backup before write
   if (existsSync(CONFIG_PATH)) {

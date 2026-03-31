@@ -3,6 +3,21 @@ import axios from 'axios';
 import { HttpsProxyAgent } from 'https-proxy-agent';
 import { readConfig } from './config';
 
+// Shared endpoint config (mirrors src/utils/providers.ts)
+const ENDPOINTS: Record<string, { latencyEndpoint: string; method: string }> = {
+  openai: { latencyEndpoint: '/v1/models', method: 'GET' },
+  anthropic: { latencyEndpoint: '/v1/messages', method: 'HEAD' },
+  google: { latencyEndpoint: '/v1beta/models', method: 'GET' },
+  'azure-openai': { latencyEndpoint: '/openai/models?api-version=2024-02-01', method: 'GET' },
+  zhipu: { latencyEndpoint: '/v1/models', method: 'GET' },
+  dashscope: { latencyEndpoint: '/compatible-mode/v1/models', method: 'GET' },
+  qianfan: { latencyEndpoint: '/rpc/2.0/ai_custom/v1/wenxinworkshop/chat/completions', method: 'POST' },
+  vllm: { latencyEndpoint: '/v1/models', method: 'GET' },
+  ollama: { latencyEndpoint: '/api/tags', method: 'GET' },
+  localai: { latencyEndpoint: '/v1/models', method: 'GET' },
+  custom: { latencyEndpoint: '/v1/models', method: 'GET' },
+};
+
 interface LatencyCheckRequest {
   providerId: string;
   mode: 'lightweight' | 'full';
@@ -14,20 +29,6 @@ interface LatencyCheckAllRequest {
   concurrency: number;
   timeout: number;
 }
-
-const PROVIDER_ENDPOINTS: Record<string, { url: string; method: string }> = {
-  openai: { url: '/v1/models', method: 'GET' },
-  anthropic: { url: '/v1/messages', method: 'HEAD' },
-  google: { url: '/v1beta/models', method: 'GET' },
-  'azure-openai': { url: '/openai/models?api-version=2024-02-01', method: 'GET' },
-  zhipu: { url: '/v1/models', method: 'GET' },
-  dashscope: { url: '/compatible-mode/v1/models', method: 'GET' },
-  qianfan: { url: '/rpc/2.0/ai_custom/v1/wenxinworkshop/chat/completions', method: 'POST' },
-  vllm: { url: '/v1/models', method: 'GET' },
-  ollama: { url: '/api/tags', method: 'GET' },
-  localai: { url: '/v1/models', method: 'GET' },
-  custom: { url: '/v1/models', method: 'GET' },
-};
 
 async function checkProviderLatency(
   providerId: string,
@@ -47,9 +48,9 @@ async function checkProviderLatency(
     return { providerId, latency: 0, status: 'error', error: 'No credentials configured', timestamp: new Date().toISOString() };
   }
 
-  const endpoint = PROVIDER_ENDPOINTS[provider.type] || PROVIDER_ENDPOINTS.custom;
+  const endpoint = ENDPOINTS[provider.type] || ENDPOINTS.custom;
   const baseUrl = provider.baseUrl || '';
-  const url = `${baseUrl}${endpoint.url}`;
+  const url = `${baseUrl}${endpoint.latencyEndpoint}`;
 
   const headers: Record<string, string> = {};
   if (credential.type === 'api_key') {
@@ -67,7 +68,7 @@ async function checkProviderLatency(
     method: mode === 'lightweight' ? 'HEAD' : endpoint.method,
     url,
     headers,
-    timeout,
+    timeout: timeout > 0 ? timeout : 10000,
     validateStatus: () => true,
   };
 
@@ -99,6 +100,7 @@ async function checkProviderLatency(
 export function registerLatencyHandlers(): void {
   ipcMain.handle('latency:check', async (_event, req: LatencyCheckRequest) => {
     const result = await checkProviderLatency(req.providerId, req.mode, req.credentialId);
+    _event.sender.send('latency:progress', result);
     return result;
   });
 

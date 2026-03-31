@@ -23,6 +23,8 @@ const App: React.FC = () => {
   const [showOnboarding, setShowOnboarding] = useState(() => {
     return localStorage.getItem('llm-status-onboarding-complete') !== 'true';
   });
+  const [showExportModal, setShowExportModal] = useState(false);
+  const [showSyncModal, setShowSyncModal] = useState(false);
 
   // Load providers on mount
   useEffect(() => {
@@ -107,10 +109,10 @@ const App: React.FC = () => {
           <button className="app-header__btn" onClick={() => setShowLatencyModal(true)} title={t('header.checkAll')}>
             ⚡
           </button>
-          <button className="app-header__btn" title={t('header.export')}>
+          <button className="app-header__btn" onClick={() => setShowExportModal(true)} title={t('header.export')}>
             📤
           </button>
-          <button className="app-header__btn" title={t('header.sync')}>
+          <button className="app-header__btn" onClick={() => setShowSyncModal(true)} title={t('header.sync')}>
             ☁️
           </button>
           <button className="app-header__btn" onClick={() => setShowSettingsModal(true)} title={t('header.settings')}>
@@ -132,7 +134,7 @@ const App: React.FC = () => {
                 <span className="app-sidebar__name">{p.name}</span>
               </button>
             ))}
-            <button className="app-sidebar__add">+ {t('sidebar.add')}</button>
+            <button className="app-sidebar__add" onClick={() => setShowSmartImport(true)}>+ {t('sidebar.add')}</button>
           </nav>
         </aside>
 
@@ -157,6 +159,8 @@ const App: React.FC = () => {
       {showLatencyModal && <LatencyModal onClose={() => setShowLatencyModal(false)} />}
       {showSettingsModal && <SettingsModal onClose={() => setShowSettingsModal(false)} />}
       {showSmartImport && <SmartImportModal onClose={() => setShowSmartImport(false)} onImport={(p) => useStore.getState().addProvider(p)} />}
+      {showExportModal && <div className="modal-overlay" onClick={() => setShowExportModal(false)}><div className="modal" onClick={(e) => e.stopPropagation()}><div className="modal__header"><h2>Export</h2><button className="modal__close" onClick={() => setShowExportModal(false)}>✕</button></div><div className="modal__body"><p>Export functionality coming soon.</p></div></div></div>}
+      {showSyncModal && <div className="modal-overlay" onClick={() => setShowSyncModal(false)}><div className="modal" onClick={(e) => e.stopPropagation()}><div className="modal__header"><h2>Cloud Sync</h2><button className="modal__close" onClick={() => setShowSyncModal(false)}>✕</button></div><div className="modal__body"><p>Cloud sync functionality coming soon.</p></div></div></div>}
       {showOnboarding && (
         <OnboardingFlow
           onComplete={(p) => {
