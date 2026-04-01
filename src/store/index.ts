@@ -26,6 +26,9 @@ interface StoreState {
   theme: Theme;
   searchQuery: string;
   commandPaletteOpen: boolean;
+  showSyncModal: boolean;
+  showExportModal: boolean;
+  showSettingsModal: boolean;
   // Settings
   settings: Partial<AppSettings>;
   // Methods
@@ -35,14 +38,17 @@ interface StoreState {
   setSelectedProvider: (id: string | null) => void;
   checkLatency: (providerId: string, mode: LatencyMode) => Promise<void>;
   checkAll: (mode: LatencyMode, concurrency: number, timeout: number) => Promise<void>;
-  uploadSync: () => Promise<void>;
-  downloadSync: () => Promise<void>;
+  uploadSync: (protocol: string, connectionConfig: Record<string, string>) => Promise<void>;
+  downloadSync: (protocol: string, connectionConfig: Record<string, string>) => Promise<void>;
   pushToTarget: (target: string, config: Record<string, unknown>) => Promise<void>;
   exportToFile: (target: string, config: Record<string, unknown>) => Promise<void>;
   setViewMode: (mode: ViewMode) => void;
   setTheme: (theme: Theme) => void;
   setSearchQuery: (query: string) => void;
   toggleCommandPalette: () => void;
+  setShowSyncModal: (show: boolean) => void;
+  setShowExportModal: (show: boolean) => void;
+  setShowSettingsModal: (show: boolean) => void;
   updateSettings: (settings: Partial<AppSettings>) => Promise<void>;
 }
 
@@ -67,6 +73,9 @@ export const useStore = create<StoreState>()((set, get) => ({
   theme: 'dark',
   searchQuery: '',
   commandPaletteOpen: false,
+  showSyncModal: false,
+  showExportModal: false,
+  showSettingsModal: false,
   settings: {},
 
   // Provider methods
@@ -122,21 +131,35 @@ export const useStore = create<StoreState>()((set, get) => ({
   },
 
   // Sync methods
-  uploadSync: async () => {
+  uploadSync: async (protocol: string, connectionConfig: Record<string, string>) => {
     set({ syncStatus: 'syncing' });
     try {
-      const config = getConfig(get());
-      await window.electronAPI.syncUpload({ protocol: 'webdav', config });
+      const appConfig = getConfig(get());
+      await window.electronAPI.syncUpload({ protocol, config: connectionConfig, data: appConfig });
+      set({ syncStatus: 'idle', lastSyncAt: new Date().toISOString() });
     } catch {
       set({ syncStatus: 'error' });
     }
   },
-  downloadSync: async () => {
+  downloadSync: async (protocol: string, connectionConfig: Record<string, string>) => {
     set({ syncStatus: 'syncing' });
     try {
-      const result = await window.electronAPI.syncDownload({ protocol: 'webdav', config: {} });
-      if (result.success) {
-        set({ lastSyncAt: result.timestamp });
+      const result = await window.electronAPI.syncDownload({ protocol, config: connectionConfig });
+      if (result.success && result.data) {
+        const remoteConfig = result.data as any;
+        if (remoteConfig.providers) {
+          set({
+            providers: remoteConfig.providers,
+            settings: remoteConfig.settings || {},
+            syncStatus: 'idle',
+            lastSyncAt: result.timestamp,
+          });
+          await window.electronAPI.configWrite(remoteConfig);
+        } else {
+          set({ syncStatus: 'idle', lastSyncAt: result.timestamp });
+        }
+      } else {
+        set({ syncStatus: 'idle', lastSyncAt: result.timestamp });
       }
     } catch {
       set({ syncStatus: 'error' });
@@ -181,6 +204,9 @@ export const useStore = create<StoreState>()((set, get) => ({
   setSearchQuery: (query: string) => set({ searchQuery: query }),
   toggleCommandPalette: () =>
     set((s) => ({ commandPaletteOpen: !s.commandPaletteOpen })),
+  setShowSyncModal: (show: boolean) => set({ showSyncModal: show }),
+  setShowExportModal: (show: boolean) => set({ showExportModal: show }),
+  setShowSettingsModal: (show: boolean) => set({ showSettingsModal: show }),
 
   // Settings methods
   updateSettings: async (settings: Partial<AppSettings>) => {

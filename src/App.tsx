@@ -17,16 +17,15 @@ const App: React.FC = () => {
     providers, selectedProviderId, viewMode, theme, searchQuery,
     setSelectedProvider, setSearchQuery, setTheme, toggleCommandPalette,
     loadProviders, settings,
+    showSyncModal, showExportModal, showSettingsModal,
+    setShowSyncModal, setShowExportModal, setShowSettingsModal,
   } = useStore();
 
   const [showLatencyModal, setShowLatencyModal] = useState(false);
-  const [showSettingsModal, setShowSettingsModal] = useState(false);
   const [showSmartImport, setShowSmartImport] = useState(false);
   const [showOnboarding, setShowOnboarding] = useState(() => {
     return localStorage.getItem('llm-status-onboarding-complete') !== 'true';
   });
-  const [showExportModal, setShowExportModal] = useState(false);
-  const [showSyncModal, setShowSyncModal] = useState(false);
 
   // Load providers on mount
   useEffect(() => {
@@ -71,6 +70,8 @@ const App: React.FC = () => {
         setSelectedProvider(null);
         setShowLatencyModal(false);
         setShowSettingsModal(false);
+        setShowSyncModal(false);
+        setShowExportModal(false);
       }
     };
     window.addEventListener('keydown', handleKeyDown);

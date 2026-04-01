@@ -56,12 +56,20 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({ onComplete, onSk
     setVerifyResult(null);
 
     try {
+      const headers: Record<string, string> = {
+        'Content-Type': 'application/json',
+      };
+
+      if (selectedType === 'anthropic') {
+        headers['x-api-key'] = apiKey;
+        headers['anthropic-version'] = '2023-06-01';
+      } else {
+        headers['Authorization'] = `Bearer ${apiKey}`;
+      }
+
       const response = await fetch(`${baseUrl}/v1/models`, {
         method: 'GET',
-        headers: {
-          'Authorization': `Bearer ${apiKey}`,
-          'Content-Type': 'application/json',
-        },
+        headers,
         signal: AbortSignal.timeout(10000),
       });
 

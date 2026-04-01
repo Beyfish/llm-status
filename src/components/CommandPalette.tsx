@@ -4,7 +4,10 @@ import { useTranslation } from 'react-i18next';
 
 export const CommandPalette: React.FC = () => {
   const { t } = useTranslation();
-  const { commandPaletteOpen, toggleCommandPalette } = useStore();
+  const {
+    commandPaletteOpen, toggleCommandPalette, setTheme, theme,
+    checkAll, setShowSyncModal, setShowExportModal, setShowSettingsModal,
+  } = useStore();
   const overlayRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -21,6 +24,14 @@ export const CommandPalette: React.FC = () => {
 
   if (!commandPaletteOpen) return null;
 
+  const commands = [
+    { icon: '⚡', label: t('header.checkAll'), action: () => { checkAll('full', 5, 10); toggleCommandPalette(); } },
+    { icon: '☁️', label: t('header.sync'), action: () => { setShowSyncModal(true); toggleCommandPalette(); } },
+    { icon: '📤', label: t('header.export'), action: () => { setShowExportModal(true); toggleCommandPalette(); } },
+    { icon: '🌙', label: t('header.theme'), action: () => { setTheme(theme === 'dark' ? 'light' : 'dark'); toggleCommandPalette(); } },
+    { icon: '⚙️', label: t('header.settings'), action: () => { setShowSettingsModal(true); toggleCommandPalette(); } },
+  ];
+
   return (
     <div className="command-palette-overlay" ref={overlayRef}>
       <input
@@ -29,26 +40,17 @@ export const CommandPalette: React.FC = () => {
         autoFocus
       />
       <div className="command-palette__list">
-        <div className="command-palette__item">
-          <span>⚡</span>
-          <span>{t('header.checkAll')}</span>
-        </div>
-        <div className="command-palette__item">
-          <span>☁️</span>
-          <span>{t('header.sync')}</span>
-        </div>
-        <div className="command-palette__item">
-          <span>📤</span>
-          <span>{t('header.export')}</span>
-        </div>
-        <div className="command-palette__item">
-          <span>🌙</span>
-          <span>{t('header.theme')}</span>
-        </div>
-        <div className="command-palette__item">
-          <span>⚙️</span>
-          <span>{t('header.settings')}</span>
-        </div>
+        {commands.map((cmd, i) => (
+          <button
+            key={i}
+            className="command-palette__item"
+            onClick={cmd.action}
+            type="button"
+          >
+            <span>{cmd.icon}</span>
+            <span>{cmd.label}</span>
+          </button>
+        ))}
       </div>
     </div>
   );

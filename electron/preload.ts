@@ -27,10 +27,10 @@ const electronAPI = {
   },
 
   // Sync
-  syncUpload: (req: { protocol: string; config: object }) =>
+  syncUpload: (req: { protocol: string; config: object; data?: object }) =>
     ipcRenderer.invoke('sync:upload', req),
   syncDownload: (req: { protocol: string; config: object }) =>
-    ipcRenderer.invoke('sync:download', req),
+    ipcRenderer.invoke('sync:download', req) as Promise<{ success: boolean; data?: any; timestamp: string }>,
   syncTest: (req: { protocol: string; config: object }) =>
     ipcRenderer.invoke('sync:test', req),
   onSyncStatus: (cb: (data: unknown) => void) => {
