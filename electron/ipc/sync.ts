@@ -9,6 +9,7 @@ const REMOTE_PATH = 'llm-status/config.json';
 interface SyncRequest {
   protocol: string;
   config: Record<string, string>;
+  data?: Record<string, unknown>;
 }
 
 // WebDAV
@@ -65,7 +66,11 @@ async function s3Download(config: Record<string, string>): Promise<string> {
     Key: REMOTE_PATH,
   }));
   const body = response.Body as Readable;
-  return body.toString('utf-8');
+  const chunks: Buffer[] = [];
+  for await (const chunk of body) {
+    chunks.push(Buffer.from(chunk));
+  }
+  return Buffer.concat(chunks).toString('utf-8');
 }
 
 // Google Drive
@@ -182,7 +187,7 @@ async function onedriveDownload(config: Record<string, string>): Promise<string>
 export function registerSyncHandlers(): void {
   ipcMain.handle('sync:upload', async (_event, req: SyncRequest): Promise<{ success: boolean; timestamp: string }> => {
     try {
-      const configData = JSON.stringify(req.config);
+      const configData = JSON.stringify(req.data || req.config);
       switch (req.protocol) {
         case 'webdav':
           await webdavUpload(req.config, configData);

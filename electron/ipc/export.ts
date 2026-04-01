@@ -64,7 +64,15 @@ async function exportToOpenRouter(req: ExportRequest): Promise<void> {
 }
 
 export function registerExportHandlers(): void {
-  ipcMain.handle('export:push', async (_event, req: ExportRequest): Promise<{ success: boolean; message: string }> => {
+  ipcMain.handle('export:push', async (_event, rawReq: { target: string; data: Record<string, unknown> }): Promise<{ success: boolean; message: string }> => {
+    // Unwrap nested structure: { target, data: { url, apiKey, data: providerData } }
+    const innerData = rawReq.data as Record<string, unknown> || {};
+    const req: ExportRequest = {
+      target: rawReq.target,
+      url: (innerData.url as string) || '',
+      apiKey: (innerData.apiKey as string) || '',
+      data: (innerData.data as Record<string, unknown>) || innerData,
+    };
     try {
       switch (req.target) {
         case 'one-api':

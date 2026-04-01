@@ -8,8 +8,8 @@ interface ElectronAPI {
   onLatencyProgress: (cb: (data: any) => void) => void;
   onLatencyComplete: (cb: (data: any) => void) => void;
   onLatencyError: (cb: (data: any) => void) => void;
-  syncUpload: (req: { protocol: string; config: object }) => Promise<void>;
-  syncDownload: (req: { protocol: string; config: object }) => Promise<any>;
+  syncUpload: (req: { protocol: string; config: object; data?: object }) => Promise<void>;
+  syncDownload: (req: { protocol: string; config: object }) => Promise<{ success: boolean; data?: any; timestamp: string }>;
   onSyncStatus: (cb: (data: any) => void) => void;
   onSyncError: (cb: (data: any) => void) => void;
   exportPush: (req: { target: string; data: object; url?: string; apiKey?: string }) => Promise<void>;

@@ -135,7 +135,7 @@ export const useStore = create<StoreState>()((set, get) => ({
     set({ syncStatus: 'syncing' });
     try {
       const appConfig = getConfig(get());
-      await window.electronAPI.syncUpload({ protocol, config: { ...connectionConfig, ...appConfig } });
+      await window.electronAPI.syncUpload({ protocol, config: connectionConfig, data: appConfig });
       set({ syncStatus: 'idle', lastSyncAt: new Date().toISOString() });
     } catch {
       set({ syncStatus: 'error' });
@@ -145,7 +145,20 @@ export const useStore = create<StoreState>()((set, get) => ({
     set({ syncStatus: 'syncing' });
     try {
       const result = await window.electronAPI.syncDownload({ protocol, config: connectionConfig });
-      if (result.success) {
+      if (result.success && result.data) {
+        const remoteConfig = result.data as any;
+        if (remoteConfig.providers) {
+          set({
+            providers: remoteConfig.providers,
+            settings: remoteConfig.settings || {},
+            syncStatus: 'idle',
+            lastSyncAt: result.timestamp,
+          });
+          await window.electronAPI.configWrite(remoteConfig);
+        } else {
+          set({ syncStatus: 'idle', lastSyncAt: result.timestamp });
+        }
+      } else {
         set({ syncStatus: 'idle', lastSyncAt: result.timestamp });
       }
     } catch {

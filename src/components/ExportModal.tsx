@@ -51,7 +51,11 @@ export const ExportModal: React.FC<ExportModalProps> = ({ onClose }) => {
               apiKey: p.credentials.find((c) => c.type === 'api_key')?.value || '',
               models: [],
             };
-            await pushToTarget(selectedTarget, { ...providerData, url: targetUrl, apiKey: targetApiKey });
+            await pushToTarget(selectedTarget, {
+              url: targetUrl,
+              apiKey: targetApiKey,
+              data: providerData,
+            });
             results.push({ name: p.name, success: true });
           } catch (err: any) {
             results.push({ name: p.name, success: false, error: err.message });
