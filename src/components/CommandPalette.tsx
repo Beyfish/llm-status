@@ -4,7 +4,10 @@ import { useTranslation } from 'react-i18next';
 
 export const CommandPalette: React.FC = () => {
   const { t } = useTranslation();
-  const { commandPaletteOpen, toggleCommandPalette, setTheme, theme } = useStore();
+  const {
+    commandPaletteOpen, toggleCommandPalette, setTheme, theme,
+    checkAll, setShowSyncModal, setShowExportModal, setShowSettingsModal,
+  } = useStore();
   const overlayRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -22,11 +25,11 @@ export const CommandPalette: React.FC = () => {
   if (!commandPaletteOpen) return null;
 
   const commands = [
-    { icon: '⚡', label: t('header.checkAll'), action: () => { toggleCommandPalette(); } },
-    { icon: '☁️', label: t('header.sync'), action: () => { toggleCommandPalette(); } },
-    { icon: '📤', label: t('header.export'), action: () => { toggleCommandPalette(); } },
+    { icon: '⚡', label: t('header.checkAll'), action: () => { checkAll('full', 5, 10); toggleCommandPalette(); } },
+    { icon: '☁️', label: t('header.sync'), action: () => { setShowSyncModal(true); toggleCommandPalette(); } },
+    { icon: '📤', label: t('header.export'), action: () => { setShowExportModal(true); toggleCommandPalette(); } },
     { icon: '🌙', label: t('header.theme'), action: () => { setTheme(theme === 'dark' ? 'light' : 'dark'); toggleCommandPalette(); } },
-    { icon: '⚙️', label: t('header.settings'), action: () => { toggleCommandPalette(); } },
+    { icon: '⚙️', label: t('header.settings'), action: () => { setShowSettingsModal(true); toggleCommandPalette(); } },
   ];
 
   return (

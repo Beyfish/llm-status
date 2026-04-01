@@ -41,17 +41,30 @@ export const ExportModal: React.FC<ExportModalProps> = ({ onClose }) => {
     try {
       if (target?.pushMode && targetUrl && targetApiKey) {
         // Push each provider individually — IPC handler expects flat single-provider data
+        const results: Array<{ name: string; success: boolean; error?: string }> = [];
         for (const p of providers) {
-          const providerData = {
-            name: p.name,
-            type: p.type,
-            baseUrl: p.baseUrl,
-            apiKey: p.credentials.find((c) => c.type === 'api_key')?.value || '',
-            models: [],
-          };
-          await pushToTarget(selectedTarget, { ...providerData, url: targetUrl, apiKey: targetApiKey });
+          try {
+            const providerData = {
+              name: p.name,
+              type: p.type,
+              baseUrl: p.baseUrl,
+              apiKey: p.credentials.find((c) => c.type === 'api_key')?.value || '',
+              models: [],
+            };
+            await pushToTarget(selectedTarget, { ...providerData, url: targetUrl, apiKey: targetApiKey });
+            results.push({ name: p.name, success: true });
+          } catch (err: any) {
+            results.push({ name: p.name, success: false, error: err.message });
+          }
         }
-        setSuccess(`Pushed to ${target.name} successfully`);
+        const succeeded = results.filter((r) => r.success).length;
+        const failed = results.filter((r) => !r.success).length;
+        if (failed > 0) {
+          const failedNames = results.filter((r) => !r.success).map((r) => r.name).join(', ');
+          setSuccess(`${succeeded}/${providers.length} pushed. Failed: ${failedNames}`);
+        } else {
+          setSuccess(`Pushed ${succeeded}/${providers.length} to ${target.name} successfully`);
+        }
       } else {
         const exportData = {
           providers: providers.map((p) => ({
