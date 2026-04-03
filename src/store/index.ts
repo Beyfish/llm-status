@@ -18,7 +18,8 @@ interface StoreState {
   latencyResults: Record<string, LatencyResult>;
   bulkChecking: boolean;
   // Sync
-  syncStatus: 'idle' | 'syncing' | 'error';
+  syncStatus: 'idle' | 'syncing' | 'error' | 'conflict';
+  syncConflict: { localVersion?: string; remoteVersion?: string; localModifiedAt?: string; remoteModifiedAt?: string } | null;
   lastSyncAt: string | null;
   // Export
   exportStatus: Record<string, 'idle' | 'exporting' | 'done' | 'error'>;
@@ -38,6 +39,8 @@ interface StoreState {
   checkAll: (mode: LatencyMode, concurrency: number, timeout: number) => Promise<void>;
   uploadSync: () => Promise<void>;
   downloadSync: () => Promise<void>;
+  forceSyncUpload: () => Promise<void>;
+  resolveSyncConflict: (strategy: 'local' | 'remote') => Promise<void>;
   pushToTarget: (target: string, config: Record<string, unknown>) => Promise<void>;
   exportToFile: (target: string, config: Record<string, unknown>) => Promise<void>;
   setViewMode: (mode: ViewMode) => void;
@@ -63,6 +66,7 @@ export const useStore = create<StoreState>()((set, get) => ({
   latencyResults: {},
   bulkChecking: false,
   syncStatus: 'idle',
+  syncConflict: null,
   lastSyncAt: null,
   exportStatus: {},
   viewMode: 'card',
@@ -126,24 +130,75 @@ export const useStore = create<StoreState>()((set, get) => ({
 
   // Sync methods
   uploadSync: async () => {
-    set({ syncStatus: 'syncing' });
+    set({ syncStatus: 'syncing', syncConflict: null });
     try {
       const config = getConfig(get());
-      await window.electronAPI.syncUpload({ protocol: 'webdav', config });
+      const result = await window.electronAPI.syncUpload({ protocol: 'webdav', config });
+      if (result.conflict?.hasConflict) {
+        set({
+          syncStatus: 'conflict',
+          syncConflict: {
+            localVersion: result.conflict.localVersion,
+            remoteVersion: result.conflict.remoteVersion,
+            localModifiedAt: result.conflict.localModifiedAt,
+            remoteModifiedAt: result.conflict.remoteModifiedAt,
+          },
+        });
+      } else {
+        set({ syncStatus: 'idle', lastSyncAt: result.timestamp });
+      }
     } catch {
       set({ syncStatus: 'error' });
     }
   },
   downloadSync: async () => {
-    set({ syncStatus: 'syncing' });
+    set({ syncStatus: 'syncing', syncConflict: null });
     try {
       const result = await window.electronAPI.syncDownload({ protocol: 'webdav', config: {} });
-      if (result.success) {
-        set({ lastSyncAt: result.timestamp });
+      if (result.success && result.data) {
+        const remoteConfig = result.data as any;
+        if (remoteConfig.providers) {
+          set({
+            providers: remoteConfig.providers,
+            settings: remoteConfig.settings || {},
+            syncStatus: 'idle',
+            syncConflict: null,
+            lastSyncAt: result.timestamp,
+          });
+          await window.electronAPI.configWrite(remoteConfig);
+        } else {
+          set({ syncStatus: 'idle', syncConflict: null, lastSyncAt: result.timestamp });
+        }
+      } else {
+        set({ syncStatus: 'idle', syncConflict: null, lastSyncAt: result.timestamp });
       }
     } catch {
       set({ syncStatus: 'error' });
     }
+  },
+
+  forceSyncUpload: async () => {
+    // Force upload ignoring conflicts
+    set({ syncStatus: 'syncing', syncConflict: null });
+    try {
+      const config = getConfig(get());
+      const configWithForce = { ...config, forceUpload: true };
+      await window.electronAPI.syncUpload({ protocol: 'webdav', config: configWithForce });
+      set({ syncStatus: 'idle', lastSyncAt: new Date().toISOString() });
+    } catch {
+      set({ syncStatus: 'error' });
+    }
+  },
+
+  resolveSyncConflict: async (strategy: 'local' | 'remote') => {
+    if (strategy === 'remote') {
+      // Download remote version and overwrite local
+      await get().downloadSync();
+    } else {
+      // Force upload local version
+      await get().forceSyncUpload();
+    }
+    set({ syncConflict: null });
   },
 
   // Export methods

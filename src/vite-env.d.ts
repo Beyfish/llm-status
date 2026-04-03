@@ -8,7 +8,8 @@ interface ElectronAPI {
   onLatencyProgress: (cb: (data: any) => void) => void;
   onLatencyComplete: (cb: (data: any) => void) => void;
   onLatencyError: (cb: (data: any) => void) => void;
-  syncUpload: (req: { protocol: string; config: object }) => Promise<void>;
+  syncUpload: (req: { protocol: string; config: object }) => Promise<{ success: boolean; timestamp: string; conflict?: { hasConflict: boolean; localVersion?: string; remoteVersion?: string; localModifiedAt?: string; remoteModifiedAt?: string } }>;
+  syncCheckConflict: (req: { protocol: string; config: object; localVersion?: string }) => Promise<{ hasConflict: boolean; localVersion?: string; remoteVersion?: string; localModifiedAt?: string; remoteModifiedAt?: string }>;
   syncDownload: (req: { protocol: string; config: object }) => Promise<any>;
   onSyncStatus: (cb: (data: any) => void) => void;
   onSyncError: (cb: (data: any) => void) => void;

@@ -30,6 +30,17 @@ function decryptFromSync(encryptedBase64: string): string {
 interface SyncRequest {
   protocol: string;
   config: Record<string, string>;
+  localVersion?: string;
+}
+
+interface SyncConflictInfo {
+  hasConflict: boolean;
+  localVersion?: string;
+  remoteVersion?: string;
+  localModifiedAt?: string;
+  remoteModifiedAt?: string;
+  localData?: string;
+  remoteData?: string;
 }
 
 // WebDAV
@@ -201,10 +212,115 @@ async function onedriveDownload(config: Record<string, string>): Promise<string>
 }
 
 export function registerSyncHandlers(): void {
-  ipcMain.handle('sync:upload', async (_event, req: SyncRequest): Promise<{ success: boolean; timestamp: string }> => {
+  ipcMain.handle('sync:checkConflict', async (_event, req: SyncRequest): Promise<SyncConflictInfo> => {
     try {
-      const configData = JSON.stringify(req.config);
+      let content: string;
+      switch (req.protocol) {
+        case 'webdav':
+          content = await webdavDownload(req.config);
+          break;
+        case 's3':
+          content = await s3Download(req.config);
+          break;
+        case 'gdrive':
+          content = await gdriveDownload(req.config);
+          break;
+        case 'onedrive':
+          content = await onedriveDownload(req.config);
+          break;
+        default:
+          return { hasConflict: false };
+      }
+
+      let remoteData: any;
+      try {
+        const decrypted = decryptFromSync(content);
+        remoteData = JSON.parse(decrypted);
+      } catch {
+        remoteData = JSON.parse(content);
+      }
+
+      const localVersion = req.localVersion || req.config.schemaVersion;
+      const remoteVersion = remoteData.schemaVersion;
+      const localModifiedAt = req.config.lastModifiedAt;
+      const remoteModifiedAt = remoteData.lastModifiedAt;
+
+      const hasConflict = localVersion !== remoteVersion ||
+        (localModifiedAt && remoteModifiedAt && localModifiedAt !== remoteModifiedAt);
+
+      return {
+        hasConflict,
+        localVersion: localVersion?.toString(),
+        remoteVersion: remoteVersion?.toString(),
+        localModifiedAt,
+        remoteModifiedAt,
+        localData: JSON.stringify(req.config),
+        remoteData: content,
+      };
+    } catch {
+      return { hasConflict: false };
+    }
+  });
+
+  ipcMain.handle('sync:upload', async (_event, req: SyncRequest): Promise<{ success: boolean; timestamp: string; conflict?: SyncConflictInfo }> => {
+    try {
+      // Check for conflicts before uploading
+      const localVersion = req.config.schemaVersion || 1;
+      const localModifiedAt = new Date().toISOString();
+      const configWithVersion = { ...req.config, schemaVersion: localVersion, lastModifiedAt: localModifiedAt };
+      const configData = JSON.stringify(configWithVersion);
       const encryptedData = encryptForSync(configData);
+
+      // Check for conflicts first
+      try {
+        let remoteContent: string;
+        switch (req.protocol) {
+          case 'webdav':
+            remoteContent = await webdavDownload(req.config);
+            break;
+          case 's3':
+            remoteContent = await s3Download(req.config);
+            break;
+          case 'gdrive':
+            remoteContent = await gdriveDownload(req.config);
+            break;
+          case 'onedrive':
+            remoteContent = await onedriveDownload(req.config);
+            break;
+          default:
+            remoteContent = '';
+        }
+
+        if (remoteContent) {
+          let remoteData: any;
+          try {
+            const decrypted = decryptFromSync(remoteContent);
+            remoteData = JSON.parse(decrypted);
+          } catch {
+            remoteData = JSON.parse(remoteContent);
+          }
+
+          const remoteVersion = remoteData.schemaVersion;
+          const remoteModifiedAt = remoteData.lastModifiedAt;
+
+          if (remoteVersion !== localVersion || (remoteModifiedAt && remoteModifiedAt !== localModifiedAt)) {
+            return {
+              success: false,
+              timestamp: new Date().toISOString(),
+              conflict: {
+                hasConflict: true,
+                localVersion: localVersion?.toString(),
+                remoteVersion: remoteVersion?.toString(),
+                localModifiedAt: localModifiedAt,
+                remoteModifiedAt,
+              },
+            };
+          }
+        }
+      } catch {
+        // Remote doesn't exist yet, no conflict
+      }
+
       switch (req.protocol) {
         case 'webdav':
           await webdavUpload(req.config, encryptedData);

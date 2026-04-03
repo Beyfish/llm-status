@@ -17,7 +17,7 @@ const PROTOCOLS: Array<{ id: Protocol; name: string; icon: string }> = [
 
 export const SyncModal: React.FC<SyncModalProps> = ({ onClose }) => {
   const { t } = useTranslation();
-  const { uploadSync, downloadSync, syncStatus, lastSyncAt } = useStore();
+  const { uploadSync, downloadSync, syncStatus, syncConflict, lastSyncAt, resolveSyncConflict } = useStore();
   const [protocol, setProtocol] = useState<Protocol>('webdav');
   const [config, setConfig] = useState<Record<string, string>>({});
   const [syncing, setSyncing] = useState(false);
@@ -119,6 +119,56 @@ export const SyncModal: React.FC<SyncModalProps> = ({ onClose }) => {
           {syncStatus === 'syncing' && (
             <div style={{ padding: '12px', borderRadius: '8px', background: 'rgba(0, 122, 255, 0.1)', color: 'var(--accent)', fontSize: '13px', marginBottom: '12px' }}>
               ⏳ Syncing...
+            </div>
+          )}
+          {syncStatus === 'conflict' && syncConflict && (
+            <div style={{ padding: '16px', borderRadius: '8px', background: 'rgba(234, 179, 8, 0.1)', border: '1px solid var(--yellow)', marginBottom: '12px' }}>
+              <div style={{ fontSize: '14px', fontWeight: 600, color: 'var(--yellow)', marginBottom: '8px' }}>
+                ⚠️ Sync Conflict Detected
+              </div>
+              <div style={{ fontSize: '12px', color: 'var(--text-secondary)', marginBottom: '12px' }}>
+                Your local version differs from the cloud version. Choose which version to keep:
+              </div>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '12px' }}>
+                <div style={{ padding: '12px', borderRadius: '6px', background: 'var(--bg-elevated)' }}>
+                  <div style={{ fontSize: '13px', fontWeight: 600 }}>📱 Local Version</div>
+                  <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>
+                    Version: {syncConflict.localVersion || 'unknown'}
+                  </div>
+                  {syncConflict.localModifiedAt && (
+                    <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>
+                      Modified: {new Date(syncConflict.localModifiedAt).toLocaleString()}
+                    </div>
+                  )}
+                </div>
+                <div style={{ padding: '12px', borderRadius: '6px', background: 'var(--bg-elevated)' }}>
+                  <div style={{ fontSize: '13px', fontWeight: 600 }}>☁️ Cloud Version</div>
+                  <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>
+                    Version: {syncConflict.remoteVersion || 'unknown'}
+                  </div>
+                  {syncConflict.remoteModifiedAt && (
+                    <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>
+                      Modified: {new Date(syncConflict.remoteModifiedAt).toLocaleString()}
+                    </div>
+                  )}
+                </div>
+              </div>
+              <div style={{ display: 'flex', gap: '8px' }}>
+                <button
+                  className="btn btn--primary"
+                  onClick={() => resolveSyncConflict('local')}
+                  style={{ flex: 1 }}
+                >
+                  ↑ Keep Local (Upload)
+                </button>
+                <button
+                  className="btn btn--ghost"
+                  onClick={() => resolveSyncConflict('remote')}
+                  style={{ flex: 1 }}
+                >
+                  ↓ Keep Cloud (Download)
+                </button>
+              </div>
             </div>
           )}
         </div>
