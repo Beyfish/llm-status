@@ -1,20 +1,8 @@
 import { describe, expect, test } from 'bun:test';
 
-// We can't easily test Electron IPC handlers in unit tests since they require
-// the electron runtime. Instead, we test the pure logic functions that would
-// be extracted, or verify the handler registration pattern works correctly.
-
 describe('encryption logic', () => {
   test('encrypt then decrypt roundtrip', () => {
-    // This verifies the conceptual flow:
-    // 1. safeStorage.encryptString(plaintext) -> Buffer
-    // 2. buffer.toString('base64') -> string for storage
-    // 3. Buffer.from(base64String, 'base64') -> Buffer
-    // 4. safeStorage.decryptString(buffer) -> plaintext
-
     const original = 'sk-test-api-key-12345';
-    // In a real test, we'd mock safeStorage, but since we can't import electron
-    // in vitest, we verify the transformation logic:
     const fakeEncrypted = Buffer.from(`encrypted:${original}`);
     const base64 = fakeEncrypted.toString('base64');
     const decoded = Buffer.from(base64, 'base64');
@@ -66,19 +54,19 @@ describe('config secrets extraction logic', () => {
       settings: { theme: 'dark' },
     };
 
-    // Simulate extractSecrets logic
-    const secrets: Record<string, any> = {};
+    const secrets: Record<string, unknown> = {};
     const configCopy = JSON.parse(JSON.stringify(config));
 
     if (configCopy.providers) {
-      configCopy.providers = configCopy.providers.map((p: any, idx: number) => {
-        if (p.credentials && p.credentials.length > 0) {
-          secrets[`provider_${idx}_credentials`] = p.credentials;
+      configCopy.providers = configCopy.providers.map((p: Record<string, unknown>, idx: number) => {
+        const creds = p.credentials as Array<Record<string, unknown>>;
+        if (creds && creds.length > 0) {
+          secrets[`provider_${idx}_credentials`] = creds;
           return {
             ...p,
-            credentials: p.credentials.map((_: any, cIdx: number) => ({
-              id: p.credentials[cIdx]?.id || `cred-${idx}-${cIdx}`,
-              type: p.credentials[cIdx]?.type || 'api_key',
+            credentials: creds.map((_: Record<string, unknown>, cIdx: number) => ({
+              id: creds[cIdx]?.id || `cred-${idx}-${cIdx}`,
+              type: creds[cIdx]?.type || 'api_key',
               status: 'unknown',
               encrypted: true,
             })),
@@ -88,13 +76,12 @@ describe('config secrets extraction logic', () => {
       });
     }
 
-    // Verify secrets were extracted
     expect(secrets['provider_0_credentials']).toBeDefined();
-    expect(secrets['provider_0_credentials'][0].value).toBe('sk-secret123');
-
-    // Verify config no longer contains raw secrets
-    expect(configCopy.providers[0].credentials[0].value).toBeUndefined();
-    expect(configCopy.providers[0].credentials[0].encrypted).toBe(true);
+    expect((secrets['provider_0_credentials'] as Array<Record<string, unknown>>)[0].value).toBe('sk-secret123');
+    const providers0 = configCopy.providers as Array<Record<string, unknown>>;
+    const creds0 = providers0[0].credentials as Array<Record<string, unknown>>;
+    expect(creds0[0].value).toBeUndefined();
+    expect(creds0[0].encrypted).toBe(true);
   });
 
   test('mergeSecrets restores credentials to config', () => {
@@ -113,16 +100,15 @@ describe('config secrets extraction logic', () => {
       settings: { theme: 'dark' },
     };
 
-    const secrets = {
+    const secrets: Record<string, unknown> = {
       provider_0_credentials: [
         { id: 'key-1', type: 'api_key', value: 'sk-restored-secret', status: 'valid' },
       ],
     };
 
-    // Simulate mergeSecrets logic
     const configCopy = JSON.parse(JSON.stringify(configWithoutSecrets));
     if (configCopy.providers && secrets) {
-      configCopy.providers = configCopy.providers.map((p: any, idx: number) => {
+      configCopy.providers = (configCopy.providers as Array<Record<string, unknown>>).map((p: Record<string, unknown>, idx: number) => {
         const secretKey = `provider_${idx}_credentials`;
         if (secrets[secretKey]) {
           return { ...p, credentials: secrets[secretKey] };
@@ -131,8 +117,9 @@ describe('config secrets extraction logic', () => {
       });
     }
 
-    // Verify secrets were restored
-    expect(configCopy.providers[0].credentials[0].value).toBe('sk-restored-secret');
-    expect(configCopy.providers[0].credentials[0].status).toBe('valid');
+    const providers1 = configCopy.providers as Array<Record<string, unknown>>;
+    const creds1 = providers1[0].credentials as Array<Record<string, unknown>>;
+    expect(creds1[0].value).toBe('sk-restored-secret');
+    expect(creds1[0].status).toBe('valid');
   });
 });

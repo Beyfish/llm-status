@@ -1,5 +1,4 @@
-import { describe, expect, test, beforeAll, afterAll, mock } from 'bun:test';
-import http from 'http';
+import { describe, expect, test } from 'bun:test';
 
 describe('latency check logic', () => {
   // Test the latency calculation and status mapping logic

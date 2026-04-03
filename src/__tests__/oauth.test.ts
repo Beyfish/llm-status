@@ -1,4 +1,4 @@
-import { describe, expect, test, beforeAll, afterAll, afterEach } from 'bun:test';
+import { describe, expect, test, afterEach } from 'bun:test';
 import http from 'http';
 
 describe('OAuth state validation', () => {
@@ -9,8 +9,8 @@ describe('OAuth state validation', () => {
   });
 
   test('state mismatch detection', () => {
-    const generatedState = 'abc123';
-    const returnedState = 'xyz789';
+    const generatedState: string = 'abc123';
+    const returnedState: string = 'xyz789';
 
     const isValid = returnedState === generatedState;
     expect(isValid).toBe(false);
@@ -118,13 +118,13 @@ describe('OAuth state validation', () => {
       data: {
         access_token: 'new_access_token',
         expires_in: 3600,
-      },
+      } as Record<string, unknown>,
     };
 
     const tokens = {
-      accessToken: mockResponse.data.access_token,
-      refreshToken: mockResponse.data.refresh_token || '',
-      expiresAt: new Date(Date.now() + mockResponse.data.expires_in * 1000).toISOString(),
+      accessToken: mockResponse.data.access_token as string,
+      refreshToken: (mockResponse.data.refresh_token as string) || '',
+      expiresAt: new Date(Date.now() + (mockResponse.data.expires_in as number) * 1000).toISOString(),
     };
 
     expect(tokens.refreshToken).toBe('');
@@ -141,7 +141,7 @@ describe('OAuth localhost server', () => {
     }
   });
 
-  test('server starts and accepts connections', (done) => {
+  test('server starts and accepts connections', (done: () => void) => {
     server = http.createServer((req, res) => {
       const url = new URL(req.url || '', `http://localhost:17171`);
       if (url.pathname === '/oauth/callback') {
@@ -165,7 +165,7 @@ describe('OAuth localhost server', () => {
     });
   });
 
-  test('server handles missing code parameter', (done) => {
+  test('server handles missing code parameter', (done: () => void) => {
     server = http.createServer((req, res) => {
       const url = new URL(req.url || '', `http://localhost:17173`);
       if (url.pathname === '/oauth/callback') {
