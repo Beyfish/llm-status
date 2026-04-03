@@ -43,6 +43,7 @@
   --green: #22C55E;
   --yellow: #EAB308;
   --red: #EF4444;
+  color-scheme: dark;
 }
 
 /* Light Theme */
@@ -59,4 +60,22 @@
   --green: #16A34A;
   --yellow: #CA8A04;
   --red: #DC2626;
+  color-scheme: light;
+}
+
+/* Automatic dark mode based on system preference */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    --bg-primary: #0F0F0F;
+    --bg-surface: #1C1C1E;
+    --bg-elevated: #2C2C2E;
+    --border-color: rgba(255, 255, 255, 0.08);
+    --text-primary: rgba(255, 255, 255, 0.95);
+    --text-secondary: rgba(255, 255, 255, 0.6);
+    --text-muted: rgba(255, 255, 255, 0.4);
+    --accent: #007AFF;
+    --green: #22C55E;
+    --yellow: #EAB308;
+    --red: #EF4444;
+  }
 }
