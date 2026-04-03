@@ -2,6 +2,37 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.2.0.0] - 2026-04-03
+
+### Added
+- You can now see all your API key statuses at a glance with the redesigned sidebar-detail layout
+- You can now verify all your API keys in one click with real-time per-provider progress
+- You can now track when API keys are about to expire, with visual indicators and desktop notifications
+- You can now organize providers by environment (personal, work, production, staging)
+- You can now see aggregate provider health in your system tray (green/yellow/red)
+- You can now test API keys with live prompts directly from the provider detail view
+- You can now generate ready-to-use curl commands for any provider with one click
+- You can now validate API key formats in real-time as you paste them
+- You can now back up and restore all credentials with passphrase-based encryption
+- You can now track API usage and estimated costs over the last 30 days
+- You can now resolve cloud sync conflicts by choosing which version to keep
+- Full Chinese (zh-CN) and English (en-US) translations for all new features
+- DESIGN.md design system documentation
+- 71 automated tests (up from 2)
+
+### Fixed
+- Production app no longer loads localhost renderer — now uses bundled files
+- API keys are now encrypted separately from config using OS-level safeStorage
+- Cloud sync now encrypts data at the application layer before upload
+- OAuth flows now validate state tokens to prevent CSRF attacks
+- Clipboard export now redacts secrets instead of copying raw values
+- IPC listeners now clean up properly on HMR reload (no more accumulation)
+- Modal close buttons now meet 44px minimum touch target size
+- Onboarding now uses consistent CSS variables instead of hardcoded pixel values
+- App now adapts to mobile viewports (375px+) with responsive breakpoints
+- Keyboard navigation now works on all interactive elements (Enter/Space support)
+- Settings tabs now have proper ARIA roles for screen readers
+
 ## [0.1.0.0] - 2026-04-01
 
 ### Added

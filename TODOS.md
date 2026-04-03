@@ -1,131 +1,131 @@
 # TODOS.md
 
 Generated: 2026-04-03
+Updated: 2026-04-03
 
-## TODO #1: Add inline API key validation
+## Completed
 
-**What:** Validate API key format in real-time as user types/pastes
-**Why:** Users are anxious when pasting keys. Instant feedback reduces abandonment and prevents saving invalid keys.
-**Pros:** Higher conversion, fewer invalid keys saved, better UX, fewer support requests
-**Cons:** Need to maintain per-provider key format patterns; false positives could frustrate users
-**Context:** Design review identified this as the highest-anxiety moment in the user journey. Users paste keys from various sources and have no confidence until they run a check.
-**Effort:** S (human: ~4 hours / CC: ~15 min)
-**Priority:** P1
-**Depends on:** None
+### TODO #1: Add inline API key validation
+
+**Completed:** v0.2.0 (2026-04-03) — Implemented in `src/utils/keyValidation.ts` with real-time format detection, provider pattern matching, and common issue detection (whitespace, Bearer prefix, quotes).
 
 ---
 
-## TODO #2: Add sync conflict resolution
+### TODO #2: Add sync conflict resolution
 
-**What:** Version-based conflict detection and user prompt when remote config differs from local
-**Why:** Two devices editing simultaneously will cause data loss without conflict handling
-**Pros:** Prevents data loss, builds trust for multi-device users, enables safe collaboration
-**Cons:** Adds complexity to sync flow; needs UI for conflict resolution
-**Context:** Eng Review identified this as CRITICAL for multi-device users. Current sync blindly overwrites remote data.
-**Effort:** M (human: ~2 days / CC: ~30 min)
-**Priority:** P1
-**Depends on:** None
+**Completed:** v0.2.0 (2026-04-03) — Implemented version-based conflict detection in `electron/ipc/sync.ts` with UI in `SyncModal.tsx` for user to choose local vs. remote version.
 
 ---
 
-## TODO #3: Implement credentialFile import/export
+### TODO #3: Implement credentialFile import/export
 
-**What:** Complete the stubbed credentialFile.ts with encrypted import/export
-**Why:** Currently registered but not implemented; causes silent IPC failures when called
-**Pros:** Users can backup and restore all provider configs; enables migration between machines
-**Cons:** One more feature to maintain; needs careful encryption handling
-**Context:** CEO Review found this as an empty shell that causes silent failures. The handler is registered in main.ts but does nothing.
-**Effort:** S (human: ~4 hours / CC: ~15 min)
-**Priority:** P1
-**Depends on:** None
+**Completed:** v0.2.0 (2026-04-03) — Implemented passphrase-based AES-256-GCM encryption in `electron/ipc/credentialFile.ts` with UI in `SettingsModal.tsx` advanced tab.
 
 ---
 
-## TODO #4: Add API usage dashboard
+### TODO #4: Add API usage dashboard
 
-**What:** Cross-provider usage, cost, and budget alerts
-**Why:** Daily reason to open the app beyond key health; transforms from monitoring tool to daily driver
-**Pros:** Increases retention, provides real value, differentiates from simple status tools
-**Cons:** Requires billing API access for each provider; some providers don't expose usage APIs
-**Context:** CEO Review expansion - accepted as differentiation feature. This is what makes users open the app every morning.
-**Effort:** L (human: ~1 week / CC: ~30 min)
-**Priority:** P2
-**Depends on:** Provider billing API research
+**Completed:** v0.2.0 (2026-04-03) — Basic implementation in `src/components/UsageDashboard.tsx` with 30-day cost tracking, per-provider breakdown, and summary cards.
 
 ---
 
-## TODO #5: Add prompt quick-test
+### TODO #5: Add prompt quick-test
 
-**What:** Text box in ProviderDetail to send a prompt and see response from the selected provider
-**Why:** 30-second interaction to compare models without leaving the app
-**Pros:** Sticky feature, differentiates from simple status tools, helps users choose providers
-**Cons:** Requires actual API calls (costs money); needs rate limiting
-**Context:** CEO Review expansion - accepted as delight feature. Users often want to quickly test "does this key work with a real prompt?"
-**Effort:** M (human: ~1 day / CC: ~15 min)
-**Priority:** P2
-**Depends on:** None
+**Completed:** v0.2.0 (2026-04-03) — Implemented in `src/components/ProviderDetail.tsx` with textarea input, send button, response display, and latency tracking.
 
 ---
 
-## TODO #6: Add system tray status indicator
+### TODO #6: Add system tray status indicator
 
-**What:** Native system tray icon showing aggregate provider health (green/yellow/red)
-**Why:** Users want to know key status without opening the app; desktop-native advantage
-**Pros:** Passive monitoring, differentiates from web tools, builds habit
-**Cons:** Platform-specific implementation (Windows/macOS/Linux differ)
-**Context:** SELECTIVE EXPANSION accepted in CEO Review. This is the "glance and know" experience.
+**Completed:** v0.2.0 (2026-04-03) — Implemented in `electron/main.ts` with dynamic icon colors (green/yellow/red/gray), click-to-focus, and "Check All Providers" menu item.
+
+---
+
+### TODO #7: Add key expiry预警 notifications
+
+**Completed:** v0.2.0 (2026-04-03) — Implemented expiry date input in `OnboardingFlow.tsx`, visual indicators in `ProviderDetail.tsx`, and desktop notifications in `App.tsx`.
+
+---
+
+### TODO #8: Add one-click copy auth curl
+
+**Completed:** v0.2.0 (2026-04-03) — Implemented in `ProviderDetail.tsx` with provider-specific curl command generation (OpenAI, Anthropic, Google formats).
+
+---
+
+### TODO #9: Add environment/project grouping
+
+**Completed:** v0.2.0 (2026-04-03) — Implemented environment selector in onboarding, filter buttons in sidebar, and environment badges in ProviderDetail header.
+
+---
+
+### TODO #10: Add config backup with encryption
+
+**Completed:** v0.2.0 (2026-04-03) — Implemented in `credentialFile.ts` with scrypt key derivation + AES-256-GCM encryption for cross-machine portability.
+
+---
+
+## Open Items
+
+### TODO #11: Set up CI/CD pipeline
+
+**What:** GitHub Actions workflow for automated testing and building
+**Why:** Ensures code quality on every PR and automates release builds
+**Pros:** Catch regressions early, automated release process, contributor confidence
+**Cons:** Initial setup complexity
+**Context:** Currently builds are manual. Need automated typecheck, test, and build on every PR.
 **Effort:** M (human: ~1 day / CC: ~20 min)
+**Priority:** P1
+**Depends on:** None
+
+---
+
+### TODO #12: Add audit logging for credential access
+
+**What:** Log when credentials are accessed, modified, or exported
+**Why:** Security compliance and incident investigation
+**Pros:** Trace credential access, detect unauthorized access, compliance readiness
+**Cons:** Adds storage overhead, needs log rotation
+**Context:** Identified in SECURITY.md as a known limitation.
+**Effort:** M (human: ~2 days / CC: ~30 min)
 **Priority:** P2
 **Depends on:** None
 
 ---
 
-## TODO #7: Add key expiry预警 notifications
+### TODO #13: Add clipboard auto-clear after copy
 
-**What:** Push notification when a key is about to expire (e.g., 7 days before)
-**Why:** Proactive is better than reactive; users hate discovering expired keys in production
-**Pros:** Prevents outages, builds trust, differentiates from reactive monitoring
-**Cons:** Needs expiry date tracking per provider; some providers don't expose expiry
-**Context:** SELECTIVE EXPANSION accepted in CEO Review. Uses existing expiresAt field.
-**Effort:** S (human: ~4 hours / CC: ~15 min)
-**Priority:** P2
-**Depends on:** None
-
----
-
-## TODO #8: Add one-click copy auth curl
-
-**What:** Copy button on each provider that generates a ready-to-use curl command with auth
-**Why:** Highest-frequency debugging operation; developers constantly test keys via curl
-**Pros:** Saves time, reduces errors, developer-friendly
-**Cons:** Minor; mostly convenience
-**Context:** SELECTIVE EXPANSION accepted in CEO Review. "curl -H 'Authorization: Bearer sk-xxx' https://api.openai.com/v1/models"
+**What:** Automatically clear clipboard 30-60 seconds after copying a key
+**Why:** Prevents accidental credential exposure via clipboard history
+**Pros:** Reduces credential leak risk, zero user effort
+**Cons:** May interfere with legitimate clipboard use
+**Context:** Identified in SECURITY.md as a known limitation.
 **Effort:** S (human: ~2 hours / CC: ~10 min)
 **Priority:** P2
 **Depends on:** None
 
 ---
 
-## TODO #9: Add environment/project grouping
+### TODO #14: Add screen recording protection (macOS)
 
-**What:** Group providers by environment (personal / work / production)
-**Why:** Users have different keys for different contexts; flat list becomes unwieldy at scale
-**Pros:** Better organization, prevents accidental use of wrong key, scales with user growth
-**Cons:** Adds UI complexity; needs migration for existing users
-**Context:** SELECTIVE EXPANSION accepted in CEO Review. Natural growth path.
-**Effort:** M (human: ~1 day / CC: ~20 min)
-**Priority:** P3
-**Depends on:** None
+**What:** Request screen recording permission and mask credential fields
+**Why:** Prevents credentials from being captured by screen recording software
+**Pros:** Additional security layer for macOS users
+**Cons:** macOS-only, requires user permission grant
+**Context:** Identified in SECURITY.md as a known limitation.
+**Effort:** S (human: ~4 hours / CC: ~15 min)
+**Priority:** P2
+**Depends on:** macOS only
 
 ---
 
-## TODO #10: Add config backup with encryption
+### TODO #15: Improve OAuth state token randomness
 
-**What:** Encrypted export/import of full app configuration (including secrets)
-**Why:** Users need to migrate between machines or recover from data loss
-**Pros:** Disaster recovery, machine migration, user confidence
-**Cons:** Must handle encryption key portability (safeStorage is machine-specific)
-**Context:** Related to credentialFile TODO. safeStorage can't decrypt on a different machine, so need a user-provided passphrase for cross-machine backups.
-**Effort:** M (human: ~1 day / CC: ~20 min)
+**What:** Replace `Math.random()` with `crypto.randomBytes()` for OAuth state generation
+**Why:** `Math.random()` is not cryptographically secure
+**Pros:** Stronger CSRF protection
+**Cons:** Minor change, low risk in current desktop context
+**Context:** Current implementation uses `Math.random().toString(36)` which is sufficient for desktop but not cryptographically strong.
+**Effort:** S (human: ~30 min / CC: ~5 min)
 **Priority:** P2
 **Depends on:** None
