@@ -10,6 +10,7 @@ import { registerOAuthHandlers } from './ipc/oauth';
 import { registerCredentialFileHandlers } from './ipc/credentialFile';
 import { registerWebhookHandlers } from './ipc/webhook';
 import { registerUsageHandlers } from './ipc/usage';
+import { registerPromptTestHandlers } from './ipc/promptTest';
 
 let mainWindow: BrowserWindow | null = null;
 let tray: Tray | null = null;
@@ -145,6 +146,7 @@ app.whenReady().then(() => {
   registerCredentialFileHandlers();
   registerWebhookHandlers();
   registerUsageHandlers();
+  registerPromptTestHandlers();
 
   createTray();
   createWindow();

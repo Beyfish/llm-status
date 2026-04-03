@@ -12,6 +12,11 @@ export const ProviderDetail: React.FC<ProviderDetailProps> = ({ provider, onClos
   const { t } = useTranslation();
   const { latencyResults, latencyStatus, checkLatency } = useStore();
   const [copiedCredId, setCopiedCredId] = useState<string | null>(null);
+  const [promptText, setPromptText] = useState('');
+  const [promptResponse, setPromptResponse] = useState<string | null>(null);
+  const [promptLoading, setPromptLoading] = useState(false);
+  const [promptError, setPromptError] = useState<string | null>(null);
+  const [promptLatency, setPromptLatency] = useState<number | null>(null);
 
   const latencyData = latencyResults[provider.id];
   const providerLatencyStatus = latencyStatus[provider.id] ?? 'idle';
@@ -53,6 +58,35 @@ export const ProviderDetail: React.FC<ProviderDetailProps> = ({ provider, onClos
     await navigator.clipboard.writeText(curl);
     setCopiedCredId(credId);
     setTimeout(() => setCopiedCredId(null), 2000);
+  };
+
+  const handlePromptTest = async () => {
+    if (!promptText.trim() || !provider.credentials.length) return;
+    setPromptLoading(true);
+    setPromptResponse(null);
+    setPromptError(null);
+    setPromptLatency(null);
+
+    try {
+      const cred = provider.credentials[0];
+      const result = await window.electronAPI.promptTest({
+        providerId: provider.id,
+        credentialId: cred.id,
+        prompt: promptText.trim(),
+        maxTokens: 256,
+      });
+
+      if (result.success) {
+        setPromptResponse(result.response || '');
+        setPromptLatency(result.latency || null);
+      } else {
+        setPromptError(result.error || 'Unknown error');
+      }
+    } catch {
+      setPromptError('Failed to send prompt');
+    } finally {
+      setPromptLoading(false);
+    }
   };
 
   const models = useMemo(() => {
@@ -153,6 +187,64 @@ export const ProviderDetail: React.FC<ProviderDetailProps> = ({ provider, onClos
             );
           })}
         </div>
+      </div>
+
+      <div className="provider-detail__section">
+        <h3 className="provider-detail__section-title">🧪 Prompt Quick Test</h3>
+        <textarea
+          className="smart-import__textarea"
+          placeholder="Type a test prompt..."
+          value={promptText}
+          onChange={(e) => setPromptText(e.target.value)}
+          rows={3}
+          style={{ marginBottom: '8px' }}
+        />
+        <button
+          className="btn btn--primary"
+          onClick={handlePromptTest}
+          disabled={promptLoading || !promptText.trim() || !provider.credentials.length}
+        >
+          {promptLoading ? 'Sending...' : 'Send Test Prompt'}
+        </button>
+
+        {promptLoading && (
+          <div style={{ marginTop: '12px', padding: '12px', borderRadius: '8px', background: 'rgba(0, 122, 255, 0.1)', color: 'var(--accent)', fontSize: '13px' }}>
+            ⏳ Waiting for response...
+          </div>
+        )}
+
+        {promptError && (
+          <div style={{ marginTop: '12px', padding: '12px', borderRadius: '8px', background: 'rgba(239, 68, 68, 0.1)', color: 'var(--red)', fontSize: '13px' }}>
+            ❌ {promptError}
+          </div>
+        )}
+
+        {promptResponse && (
+          <div style={{ marginTop: '12px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
+              <span style={{ fontSize: '12px', fontWeight: 600 }}>Response</span>
+              {promptLatency && (
+                <span className="mono" style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>
+                  {promptLatency}ms
+                </span>
+              )}
+            </div>
+            <pre style={{
+              padding: '12px',
+              borderRadius: '8px',
+              background: 'var(--bg-elevated)',
+              fontSize: '13px',
+              lineHeight: 1.5,
+              whiteSpace: 'pre-wrap',
+              wordBreak: 'break-word',
+              maxHeight: '200px',
+              overflowY: 'auto',
+              margin: 0,
+            }}>
+              {promptResponse}
+            </pre>
+          </div>
+        )}
       </div>
     </div>
   );
