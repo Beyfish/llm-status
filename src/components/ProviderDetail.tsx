@@ -10,9 +10,10 @@ interface ProviderDetailProps {
 
 export const ProviderDetail: React.FC<ProviderDetailProps> = ({ provider, onClose }) => {
   const { t } = useTranslation();
-  const { latencyResults, checkLatency } = useStore();
+  const { latencyResults, latencyStatus, checkLatency } = useStore();
 
   const latencyData = latencyResults[provider.id];
+  const providerLatencyStatus = latencyStatus[provider.id] ?? 'idle';
   const statusLabel = provider.status === 'valid' ? t('status.valid') : provider.status === 'warning' ? t('status.warning') : provider.status === 'error' ? t('status.error') : t('status.idle');
 
   const models = useMemo(() => {
@@ -42,10 +43,16 @@ export const ProviderDetail: React.FC<ProviderDetailProps> = ({ provider, onClos
         </div>
         <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
           <span className="mono" style={{ fontSize: '24px', fontWeight: 700 }}>
-            {latencyData?.status === 'success' ? `${latencyData.latency}ms` : statusLabel}
+            {providerLatencyStatus === 'checking'
+              ? t('modal.checking')
+              : latencyData?.status === 'success'
+                ? `${latencyData.latency}ms`
+                : latencyData?.status === 'timeout'
+                  ? t('card.timeout')
+                  : statusLabel}
           </span>
-          <button className="btn btn--primary" onClick={() => checkLatency(provider.id, 'full')}>
-            {t('header.checkAll')}
+          <button className="btn btn--primary" onClick={() => checkLatency(provider.id, 'full')} disabled={providerLatencyStatus === 'checking'}>
+            {providerLatencyStatus === 'checking' ? t('modal.checking') : t('header.checkAll')}
           </button>
           <button className="btn btn--ghost" onClick={onClose} aria-label="Close">✕</button>
         </div>

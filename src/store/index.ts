@@ -16,6 +16,7 @@ interface StoreState {
   // Latency
   latencyStatus: Record<string, 'idle' | 'checking' | 'done' | 'error'>;
   latencyResults: Record<string, LatencyResult>;
+  bulkChecking: boolean;
   // Sync
   syncStatus: 'idle' | 'syncing' | 'error';
   lastSyncAt: string | null;
@@ -60,6 +61,7 @@ export const useStore = create<StoreState>()((set, get) => ({
   selectedProviderId: null,
   latencyStatus: {},
   latencyResults: {},
+  bulkChecking: false,
   syncStatus: 'idle',
   lastSyncAt: null,
   exportStatus: {},
@@ -113,10 +115,11 @@ export const useStore = create<StoreState>()((set, get) => ({
     state.providers.forEach((p: Provider) => {
       initialStatus[p.id] = 'checking';
     });
-    set({ latencyStatus: initialStatus });
+    set({ latencyStatus: initialStatus, bulkChecking: true });
     try {
       await window.electronAPI.latencyCheckAll({ mode, concurrency, timeout });
     } catch {
+      set({ bulkChecking: false });
       // Error handled via IPC
     }
   },
@@ -195,6 +198,7 @@ export const useStore = create<StoreState>()((set, get) => ({
 if (typeof window !== 'undefined' && window.electronAPI) {
   window.electronAPI.onLatencyProgress((data: any) => {
     useStore.setState((s) => ({
+      bulkChecking: true,
       latencyStatus: { ...s.latencyStatus, [data.providerId]: 'checking' },
       latencyResults: { ...s.latencyResults, [data.providerId]: data },
     }));
@@ -207,7 +211,7 @@ if (typeof window !== 'undefined' && window.electronAPI) {
       newStatus[r.providerId] = r.status === 'success' ? 'done' : 'error';
       newResults[r.providerId] = r;
     });
-    useStore.setState({ latencyStatus: newStatus, latencyResults: newResults });
+    useStore.setState({ latencyStatus: newStatus, latencyResults: newResults, bulkChecking: false });
   });
 
   window.electronAPI.onSyncStatus((data: any) => {

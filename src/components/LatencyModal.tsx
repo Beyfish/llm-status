@@ -8,27 +8,37 @@ interface LatencyModalProps {
 
 export const LatencyModal: React.FC<LatencyModalProps> = ({ onClose }) => {
   const { t } = useTranslation();
-  const { checkAll } = useStore();
+  const { checkAll, providers, latencyStatus, bulkChecking } = useStore();
   const [mode, setMode] = useState<'lightweight' | 'full'>('full');
   const [timeout, setTimeoutVal] = useState(10);
   const [concurrency, setConcurrency] = useState(5);
-  const [checking, setChecking] = useState(false);
 
   const handleStart = async () => {
-    setChecking(true);
     await checkAll(mode, concurrency, timeout);
-    setChecking(false);
-    onClose();
   };
+
+  const checkedCount = providers.filter((provider) => latencyStatus[provider.id] === 'done' || latencyStatus[provider.id] === 'error').length;
 
   return (
     <div className="modal-overlay" onClick={onClose} role="dialog" aria-modal="true" aria-label={t('modal.latencyTitle')}>
-      <div className="modal" onClick={(e) => e.stopPropagation()}>
+      <div className="modal modal--large" onClick={(e) => e.stopPropagation()}>
         <div className="modal__header">
           <h2>{t('modal.latencyTitle')}</h2>
           <button className="modal__close" onClick={onClose} aria-label="Close">✕</button>
         </div>
         <div className="modal__body">
+          <div className="latency-modal__summary">
+            <div className="latency-modal__summary-copy">
+              <strong>{bulkChecking ? t('modal.checking') : t('header.checkAll')}</strong>
+              <span>
+                {checkedCount}/{providers.length} providers processed
+              </span>
+            </div>
+            <div className="latency-modal__progress" aria-hidden="true">
+              <span className="latency-modal__progress-bar" style={{ width: `${providers.length ? (checkedCount / providers.length) * 100 : 0}%` }} />
+            </div>
+          </div>
+
           <div className="modal__option" onClick={() => setMode('lightweight')}>
             <span className={`modal__radio ${mode === 'lightweight' ? 'modal__radio--checked' : ''}`} />
             <div>
@@ -54,11 +64,31 @@ export const LatencyModal: React.FC<LatencyModalProps> = ({ onClose }) => {
             <label>{t('modal.concurrency')}</label>
             <input type="number" value={concurrency} onChange={(e) => setConcurrency(Number(e.target.value))} min={1} max={20} className="modal__input" />
           </div>
+
+          <div className="latency-modal__providers" role="status" aria-live="polite">
+            {providers.map((provider) => {
+              const status = latencyStatus[provider.id] ?? 'idle';
+              const statusText = status === 'checking'
+                ? t('modal.checking')
+                : status === 'done'
+                  ? t('status.valid')
+                  : status === 'error'
+                    ? t('status.error')
+                    : t('status.idle');
+
+              return (
+                <div key={provider.id} className="latency-modal__provider-row">
+                  <span className="latency-modal__provider-name">{provider.name}</span>
+                  <span className={`latency-modal__provider-state latency-modal__provider-state--${status}`}>{statusText}</span>
+                </div>
+              );
+            })}
+          </div>
         </div>
         <div className="modal__footer">
           <button className="btn btn--ghost" onClick={onClose}>{t('modal.cancel')}</button>
-          <button className="btn btn--primary" onClick={handleStart} disabled={checking}>
-            {checking ? t('modal.checking') : t('modal.start')}
+          <button className="btn btn--primary" onClick={bulkChecking ? onClose : handleStart} disabled={!providers.length}>
+            {bulkChecking ? t('modal.close', 'Close') : t('modal.start')}
           </button>
         </div>
       </div>

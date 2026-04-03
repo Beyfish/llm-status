@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { ProviderCard } from './components/ProviderCard';
 import { ProviderDetail } from './components/ProviderDetail';
 import { CommandPalette } from './components/CommandPalette';
 import { LatencyModal } from './components/LatencyModal';
@@ -14,7 +13,7 @@ import { useTranslation } from 'react-i18next';
 const App: React.FC = () => {
   const { t, i18n } = useTranslation();
   const {
-    providers, selectedProviderId, viewMode, theme, searchQuery,
+    providers, selectedProviderId, theme, searchQuery, latencyStatus,
     setSelectedProvider, setSearchQuery, setTheme, toggleCommandPalette,
     loadProviders, settings,
   } = useStore();
@@ -84,7 +83,31 @@ const App: React.FC = () => {
       )
     : providers;
 
+  const hasProviders = providers.length > 0;
   const selectedProvider = providers.find((p) => p.id === selectedProviderId);
+
+  const renderSidebarStatus = (providerId: string) => {
+    const status = latencyStatus[providerId];
+    const latencyResult = useStore.getState().latencyResults[providerId];
+    if (status === 'checking') {
+      return <span className="app-sidebar__status app-sidebar__status--checking">{t('modal.checking')}</span>;
+    }
+
+    const provider = providers.find((p) => p.id === providerId);
+    const label = latencyResult?.status === 'success'
+      ? t('status.valid')
+      : latencyResult?.status === 'timeout'
+        ? t('card.timeout')
+        : provider?.status === 'valid'
+          ? t('status.valid')
+          : provider?.status === 'warning'
+            ? t('status.warning')
+            : provider?.status === 'error'
+              ? t('status.error')
+              : t('status.idle');
+
+    return <span className="app-sidebar__status">{label}</span>;
+  };
 
   return (
     <div className={`app app--${theme === 'system' ? (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light') : theme}`}>
@@ -126,14 +149,24 @@ const App: React.FC = () => {
       <main className="app-main">
         <aside className="app-sidebar">
           <nav className="app-sidebar__nav">
-            {providers.map((p) => (
+            {filteredProviders.map((p) => (
               <button
                 key={p.id}
                 className={`app-sidebar__item ${selectedProviderId === p.id ? 'app-sidebar__item--active' : ''}`}
                 onClick={() => setSelectedProvider(p.id)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    setSelectedProvider(p.id);
+                  }
+                }}
               >
-                <span className={`status-dot status-dot--${p.status}`} />
-                <span className="app-sidebar__name">{p.name}</span>
+                <span className={`status-dot status-dot--${latencyStatus[p.id] === 'checking' ? 'idle' : p.status}`} />
+                <div className="app-sidebar__item-content">
+                  <span className="app-sidebar__name">{p.name}</span>
+                  {renderSidebarStatus(p.id)}
+                </div>
+                <span className={`status-dot status-dot--${latencyStatus[p.id] === 'checking' ? 'idle' : p.status}`} />
               </button>
             ))}
             <button className="app-sidebar__add" onClick={() => setShowSmartImport(true)}>+ {t('sidebar.add')}</button>
@@ -141,17 +174,34 @@ const App: React.FC = () => {
         </aside>
 
         <section className="app-content">
-          <div className={`app-grid app-grid--${viewMode}`}>
-            {filteredProviders.map((p) => (
-              <ProviderCard key={p.id} provider={p} />
-            ))}
-          </div>
+          {!hasProviders && (
+            <div className="app-empty-state" role="status" aria-live="polite">
+              <div className="app-empty-state__icon">⚡</div>
+              <h2 className="app-empty-state__title">{t('onboarding.welcomeTitle', 'Add your first provider')}</h2>
+              <p className="app-empty-state__desc">
+                {t('onboarding.welcomeDesc', 'Paste an API key, verify it instantly, and keep your provider health in one place.')}
+              </p>
+              <button className="btn btn--primary" onClick={() => setShowSmartImport(true)}>
+                {t('sidebar.add')}
+              </button>
+            </div>
+          )}
 
-          {selectedProvider && (
+          {hasProviders && selectedProvider && (
             <ProviderDetail
               provider={selectedProvider}
               onClose={() => setSelectedProvider(null)}
             />
+          )}
+
+          {hasProviders && !selectedProvider && (
+            <div className="app-empty-state app-empty-state--panel" role="status" aria-live="polite">
+              <div className="app-empty-state__icon">👈</div>
+              <h2 className="app-empty-state__title">Select a provider</h2>
+              <p className="app-empty-state__desc">
+                Pick a provider from the sidebar to inspect credentials, run checks, and diagnose latency.
+              </p>
+            </div>
           )}
         </section>
       </main>
