@@ -122,6 +122,22 @@ export function registerExportHandlers(): void {
   });
 
   ipcMain.handle('export:clipboard', async (_event, data: Record<string, unknown>): Promise<void> => {
-    clipboard.writeText(JSON.stringify(data, null, 2));
+    // Redact sensitive fields before copying to clipboard
+    const redacted = JSON.parse(JSON.stringify(data));
+    if (redacted.providers) {
+      redacted.providers = redacted.providers.map((p: any) => ({
+        ...p,
+        credentials: p.credentials?.map((c: any) => ({
+          ...c,
+          value: c.value ? `****${c.value.slice(-4)}` : undefined,
+          accessToken: c.accessToken ? '****' : undefined,
+          refreshToken: c.refreshToken ? '****' : undefined,
+          privateKey: c.privateKey ? '****' : undefined,
+          secretAccessKey: c.secretAccessKey ? '****' : undefined,
+          clientSecret: c.clientSecret ? '****' : undefined,
+        })),
+      }));
+    }
+    clipboard.writeText(JSON.stringify(redacted, null, 2));
   });
 }
