@@ -32,6 +32,44 @@ const App: React.FC = () => {
     loadProviders();
   }, []);
 
+  // Check for expiring credentials after providers load
+  useEffect(() => {
+    if (providers.length === 0) return;
+
+    const now = new Date();
+    const sevenDaysFromNow = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
+
+    for (const provider of providers) {
+      for (const cred of provider.credentials) {
+        if (cred.expiresAt) {
+          const expiryDate = new Date(cred.expiresAt);
+          if (expiryDate <= sevenDaysFromNow && expiryDate > now) {
+            const daysLeft = Math.ceil((expiryDate.getTime() - now.getTime()) / (24 * 60 * 60 * 1000));
+            if (window.electronAPI?.notifyDesktop) {
+              window.electronAPI.notifyDesktop({
+                title: 'Key Expiring Soon',
+                body: `${provider.name} key expires in ${daysLeft} day${daysLeft !== 1 ? 's' : ''}`,
+                type: 'warning' as const,
+                providerId: provider.id,
+                timestamp: new Date().toISOString(),
+              });
+            }
+          } else if (expiryDate <= now) {
+            if (window.electronAPI?.notifyDesktop) {
+              window.electronAPI.notifyDesktop({
+                title: 'Key Expired',
+                body: `${provider.name} key has expired`,
+                type: 'error' as const,
+                providerId: provider.id,
+                timestamp: new Date().toISOString(),
+              });
+            }
+          }
+        }
+      }
+    }
+  }, [providers]);
+
   // Apply theme
   useEffect(() => {
     const effectiveTheme = theme === 'system'

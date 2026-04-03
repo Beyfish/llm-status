@@ -38,6 +38,7 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({ onComplete, onSk
   const [apiKey, setApiKey] = useState('');
   const [baseUrl, setBaseUrl] = useState('');
   const [providerName, setProviderName] = useState('');
+  const [expiresAt, setExpiresAt] = useState('');
   const [verifying, setVerifying] = useState(false);
   const [verifyResult, setVerifyResult] = useState<'success' | 'error' | null>(null);
   const [keyValidation, setKeyValidation] = useState<KeyValidationResult>({
@@ -105,6 +106,7 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({ onComplete, onSk
         value: cleanedKey,
         encrypted: true,
         status: verifyResult === 'success' ? 'valid' : 'unknown',
+        expiresAt: expiresAt || undefined,
       }] : [],
       latencyHistory: [],
       status: 'idle',
@@ -222,6 +224,15 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({ onComplete, onSk
             )}
           </div>
         )}
+        <div className="onboarding__field">
+          <label>{t('onboarding.expiresAt', 'Expiry date (optional)')}</label>
+          <input
+            type="date"
+            value={expiresAt}
+            onChange={(e) => setExpiresAt(e.target.value)}
+            className="onboarding__input"
+          />
+        </div>
         <button
           className="btn btn--primary"
           onClick={handleVerify}

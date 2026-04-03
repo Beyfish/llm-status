@@ -17,6 +17,18 @@ export const ProviderDetail: React.FC<ProviderDetailProps> = ({ provider, onClos
   const providerLatencyStatus = latencyStatus[provider.id] ?? 'idle';
   const statusLabel = provider.status === 'valid' ? t('status.valid') : provider.status === 'warning' ? t('status.warning') : provider.status === 'error' ? t('status.error') : t('status.idle');
 
+  const getExpiryInfo = (expiresAt: string): { label: string; color: string } | null => {
+    if (!expiresAt) return null;
+    const now = new Date();
+    const expiry = new Date(expiresAt);
+    const daysLeft = Math.ceil((expiry.getTime() - now.getTime()) / (24 * 60 * 60 * 1000));
+
+    if (daysLeft < 0) return { label: '⚠️ Expired', color: 'var(--red)' };
+    if (daysLeft <= 3) return { label: `⚠️ ${daysLeft}d left`, color: 'var(--red)' };
+    if (daysLeft <= 7) return { label: `🟡 ${daysLeft}d left`, color: 'var(--yellow)' };
+    return { label: `🟢 ${daysLeft}d left`, color: 'var(--green)' };
+  };
+
   const handleCopyCurl = async (credId: string) => {
     const cred = provider.credentials.find((c) => c.id === credId);
     if (!cred || !cred.value) return;
@@ -108,29 +120,38 @@ export const ProviderDetail: React.FC<ProviderDetailProps> = ({ provider, onClos
       <div className="provider-detail__section">
         <h3 className="provider-detail__section-title">{t('detail.credentials')}</h3>
         <div className="provider-detail__credentials">
-          {provider.credentials.map((cred) => (
-            <div key={cred.id} className="provider-detail__credential">
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flex: 1, minWidth: 0 }}>
-                <span className={`status-dot status-dot--${cred.status}`} />
-                <span className="mono" style={{ fontSize: '12px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                  {cred.type === 'api_key' ? `sk-****${(cred.value || '').slice(-4)}` : cred.type}
-                </span>
+          {provider.credentials.map((cred) => {
+            const expiryInfo = cred.expiresAt ? getExpiryInfo(cred.expiresAt) : null;
+
+            return (
+              <div key={cred.id} className="provider-detail__credential">
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flex: 1, minWidth: 0 }}>
+                  <span className={`status-dot status-dot--${cred.status}`} />
+                  <span className="mono" style={{ fontSize: '12px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                    {cred.type === 'api_key' ? `sk-****${(cred.value || '').slice(-4)}` : cred.type}
+                  </span>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <span style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>
+                    {cred.status === 'valid' ? t('status.valid') : t('status.error')}
+                  </span>
+                  {expiryInfo && (
+                    <span style={{ fontSize: '11px', color: expiryInfo.color }} title={`Expires: ${cred.expiresAt}`}>
+                      {expiryInfo.label}
+                    </span>
+                  )}
+                  <button
+                    className="btn btn--ghost"
+                    style={{ fontSize: '11px', padding: '0 8px', height: '28px' }}
+                    onClick={() => handleCopyCurl(cred.id)}
+                    title="Copy curl command for testing"
+                  >
+                    {copiedCredId === cred.id ? '✅ Copied' : '📋 Copy curl'}
+                  </button>
+                </div>
               </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <span style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>
-                  {cred.status === 'valid' ? t('status.valid') : t('status.error')}
-                </span>
-                <button
-                  className="btn btn--ghost"
-                  style={{ fontSize: '11px', padding: '0 8px', height: '28px' }}
-                  onClick={() => handleCopyCurl(cred.id)}
-                  title="Copy curl command for testing"
-                >
-                  {copiedCredId === cred.id ? '✅ Copied' : '📋 Copy curl'}
-                </button>
-              </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </div>
     </div>
