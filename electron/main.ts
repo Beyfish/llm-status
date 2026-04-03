@@ -136,7 +136,20 @@ function createWindow(): void {
   if (is.dev && process.env['ELECTRON_RENDERER_URL']) {
     mainWindow.loadURL(process.env['ELECTRON_RENDERER_URL']);
   } else {
-    mainWindow.loadFile(join(__dirname, '../renderer/index.html'));
+    const path = require('path');
+    const rendererPath = path.join(__dirname, '../renderer/index.html');
+    const distPublicPath = path.join(__dirname, '../dist/public/index.html');
+    const distPath = path.join(__dirname, '../dist/index.html');
+    const { existsSync } = require('fs');
+    if (existsSync(rendererPath)) {
+      mainWindow.loadFile(rendererPath);
+    } else if (existsSync(distPublicPath)) {
+      mainWindow.loadFile(distPublicPath);
+    } else if (existsSync(distPath)) {
+      mainWindow.loadFile(distPath);
+    } else {
+      mainWindow.loadFile(path.join(__dirname, '../public/index.html'));
+    }
   }
 }
 
