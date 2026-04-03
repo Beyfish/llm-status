@@ -80,18 +80,21 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ onClose }) => {
           <button className="modal__close" onClick={onClose} aria-label="Close">✕</button>
         </div>
         <div className="modal__body modal__body--settings">
-          <nav className="settings-tabs">
+          <nav className="settings-tabs" role="tablist" aria-label="Settings sections">
             {tabs.map((tab) => (
               <button
                 key={tab.id}
                 className={`settings-tab ${activeTab === tab.id ? 'settings-tab--active' : ''}`}
                 onClick={() => setActiveTab(tab.id)}
+                role="tab"
+                aria-selected={activeTab === tab.id}
+                aria-controls={`settings-panel-${tab.id}`}
               >
                 {tab.label}
               </button>
             ))}
           </nav>
-          <div className="settings-content">
+          <div className="settings-content" role="tabpanel" id={`settings-panel-${activeTab}`}>
             {activeTab === 'general' && (
               <>
                 <div className="settings-field">
