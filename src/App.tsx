@@ -10,6 +10,8 @@ import { ExportModal } from './components/ExportModal';
 import { useStore } from './store';
 import { useTranslation } from 'react-i18next';
 
+import type { ProviderEnvironment } from '@/types';
+
 const App: React.FC = () => {
   const { t, i18n } = useTranslation();
   const {
@@ -17,6 +19,8 @@ const App: React.FC = () => {
     setSelectedProvider, setSearchQuery, setTheme, toggleCommandPalette,
     loadProviders, settings,
   } = useStore();
+
+  const [envFilter, setEnvFilter] = useState<ProviderEnvironment | 'all'>('all');
 
   const [showLatencyModal, setShowLatencyModal] = useState(false);
   const [showSettingsModal, setShowSettingsModal] = useState(false);
@@ -141,6 +145,12 @@ const App: React.FC = () => {
       )
     : providers;
 
+  const envFilteredProviders = envFilter === 'all'
+    ? filteredProviders
+    : filteredProviders.filter((p) => p.environment === envFilter);
+
+  const displayProviders = envFilteredProviders;
+
   const hasProviders = providers.length > 0;
   const selectedProvider = providers.find((p) => p.id === selectedProviderId);
 
@@ -207,7 +217,19 @@ const App: React.FC = () => {
       <main className="app-main">
         <aside className="app-sidebar">
           <nav className="app-sidebar__nav">
-            {filteredProviders.map((p) => (
+            <div style={{ display: 'flex', gap: '4px', marginBottom: '8px', flexWrap: 'wrap' }}>
+              {(['all', 'personal', 'work', 'production', 'staging'] as const).map((env) => (
+                <button
+                  key={env}
+                  className={`btn ${envFilter === env ? 'btn--primary' : 'btn--ghost'}`}
+                  style={{ fontSize: '10px', padding: '2px 6px', height: '22px' }}
+                  onClick={() => setEnvFilter(env)}
+                >
+                  {env === 'all' ? 'All' : env.charAt(0).toUpperCase() + env.slice(1)}
+                </button>
+              ))}
+            </div>
+            {displayProviders.map((p) => (
               <button
                 key={p.id}
                 className={`app-sidebar__item ${selectedProviderId === p.id ? 'app-sidebar__item--active' : ''}`}
@@ -223,6 +245,11 @@ const App: React.FC = () => {
                 <div className="app-sidebar__item-content">
                   <span className="app-sidebar__name">{p.name}</span>
                   {renderSidebarStatus(p.id)}
+                  {p.environment && p.environment !== 'personal' && (
+                    <span style={{ fontSize: '9px', color: 'var(--text-muted)', textTransform: 'uppercase' }}>
+                      {p.environment}
+                    </span>
+                  )}
                 </div>
                 <span className={`status-dot status-dot--${latencyStatus[p.id] === 'checking' ? 'idle' : p.status}`} />
               </button>

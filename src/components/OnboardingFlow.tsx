@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import type { Provider, ProviderType, CredentialType } from '@/types';
+import type { Provider, ProviderType, CredentialType, ProviderEnvironment } from '@/types';
 import { validateApiKey, cleanApiKey, type KeyValidationResult } from '@/utils/keyValidation';
 
 interface OnboardingFlowProps {
@@ -39,6 +39,7 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({ onComplete, onSk
   const [baseUrl, setBaseUrl] = useState('');
   const [providerName, setProviderName] = useState('');
   const [expiresAt, setExpiresAt] = useState('');
+  const [environment, setEnvironment] = useState<ProviderEnvironment>('personal');
   const [verifying, setVerifying] = useState(false);
   const [verifyResult, setVerifyResult] = useState<'success' | 'error' | null>(null);
   const [keyValidation, setKeyValidation] = useState<KeyValidationResult>({
@@ -100,6 +101,7 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({ onComplete, onSk
       type: selectedType,
       name: providerName || selectedType,
       baseUrl,
+      environment,
       credentials: cleanedKey ? [{
         id: `key-${Date.now()}`,
         type: selectedCredType,
@@ -232,6 +234,20 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({ onComplete, onSk
             onChange={(e) => setExpiresAt(e.target.value)}
             className="onboarding__input"
           />
+        </div>
+        <div className="onboarding__field">
+          <label>{t('onboarding.environment', 'Environment')}</label>
+          <select
+            value={environment}
+            onChange={(e) => setEnvironment(e.target.value as ProviderEnvironment)}
+            className="onboarding__input"
+          >
+            <option value="personal">🏠 Personal</option>
+            <option value="work">💼 Work</option>
+            <option value="production">🚀 Production</option>
+            <option value="staging">🧪 Staging</option>
+            <option value="custom">🔧 Custom</option>
+          </select>
         </div>
         <button
           className="btn btn--primary"

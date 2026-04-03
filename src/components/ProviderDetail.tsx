@@ -113,6 +113,25 @@ export const ProviderDetail: React.FC<ProviderDetailProps> = ({ provider, onClos
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
           <span className={`status-dot status-dot--${provider.status}`} />
           <h2 className="provider-detail__name">{provider.name}</h2>
+          {provider.environment && (
+            <span style={{
+              fontSize: '10px',
+              padding: '2px 8px',
+              borderRadius: '999px',
+              background: provider.environment === 'production' ? 'rgba(239, 68, 68, 0.15)' :
+                provider.environment === 'work' ? 'rgba(0, 122, 255, 0.15)' :
+                provider.environment === 'staging' ? 'rgba(234, 179, 8, 0.15)' :
+                'rgba(107, 114, 128, 0.15)',
+              color: provider.environment === 'production' ? 'var(--red)' :
+                provider.environment === 'work' ? 'var(--accent)' :
+                provider.environment === 'staging' ? 'var(--yellow)' :
+                'var(--text-muted)',
+              textTransform: 'uppercase',
+              fontWeight: 600,
+            }}>
+              {provider.environment}
+            </span>
+          )}
         </div>
         <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
           <span className="mono" style={{ fontSize: '24px', fontWeight: 700 }}>

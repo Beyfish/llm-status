@@ -60,6 +60,8 @@ export interface Credential {
   scope?: string;
 }
 
+export type ProviderEnvironment = 'personal' | 'work' | 'production' | 'staging' | 'custom';
+
 export interface LatencyRecord {
   timestamp: string;
   latency: number;
@@ -71,11 +73,14 @@ export interface Provider {
   name: string;
   baseUrl?: string;
   region?: string;
+  environment?: ProviderEnvironment;
   credentials: Credential[];
   latencyHistory: LatencyRecord[];
   status: 'valid' | 'warning' | 'error' | 'idle';
   averageLatency?: number;
   modelCount?: number;
+  checkCount?: number;
+  promptCount?: number;
 }
 
 export interface AppSettings {
