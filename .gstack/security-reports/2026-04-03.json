@@ -1,0 +1,122 @@
+{
+  "generatedAt": "2026-04-03T00:00:00+08:00",
+  "project": "LLM Status Manager",
+  "scope": "full-audit",
+  "verification": "self-verified",
+  "filterStats": {
+    "candidatesScanned": 11,
+    "filteredAsFalsePositive": 6,
+    "reported": 5
+  },
+  "totals": {
+    "critical": 1,
+    "high": 2,
+    "medium": 2
+  },
+  "findings": [
+    {
+      "id": 1,
+      "severity": "CRITICAL",
+      "confidence": 10,
+      "category": "Security Misconfiguration",
+      "owasp": "A05",
+      "title": "Production app always loads a localhost renderer with privileged preload access",
+      "files": [
+        { "path": "electron/main.ts", "line": 42 }
+      ],
+      "description": "The BrowserWindow always loads http://localhost:5173, even in packaged builds. Because preload remains enabled and exposes a large privileged electronAPI surface, any process able to bind a local server on 5173 can supply arbitrary JavaScript to the production app and immediately inherit access to configRead/configWrite, encrypt/decrypt, sync/export, webhook, and OAuth IPC calls.",
+      "exploitScenario": [
+        "Attacker runs a local HTTP server on the victim machine listening on 127.0.0.1:5173.",
+        "Victim launches the packaged LLM Status desktop app.",
+        "The app loads attacker-controlled HTML/JS from localhost instead of a bundled local file.",
+        "Attacker code calls window.electronAPI.configRead(), decryptValue(), exportFile(), syncUpload(), or webhookSend().",
+        "All locally stored credentials and secrets can be read, exfiltrated, modified, or destroyed."
+      ],
+      "impact": "Full compromise of all secrets managed by the desktop app, plus arbitrary privileged actions through the preload bridge."
+    },
+    {
+      "id": 2,
+      "severity": "HIGH",
+      "confidence": 10,
+      "category": "Cryptographic Failure",
+      "owasp": "A02",
+      "title": "Credential config is written to disk in plaintext despite encrypted storage mode default",
+      "files": [
+        { "path": "electron/ipc/config.ts", "line": 21 },
+        { "path": "electron/ipc/config.ts", "line": 44 },
+        { "path": "electron/ipc/config.ts", "line": 65 }
+      ],
+      "description": "The app default settings say storageMode is 'encrypted', but config write/read simply JSON-serialize the entire config to ~/.llm-status/config.json. Providers, API keys, OAuth tokens, private keys, and AWS secrets therefore persist on disk in plaintext. The backup flow also copies plaintext snapshots.",
+      "exploitScenario": [
+        "Attacker gains local user-level file access via malware, backup compromise, remote support session, or a shared machine.",
+        "Attacker reads ~/.llm-status/config.json and any config.backup.*.json files.",
+        "All provider secrets are immediately recoverable without OS-keystore access."
+      ],
+      "impact": "Credential theft for every configured provider, including API keys, OAuth refresh tokens, and private key material."
+    },
+    {
+      "id": 3,
+      "severity": "HIGH",
+      "confidence": 10,
+      "category": "Cryptographic Failure",
+      "owasp": "A02",
+      "title": "Cloud sync uploads full secret-bearing config without application-level encryption",
+      "files": [
+        { "path": "src/store/index.ts", "line": 129 },
+        { "path": "src/store/index.ts", "line": 130 },
+        { "path": "electron/ipc/sync.ts", "line": 186 },
+        { "path": "electron/ipc/sync.ts", "line": 188 },
+        { "path": "electron/ipc/sync.ts", "line": 191 }
+      ],
+      "description": "uploadSync merges cloud connection credentials with the full app config, then sync:upload serializes that merged object and sends it to WebDAV/S3/Google Drive/OneDrive. That means provider secrets and sync-provider secrets are uploaded together as plaintext JSON at the application layer. TLS may protect transport, but the remote storage content is still readable by anyone who compromises the storage account, bucket, or folder.",
+      "exploitScenario": [
+        "Victim enables sync to WebDAV, S3, Google Drive, or OneDrive.",
+        "Attacker compromises that storage account, shared folder, or bucket permissions.",
+        "Attacker downloads llm-status/config.json from remote storage.",
+        "The file contains provider credentials and, depending on flow, the sync credentials themselves."
+      ],
+      "impact": "Mass secret disclosure beyond the local device, with potentially wider blast radius because remote storage is often backed up, shared, and less tightly controlled."
+    },
+    {
+      "id": 4,
+      "severity": "MEDIUM",
+      "confidence": 8,
+      "category": "Identification and Authentication Failures",
+      "owasp": "A07",
+      "title": "OAuth callback accepts any localhost request and generated state is never verified",
+      "files": [
+        { "path": "electron/ipc/oauth.ts", "line": 24 },
+        { "path": "electron/ipc/oauth.ts", "line": 29 },
+        { "path": "electron/ipc/oauth.ts", "line": 78 },
+        { "path": "electron/ipc/oauth.ts", "line": 83 }
+      ],
+      "description": "oauth:start generates a random state, but the returned callback payload only extracts code and ignores state validation. The localhost callback server accepts any request to /oauth/callback and resolves immediately if code and state are present, regardless of whether the returned state matches the generated one.",
+      "exploitScenario": [
+        "Victim starts an OAuth flow in the desktop app.",
+        "A malicious local process or browser page sends a forged request to http://localhost:17171/oauth/callback with attacker-controlled code/state before the legitimate redirect arrives.",
+        "The app accepts the forged callback and exchanges the supplied code.",
+        "Victim can end up linked to the wrong remote account or the OAuth flow can be hijacked / confused."
+      ],
+      "impact": "OAuth CSRF / account confusion risk, especially on shared or compromised local environments."
+    },
+    {
+      "id": 5,
+      "severity": "MEDIUM",
+      "confidence": 8,
+      "category": "Information Disclosure",
+      "owasp": "A02",
+      "title": "Clipboard export copies full configuration secrets to the global system clipboard",
+      "files": [
+        { "path": "electron/ipc/export.ts", "line": 127 },
+        { "path": "electron/ipc/export.ts", "line": 128 }
+      ],
+      "description": "export:clipboard writes the full JSON payload directly to the system clipboard with no redaction, no expiry, and no warning. Clipboard managers, remote desktop tools, browser extensions, and other local apps can read that clipboard data.",
+      "exploitScenario": [
+        "Victim uses clipboard export for configuration or secrets.",
+        "A clipboard-monitoring process or cloud clipboard sync feature captures the plaintext JSON.",
+        "Attacker later retrieves provider keys or tokens from clipboard history."
+      ],
+      "impact": "Secret disclosure outside the app's storage boundary, with weak user visibility and no automatic cleanup."
+    }
+  ]
+}

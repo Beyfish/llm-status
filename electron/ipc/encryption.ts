@@ -13,7 +13,11 @@ export function registerEncryptionHandlers(): void {
     if (!safeStorage.isEncryptionAvailable()) {
       throw new Error('Encryption not available on this platform');
     }
-    const buffer = Buffer.from(encrypted, 'base64');
-    return safeStorage.decryptString(buffer);
+    try {
+      const buffer = Buffer.from(encrypted, 'base64');
+      return safeStorage.decryptString(buffer);
+    } catch {
+      throw new Error('Failed to decrypt value — data may be corrupted or from a different machine');
+    }
   });
 }

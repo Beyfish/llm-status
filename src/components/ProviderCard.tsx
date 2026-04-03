@@ -30,7 +30,12 @@ export const ProviderCard: React.FC<ProviderCardProps> = ({ provider }) => {
   };
 
   return (
-    <div className="provider-card" onClick={handleClick} role="button" tabIndex={0} aria-label={`${provider.name} - ${statusLabel}`}>
+    <div className="provider-card" onClick={handleClick} role="button" tabIndex={0} aria-label={`${provider.name} - ${statusLabel}`} onKeyDown={(e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        handleClick();
+      }
+    }}>
       <div className="provider-card__header">
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
           <span className={`status-dot status-dot--${provider.status}`} />

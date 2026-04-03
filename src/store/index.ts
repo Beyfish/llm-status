@@ -7,6 +7,7 @@ import type {
   LatencyMode,
   ViewMode,
   Theme,
+  UsageRecord,
 } from '@/types';
 
 interface StoreState {
@@ -16,19 +17,21 @@ interface StoreState {
   // Latency
   latencyStatus: Record<string, 'idle' | 'checking' | 'done' | 'error'>;
   latencyResults: Record<string, LatencyResult>;
+  bulkChecking: boolean;
   // Sync
-  syncStatus: 'idle' | 'syncing' | 'error';
+  syncStatus: 'idle' | 'syncing' | 'error' | 'conflict';
+  syncConflict: { localVersion?: string; remoteVersion?: string; localModifiedAt?: string; remoteModifiedAt?: string } | null;
   lastSyncAt: string | null;
   // Export
   exportStatus: Record<string, 'idle' | 'exporting' | 'done' | 'error'>;
+  // Usage
+  usageData: Record<string, UsageRecord[]>;
+  usageSummary: { totalCost: number; totalChecks: number; totalPrompts: number; byProvider: Record<string, { cost: number; checks: number; prompts: number }> } | null;
   // UI
   viewMode: ViewMode;
   theme: Theme;
   searchQuery: string;
   commandPaletteOpen: boolean;
-  showSyncModal: boolean;
-  showExportModal: boolean;
-  showSettingsModal: boolean;
   // Settings
   settings: Partial<AppSettings>;
   // Methods
@@ -38,17 +41,19 @@ interface StoreState {
   setSelectedProvider: (id: string | null) => void;
   checkLatency: (providerId: string, mode: LatencyMode) => Promise<void>;
   checkAll: (mode: LatencyMode, concurrency: number, timeout: number) => Promise<void>;
-  uploadSync: (protocol: string, connectionConfig: Record<string, string>) => Promise<void>;
-  downloadSync: (protocol: string, connectionConfig: Record<string, string>) => Promise<void>;
+  uploadSync: () => Promise<void>;
+  downloadSync: () => Promise<void>;
+  forceSyncUpload: () => Promise<void>;
+  resolveSyncConflict: (strategy: 'local' | 'remote') => Promise<void>;
   pushToTarget: (target: string, config: Record<string, unknown>) => Promise<void>;
   exportToFile: (target: string, config: Record<string, unknown>) => Promise<void>;
   setViewMode: (mode: ViewMode) => void;
   setTheme: (theme: Theme) => void;
   setSearchQuery: (query: string) => void;
   toggleCommandPalette: () => void;
-  setShowSyncModal: (show: boolean) => void;
-  setShowExportModal: (show: boolean) => void;
-  setShowSettingsModal: (show: boolean) => void;
+  fetchUsage: (providerId: string) => Promise<void>;
+  fetchUsageSummary: () => Promise<void>;
+  recordUsage: (record: UsageRecord) => Promise<void>;
   updateSettings: (settings: Partial<AppSettings>) => Promise<void>;
 }
 
@@ -66,16 +71,17 @@ export const useStore = create<StoreState>()((set, get) => ({
   selectedProviderId: null,
   latencyStatus: {},
   latencyResults: {},
+  bulkChecking: false,
   syncStatus: 'idle',
+  syncConflict: null,
   lastSyncAt: null,
   exportStatus: {},
+  usageData: {},
+  usageSummary: null,
   viewMode: 'card',
   theme: 'dark',
   searchQuery: '',
   commandPaletteOpen: false,
-  showSyncModal: false,
-  showExportModal: false,
-  showSettingsModal: false,
   settings: {},
 
   // Provider methods
@@ -122,29 +128,42 @@ export const useStore = create<StoreState>()((set, get) => ({
     state.providers.forEach((p: Provider) => {
       initialStatus[p.id] = 'checking';
     });
-    set({ latencyStatus: initialStatus });
+    set({ latencyStatus: initialStatus, bulkChecking: true });
     try {
       await window.electronAPI.latencyCheckAll({ mode, concurrency, timeout });
     } catch {
+      set({ bulkChecking: false });
       // Error handled via IPC
     }
   },
 
   // Sync methods
-  uploadSync: async (protocol: string, connectionConfig: Record<string, string>) => {
-    set({ syncStatus: 'syncing' });
+  uploadSync: async () => {
+    set({ syncStatus: 'syncing', syncConflict: null });
     try {
-      const appConfig = getConfig(get());
-      await window.electronAPI.syncUpload({ protocol, config: connectionConfig, data: appConfig });
-      set({ syncStatus: 'idle', lastSyncAt: new Date().toISOString() });
+      const config = getConfig(get());
+      const result = await window.electronAPI.syncUpload({ protocol: 'webdav', config });
+      if (result.conflict?.hasConflict) {
+        set({
+          syncStatus: 'conflict',
+          syncConflict: {
+            localVersion: result.conflict.localVersion,
+            remoteVersion: result.conflict.remoteVersion,
+            localModifiedAt: result.conflict.localModifiedAt,
+            remoteModifiedAt: result.conflict.remoteModifiedAt,
+          },
+        });
+      } else {
+        set({ syncStatus: 'idle', lastSyncAt: result.timestamp });
+      }
     } catch {
       set({ syncStatus: 'error' });
     }
   },
-  downloadSync: async (protocol: string, connectionConfig: Record<string, string>) => {
-    set({ syncStatus: 'syncing' });
+  downloadSync: async () => {
+    set({ syncStatus: 'syncing', syncConflict: null });
     try {
-      const result = await window.electronAPI.syncDownload({ protocol, config: connectionConfig });
+      const result = await window.electronAPI.syncDownload({ protocol: 'webdav', config: {} });
       if (result.success && result.data) {
         const remoteConfig = result.data as any;
         if (remoteConfig.providers) {
@@ -152,18 +171,43 @@ export const useStore = create<StoreState>()((set, get) => ({
             providers: remoteConfig.providers,
             settings: remoteConfig.settings || {},
             syncStatus: 'idle',
+            syncConflict: null,
             lastSyncAt: result.timestamp,
           });
           await window.electronAPI.configWrite(remoteConfig);
         } else {
-          set({ syncStatus: 'idle', lastSyncAt: result.timestamp });
+          set({ syncStatus: 'idle', syncConflict: null, lastSyncAt: result.timestamp });
         }
       } else {
-        set({ syncStatus: 'idle', lastSyncAt: result.timestamp });
+        set({ syncStatus: 'idle', syncConflict: null, lastSyncAt: result.timestamp });
       }
     } catch {
       set({ syncStatus: 'error' });
     }
+  },
+
+  forceSyncUpload: async () => {
+    // Force upload ignoring conflicts
+    set({ syncStatus: 'syncing', syncConflict: null });
+    try {
+      const config = getConfig(get());
+      const configWithForce = { ...config, forceUpload: true };
+      await window.electronAPI.syncUpload({ protocol: 'webdav', config: configWithForce });
+      set({ syncStatus: 'idle', lastSyncAt: new Date().toISOString() });
+    } catch {
+      set({ syncStatus: 'error' });
+    }
+  },
+
+  resolveSyncConflict: async (strategy: 'local' | 'remote') => {
+    if (strategy === 'remote') {
+      // Download remote version and overwrite local
+      await get().downloadSync();
+    } else {
+      // Force upload local version
+      await get().forceSyncUpload();
+    }
+    set({ syncConflict: null });
   },
 
   // Export methods
@@ -204,9 +248,33 @@ export const useStore = create<StoreState>()((set, get) => ({
   setSearchQuery: (query: string) => set({ searchQuery: query }),
   toggleCommandPalette: () =>
     set((s) => ({ commandPaletteOpen: !s.commandPaletteOpen })),
-  setShowSyncModal: (show: boolean) => set({ showSyncModal: show }),
-  setShowExportModal: (show: boolean) => set({ showExportModal: show }),
-  setShowSettingsModal: (show: boolean) => set({ showSettingsModal: show }),
+
+  // Usage methods
+  fetchUsage: async (providerId: string) => {
+    try {
+      const result = await window.electronAPI.usageFetch(providerId);
+      set((s) => ({
+        usageData: { ...s.usageData, [providerId]: result.records || [] },
+      }));
+    } catch {
+      // Silently fail — usage data is non-critical
+    }
+  },
+  fetchUsageSummary: async () => {
+    try {
+      const data = await window.electronAPI.usageFetch('summary');
+      set({ usageSummary: data });
+    } catch {
+      set({ usageSummary: null });
+    }
+  },
+  recordUsage: async (record: UsageRecord) => {
+    try {
+      await window.electronAPI.usageFetch({ type: 'record', record });
+    } catch {
+      // Silently fail
+    }
+  },
 
   // Settings methods
   updateSettings: async (settings: Partial<AppSettings>) => {
@@ -217,26 +285,5 @@ export const useStore = create<StoreState>()((set, get) => ({
   },
 }));
 
-// Setup IPC listeners
-if (typeof window !== 'undefined' && window.electronAPI) {
-  window.electronAPI.onLatencyProgress((data: any) => {
-    useStore.setState((s) => ({
-      latencyStatus: { ...s.latencyStatus, [data.providerId]: 'checking' },
-      latencyResults: { ...s.latencyResults, [data.providerId]: data },
-    }));
-  });
-
-  window.electronAPI.onLatencyComplete((data: any) => {
-    const newStatus: Record<string, 'idle' | 'checking' | 'done' | 'error'> = {};
-    const newResults: Record<string, LatencyResult> = {};
-    data.results?.forEach((r: LatencyResult) => {
-      newStatus[r.providerId] = r.status === 'success' ? 'done' : 'error';
-      newResults[r.providerId] = r;
-    });
-    useStore.setState({ latencyStatus: newStatus, latencyResults: newResults });
-  });
-
-  window.electronAPI.onSyncStatus((data: any) => {
-    useStore.setState({ syncStatus: data.status });
-  });
-}
+// IPC listeners are set up via setupIPCListeners() from ipc-listeners.ts
+// Do NOT register listeners here — they accumulate on HMR reload

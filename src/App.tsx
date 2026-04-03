@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { ProviderCard } from './components/ProviderCard';
 import { ProviderDetail } from './components/ProviderDetail';
 import { CommandPalette } from './components/CommandPalette';
 import { LatencyModal } from './components/LatencyModal';
@@ -9,17 +8,22 @@ import { OnboardingFlow } from './components/OnboardingFlow';
 import { SyncModal } from './components/SyncModal';
 import { ExportModal } from './components/ExportModal';
 import { useStore } from './store';
+import { setupIPCListeners, cleanupIPCListeners } from './store/ipc-listeners';
 import { useTranslation } from 'react-i18next';
+
+import type { ProviderEnvironment } from '@/types';
 
 const App: React.FC = () => {
   const { t, i18n } = useTranslation();
   const {
-    providers, selectedProviderId, viewMode, theme, searchQuery,
+    providers, selectedProviderId, theme, searchQuery, latencyStatus,
     setSelectedProvider, setSearchQuery, setTheme, toggleCommandPalette,
     loadProviders, settings,
     showSyncModal, showExportModal, showSettingsModal,
     setShowSyncModal, setShowExportModal, setShowSettingsModal,
   } = useStore();
+
+  const [envFilter, setEnvFilter] = useState<ProviderEnvironment | 'all'>('all');
 
   const [showLatencyModal, setShowLatencyModal] = useState(false);
   const [showSmartImport, setShowSmartImport] = useState(false);
@@ -27,10 +31,70 @@ const App: React.FC = () => {
     return localStorage.getItem('llm-status-onboarding-complete') !== 'true';
   });
 
-  // Load providers on mount
+  // Load providers on mount and setup IPC listeners
   useEffect(() => {
+    setupIPCListeners();
     loadProviders();
+    return () => cleanupIPCListeners();
   }, []);
+
+  // Update tray icon based on provider status
+  useEffect(() => {
+    if (!window.electronAPI?.trayUpdateStatus) return;
+    if (providers.length === 0) {
+      window.electronAPI.trayUpdateStatus('gray');
+      return;
+    }
+
+    const hasError = providers.some((p) => p.status === 'error');
+    const hasWarning = providers.some((p) => p.status === 'warning');
+
+    if (hasError) {
+      window.electronAPI.trayUpdateStatus('red');
+    } else if (hasWarning) {
+      window.electronAPI.trayUpdateStatus('yellow');
+    } else {
+      window.electronAPI.trayUpdateStatus('green');
+    }
+  }, [providers]);
+
+  // Check for expiring credentials after providers load
+  useEffect(() => {
+    if (providers.length === 0) return;
+
+    const now = new Date();
+    const sevenDaysFromNow = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
+
+    for (const provider of providers) {
+      for (const cred of provider.credentials) {
+        if (cred.expiresAt) {
+          const expiryDate = new Date(cred.expiresAt);
+          if (expiryDate <= sevenDaysFromNow && expiryDate > now) {
+            const daysLeft = Math.ceil((expiryDate.getTime() - now.getTime()) / (24 * 60 * 60 * 1000));
+            if (window.electronAPI?.notifyDesktop) {
+              window.electronAPI.notifyDesktop({
+                title: 'Key Expiring Soon',
+                body: `${provider.name} key expires in ${daysLeft} day${daysLeft !== 1 ? 's' : ''}`,
+                type: 'warning' as const,
+                providerId: provider.id,
+                timestamp: new Date().toISOString(),
+              });
+            }
+          } else if (expiryDate <= now) {
+            if (window.electronAPI?.notifyDesktop) {
+              window.electronAPI.notifyDesktop({
+                title: 'Key Expired',
+                body: `${provider.name} key has expired`,
+                type: 'error' as const,
+                providerId: provider.id,
+                timestamp: new Date().toISOString(),
+              });
+            }
+          }
+        }
+      }
+    }
+  }, [providers]);
 
   // Apply theme
   useEffect(() => {
@@ -85,7 +149,37 @@ const App: React.FC = () => {
       )
     : providers;
 
+  const envFilteredProviders = envFilter === 'all'
+    ? filteredProviders
+    : filteredProviders.filter((p) => p.environment === envFilter);
+
+  const displayProviders = envFilteredProviders;
+
+  const hasProviders = providers.length > 0;
   const selectedProvider = providers.find((p) => p.id === selectedProviderId);
+
+  const renderSidebarStatus = (providerId: string) => {
+    const status = latencyStatus[providerId];
+    const latencyResult = useStore.getState().latencyResults[providerId];
+    if (status === 'checking') {
+      return <span className="app-sidebar__status app-sidebar__status--checking">{t('modal.checking')}</span>;
+    }
+
+    const provider = providers.find((p) => p.id === providerId);
+    const label = latencyResult?.status === 'success'
+      ? t('status.valid')
+      : latencyResult?.status === 'timeout'
+        ? t('card.timeout')
+        : provider?.status === 'valid'
+          ? t('status.valid')
+          : provider?.status === 'warning'
+            ? t('status.warning')
+            : provider?.status === 'error'
+              ? t('status.error')
+              : t('status.idle');
+
+    return <span className="app-sidebar__status">{label}</span>;
+  };
 
   return (
     <div className={`app app--${theme === 'system' ? (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light') : theme}`}>
@@ -127,14 +221,41 @@ const App: React.FC = () => {
       <main className="app-main">
         <aside className="app-sidebar">
           <nav className="app-sidebar__nav">
-            {providers.map((p) => (
+            <div style={{ display: 'flex', gap: '4px', marginBottom: '8px', flexWrap: 'wrap' }}>
+              {(['all', 'personal', 'work', 'production', 'staging'] as const).map((env) => (
+                <button
+                  key={env}
+                  className={`btn ${envFilter === env ? 'btn--primary' : 'btn--ghost'}`}
+                  style={{ fontSize: '10px', padding: '2px 6px', height: '22px' }}
+                  onClick={() => setEnvFilter(env)}
+                >
+                  {env === 'all' ? 'All' : env.charAt(0).toUpperCase() + env.slice(1)}
+                </button>
+              ))}
+            </div>
+            {displayProviders.map((p) => (
               <button
                 key={p.id}
                 className={`app-sidebar__item ${selectedProviderId === p.id ? 'app-sidebar__item--active' : ''}`}
                 onClick={() => setSelectedProvider(p.id)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    setSelectedProvider(p.id);
+                  }
+                }}
               >
-                <span className={`status-dot status-dot--${p.status}`} />
-                <span className="app-sidebar__name">{p.name}</span>
+                <span className={`status-dot status-dot--${latencyStatus[p.id] === 'checking' ? 'idle' : p.status}`} />
+                <div className="app-sidebar__item-content">
+                  <span className="app-sidebar__name">{p.name}</span>
+                  {renderSidebarStatus(p.id)}
+                  {p.environment && p.environment !== 'personal' && (
+                    <span style={{ fontSize: '9px', color: 'var(--text-muted)', textTransform: 'uppercase' }}>
+                      {p.environment}
+                    </span>
+                  )}
+                </div>
+                <span className={`status-dot status-dot--${latencyStatus[p.id] === 'checking' ? 'idle' : p.status}`} />
               </button>
             ))}
             <button className="app-sidebar__add" onClick={() => setShowSmartImport(true)}>+ {t('sidebar.add')}</button>
@@ -142,17 +263,34 @@ const App: React.FC = () => {
         </aside>
 
         <section className="app-content">
-          <div className={`app-grid app-grid--${viewMode}`}>
-            {filteredProviders.map((p) => (
-              <ProviderCard key={p.id} provider={p} />
-            ))}
-          </div>
+          {!hasProviders && (
+            <div className="app-empty-state" role="status" aria-live="polite">
+              <div className="app-empty-state__icon">⚡</div>
+              <h2 className="app-empty-state__title">{t('onboarding.welcomeTitle', 'Add your first provider')}</h2>
+              <p className="app-empty-state__desc">
+                {t('onboarding.welcomeDesc', 'Paste an API key, verify it instantly, and keep your provider health in one place.')}
+              </p>
+              <button className="btn btn--primary" onClick={() => setShowSmartImport(true)}>
+                {t('sidebar.add')}
+              </button>
+            </div>
+          )}
 
-          {selectedProvider && (
+          {hasProviders && selectedProvider && (
             <ProviderDetail
               provider={selectedProvider}
               onClose={() => setSelectedProvider(null)}
             />
+          )}
+
+          {hasProviders && !selectedProvider && (
+            <div className="app-empty-state app-empty-state--panel" role="status" aria-live="polite">
+              <div className="app-empty-state__icon">👈</div>
+              <h2 className="app-empty-state__title">Select a provider</h2>
+              <p className="app-empty-state__desc">
+                Pick a provider from the sidebar to inspect credentials, run checks, and diagnose latency.
+              </p>
+            </div>
           )}
         </section>
       </main>

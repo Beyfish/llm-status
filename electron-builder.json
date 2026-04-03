@@ -31,11 +31,11 @@
     ]
   },
   "win": {
+    "signAndEditExecutable": false,
     "target": [
-      { "target": "nsis", "arch": ["x64"] }
+      { "target": "portable", "arch": ["x64"] }
     ],
-    "icon": "build/icon.ico",
-    "artifactName": "${productName}-${version}-Setup.${ext}"
+    "artifactName": "${productName}-${version}.${ext}"
   },
   "nsis": {
     "oneClick": false,

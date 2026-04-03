@@ -1,4 +1,4 @@
-import { ipcMain, dialog } from 'electron';
+import { ipcMain, dialog, safeStorage } from 'electron';
 import { createClient } from 'webdav';
 import { S3Client, PutObjectCommand, GetObjectCommand } from '@aws-sdk/client-s3';
 import { Readable } from 'stream';
@@ -6,10 +6,32 @@ import { google } from 'googleapis';
 
 const REMOTE_PATH = 'llm-status/config.json';
 
+function encryptForSync(data: string): string {
+  if (!safeStorage.isEncryptionAvailable()) {
+    return data; // Fallback: send plaintext (better than crashing)
+  }
+  const encrypted = safeStorage.encryptString(data);
+  return encrypted.toString('base64');
+}
+
+function decryptFromSync(encryptedBase64: string): string {
+  try {
+    if (!safeStorage.isEncryptionAvailable()) {
+      return encryptedBase64; // Can't decrypt, return as-is
+    }
+    const buffer = Buffer.from(encryptedBase64, 'base64');
+    return safeStorage.decryptString(buffer);
+  } catch {
+    // Fallback: treat as plaintext JSON (backward compat with old unencrypted sync data)
+    return encryptedBase64;
+  }
+}
+
 interface SyncRequest {
   protocol: string;
   config: Record<string, string>;
   data?: Record<string, unknown>;
+  localVersion?: string;
 }
 
 // WebDAV
@@ -185,21 +207,127 @@ async function onedriveDownload(config: Record<string, string>): Promise<string>
 }
 
 export function registerSyncHandlers(): void {
-  ipcMain.handle('sync:upload', async (_event, req: SyncRequest): Promise<{ success: boolean; timestamp: string }> => {
+  ipcMain.handle('sync:checkConflict', async (_event, req: SyncRequest): Promise<SyncConflictInfo> => {
     try {
-      const configData = JSON.stringify(req.data || req.config);
+      let content: string;
       switch (req.protocol) {
         case 'webdav':
-          await webdavUpload(req.config, configData);
+          content = await webdavDownload(req.config);
           break;
         case 's3':
-          await s3Upload(req.config, configData);
+          content = await s3Download(req.config);
           break;
         case 'gdrive':
-          await gdriveUpload(req.config, configData);
+          content = await gdriveDownload(req.config);
           break;
         case 'onedrive':
-          await onedriveUpload(req.config, configData);
+          content = await onedriveDownload(req.config);
+          break;
+        default:
+          return { hasConflict: false };
+      }
+
+      let remoteData: any;
+      try {
+        const decrypted = decryptFromSync(content);
+        remoteData = JSON.parse(decrypted);
+      } catch {
+        remoteData = JSON.parse(content);
+      }
+
+      const localVersion = req.localVersion || req.config.schemaVersion;
+      const remoteVersion = remoteData.schemaVersion;
+      const localModifiedAt = req.config.lastModifiedAt;
+      const remoteModifiedAt = remoteData.lastModifiedAt;
+
+      const hasConflict = localVersion !== remoteVersion ||
+        (localModifiedAt && remoteModifiedAt && localModifiedAt !== remoteModifiedAt);
+
+      return {
+        hasConflict,
+        localVersion: localVersion?.toString(),
+        remoteVersion: remoteVersion?.toString(),
+        localModifiedAt,
+        remoteModifiedAt,
+        localData: JSON.stringify(req.config),
+        remoteData: content,
+      };
+    } catch {
+      return { hasConflict: false };
+    }
+  });
+
+  ipcMain.handle('sync:upload', async (_event, req: SyncRequest): Promise<{ success: boolean; timestamp: string; conflict?: SyncConflictInfo }> => {
+    try {
+      // Check for conflicts before uploading
+      const localVersion = req.config.schemaVersion || 1;
+      const localModifiedAt = new Date().toISOString();
+      const configWithVersion = { ...req.config, schemaVersion: localVersion, lastModifiedAt: localModifiedAt };
+      const configData = JSON.stringify(configWithVersion);
+      const encryptedData = encryptForSync(configData);
+
+      // Check for conflicts first
+      try {
+        let remoteContent: string;
+        switch (req.protocol) {
+          case 'webdav':
+            remoteContent = await webdavDownload(req.config);
+            break;
+          case 's3':
+            remoteContent = await s3Download(req.config);
+            break;
+          case 'gdrive':
+            remoteContent = await gdriveDownload(req.config);
+            break;
+          case 'onedrive':
+            remoteContent = await onedriveDownload(req.config);
+            break;
+          default:
+            remoteContent = '';
+        }
+
+        if (remoteContent) {
+          let remoteData: any;
+          try {
+            const decrypted = decryptFromSync(remoteContent);
+            remoteData = JSON.parse(decrypted);
+          } catch {
+            remoteData = JSON.parse(remoteContent);
+          }
+
+          const remoteVersion = remoteData.schemaVersion;
+          const remoteModifiedAt = remoteData.lastModifiedAt;
+
+          if (remoteVersion !== localVersion || (remoteModifiedAt && remoteModifiedAt !== localModifiedAt)) {
+            return {
+              success: false,
+              timestamp: new Date().toISOString(),
+              conflict: {
+                hasConflict: true,
+                localVersion: localVersion?.toString(),
+                remoteVersion: remoteVersion?.toString(),
+                localModifiedAt: localModifiedAt,
+                remoteModifiedAt,
+              },
+            };
+          }
+        }
+      } catch {
+        // Remote doesn't exist yet, no conflict
+      }
+
+      switch (req.protocol) {
+        case 'webdav':
+          await webdavUpload(req.config, encryptedData);
+          break;
+        case 's3':
+          await s3Upload(req.config, encryptedData);
+          break;
+        case 'gdrive':
+          await gdriveUpload(req.config, encryptedData);
+          break;
+        case 'onedrive':
+          await onedriveUpload(req.config, encryptedData);
           break;
         default:
           throw new Error(`Unknown protocol: ${req.protocol}`);
@@ -230,7 +358,18 @@ export function registerSyncHandlers(): void {
         default:
           throw new Error(`Unknown protocol: ${req.protocol}`);
       }
-      return { success: true, data: JSON.parse(content), timestamp: new Date().toISOString() };
+
+      // Try to decrypt; if fails, assume plaintext (backward compat)
+      let parsedData: any;
+      try {
+        const decrypted = decryptFromSync(content);
+        parsedData = JSON.parse(decrypted);
+      } catch {
+        // Fallback: treat as plaintext JSON
+        parsedData = JSON.parse(content);
+      }
+
+      return { success: true, data: parsedData, timestamp: new Date().toISOString() };
     } catch (err: any) {
       _event.sender.send('sync:error', { protocol: req.protocol, error: err.code || 'UNKNOWN', message: err.message });
       throw err;

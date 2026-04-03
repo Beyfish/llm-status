@@ -8,8 +8,11 @@ interface SettingsModalProps {
 
 export const SettingsModal: React.FC<SettingsModalProps> = ({ onClose }) => {
   const { t, i18n } = useTranslation();
-  const { settings, updateSettings, theme, setTheme } = useStore();
+  const { settings, updateSettings, theme, setTheme, providers } = useStore();
   const [activeTab, setActiveTab] = useState<'general' | 'detection' | 'appearance' | 'advanced'>('general');
+  const [backupPassphrase, setBackupPassphrase] = useState('');
+  const [backupStatus, setBackupStatus] = useState<'idle' | 'exporting' | 'importing' | 'success' | 'error'>('idle');
+  const [backupMessage, setBackupMessage] = useState('');
 
   const tabs = [
     { id: 'general' as const, label: t('settings.general') },
@@ -17,6 +20,57 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ onClose }) => {
     { id: 'appearance' as const, label: t('settings.appearance') },
     { id: 'advanced' as const, label: t('settings.advanced') },
   ];
+
+  const handleExportCredentials = async () => {
+    if (!backupPassphrase || backupPassphrase.length < 8) {
+      setBackupStatus('error');
+      setBackupMessage('Passphrase must be at least 8 characters');
+      return;
+    }
+    setBackupStatus('exporting');
+    setBackupMessage('');
+    try {
+      const config = { providers, settings };
+      const result = await window.electronAPI.credentialFileExport(config, backupPassphrase);
+      if (result.success) {
+        setBackupStatus('success');
+        setBackupMessage(result.message);
+      } else {
+        setBackupStatus('error');
+        setBackupMessage(result.message);
+      }
+    } catch {
+      setBackupStatus('error');
+      setBackupMessage('Export failed');
+    }
+  };
+
+  const handleImportCredentials = async () => {
+    if (!backupPassphrase || backupPassphrase.length < 8) {
+      setBackupStatus('error');
+      setBackupMessage('Passphrase must be at least 8 characters');
+      return;
+    }
+    setBackupStatus('importing');
+    setBackupMessage('');
+    try {
+      const result = await window.electronAPI.credentialFileImport(backupPassphrase);
+      if (result.success && result.data) {
+        setBackupStatus('success');
+        setBackupMessage(`Imported ${result.data.providers.length} providers`);
+        // Reload providers from imported data
+        for (const provider of result.data.providers) {
+          await useStore.getState().addProvider(provider as any);
+        }
+      } else {
+        setBackupStatus('error');
+        setBackupMessage(result.message);
+      }
+    } catch {
+      setBackupStatus('error');
+      setBackupMessage('Import failed');
+    }
+  };
 
   return (
     <div className="modal-overlay" onClick={onClose} role="dialog" aria-modal="true">
@@ -26,18 +80,21 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ onClose }) => {
           <button className="modal__close" onClick={onClose} aria-label="Close">✕</button>
         </div>
         <div className="modal__body modal__body--settings">
-          <nav className="settings-tabs">
+          <nav className="settings-tabs" role="tablist" aria-label="Settings sections">
             {tabs.map((tab) => (
               <button
                 key={tab.id}
                 className={`settings-tab ${activeTab === tab.id ? 'settings-tab--active' : ''}`}
                 onClick={() => setActiveTab(tab.id)}
+                role="tab"
+                aria-selected={activeTab === tab.id}
+                aria-controls={`settings-panel-${tab.id}`}
               >
                 {tab.label}
               </button>
             ))}
           </nav>
-          <div className="settings-content">
+          <div className="settings-content" role="tabpanel" id={`settings-panel-${activeTab}`}>
             {activeTab === 'general' && (
               <>
                 <div className="settings-field">
@@ -118,6 +175,51 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ onClose }) => {
                 <div className="settings-field">
                   <label>{t('settings.configPath')}</label>
                   <code className="mono" style={{ fontSize: '12px' }}>~/.llm-status/config.json</code>
+                </div>
+
+                <div className="modal__divider" />
+
+                <div className="settings-field">
+                  <label>Credential Backup & Restore</label>
+                  <p style={{ fontSize: '12px', color: 'var(--text-secondary)', marginBottom: '12px' }}>
+                    Export or import all provider credentials with passphrase-based encryption.
+                    This allows migration between machines.
+                  </p>
+
+                  <div className="settings-field">
+                    <label>Passphrase (min 8 characters)</label>
+                    <input
+                      type="password"
+                      value={backupPassphrase}
+                      onChange={(e) => setBackupPassphrase(e.target.value)}
+                      className="settings-select"
+                      placeholder="Enter a strong passphrase"
+                      style={{ width: '100%', height: '40px' }}
+                    />
+                  </div>
+
+                  <div style={{ display: 'flex', gap: '8px', marginTop: '12px' }}>
+                    <button
+                      className="btn btn--primary"
+                      onClick={handleExportCredentials}
+                      disabled={backupStatus === 'exporting' || backupStatus === 'importing'}
+                    >
+                      {backupStatus === 'exporting' ? 'Exporting...' : '📤 Export Credentials'}
+                    </button>
+                    <button
+                      className="btn btn--ghost"
+                      onClick={handleImportCredentials}
+                      disabled={backupStatus === 'exporting' || backupStatus === 'importing'}
+                    >
+                      {backupStatus === 'importing' ? 'Importing...' : '📥 Import Credentials'}
+                    </button>
+                  </div>
+
+                  {backupMessage && (
+                    <div className={backupStatus === 'success' ? 'onboarding__success' : 'onboarding__error'} style={{ marginTop: '12px' }}>
+                      {backupStatus === 'success' ? '✅' : '❌'} {backupMessage}
+                    </div>
+                  )}
                 </div>
               </>
             )}
