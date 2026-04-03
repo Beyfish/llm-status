@@ -393,8 +393,8 @@ code, pre, .mono {
 }
 
 .modal__close {
-  width: 32px;
-  height: 32px;
+  width: 44px;
+  height: 44px;
   border: none;
   background: transparent;
   color: var(--text-secondary);
@@ -404,6 +404,7 @@ code, pre, .mono {
   display: flex;
   align-items: center;
   justify-content: center;
+  transition: background var(--transition-fast);
 }
 
 .modal__close:hover {
@@ -778,8 +779,8 @@ code, pre, .mono {
 .onboarding__progress {
   display: flex;
   justify-content: center;
-  gap: 8px;
-  margin-bottom: 48px;
+  gap: var(--space-2);
+  margin-bottom: var(--space-7);
 }
 
 .onboarding__progress-dot {
@@ -796,35 +797,35 @@ code, pre, .mono {
 
 .onboarding__icon {
   font-size: 48px;
-  margin-bottom: 24px;
+  margin-bottom: var(--space-6);
 }
 
 .onboarding__title {
   font-size: 24px;
   font-weight: 600;
-  margin-bottom: 12px;
+  margin-bottom: var(--space-3);
 }
 
 .onboarding__desc {
   font-size: 14px;
   color: var(--text-secondary);
-  margin-bottom: 32px;
+  margin-bottom: var(--space-6);
   line-height: 1.6;
 }
 
 .onboarding__grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 12px;
-  margin-bottom: 24px;
+  gap: var(--space-3);
+  margin-bottom: var(--space-5);
 }
 
 .onboarding__card {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 8px;
-  padding: 16px;
+  gap: var(--space-2);
+  padding: var(--space-4);
   border: 1px solid var(--border-color);
   border-radius: var(--radius-card);
   background: var(--bg-surface);
@@ -865,8 +866,8 @@ code, pre, .mono {
 .onboarding__form {
   display: flex;
   flex-direction: column;
-  gap: 16px;
-  margin-bottom: 24px;
+  gap: var(--space-4);
+  margin-bottom: var(--space-5);
   text-align: left;
 }
 
@@ -874,7 +875,7 @@ code, pre, .mono {
   display: block;
   font-size: 13px;
   font-weight: 500;
-  margin-bottom: 6px;
+  margin-bottom: var(--space-2);
   color: var(--text-secondary);
 }
 
@@ -895,17 +896,17 @@ code, pre, .mono {
 }
 
 .onboarding__success {
-  padding: 12px;
+  padding: var(--space-3);
   border-radius: var(--radius-btn);
-  background: rgba(34, 197, 94, 0.1);
+  background: color-mix(in srgb, var(--green) 10%, transparent);
   color: var(--green);
   font-size: 13px;
 }
 
 .onboarding__error {
-  padding: 12px;
+  padding: var(--space-3);
   border-radius: var(--radius-btn);
-  background: rgba(239, 68, 68, 0.1);
+  background: color-mix(in srgb, var(--red) 10%, transparent);
   color: var(--red);
   font-size: 13px;
 }
@@ -913,7 +914,7 @@ code, pre, .mono {
 .onboarding__nav {
   display: flex;
   justify-content: space-between;
-  margin-top: 24px;
+  margin-top: var(--space-5);
 }
 
 .onboarding__list {
@@ -1107,6 +1108,61 @@ code, pre, .mono {
   .modal,
   .modal--large {
     width: min(640px, calc(100vw - 32px));
+  }
+
+  .app-sidebar {
+    width: 180px;
+  }
+
+  .onboarding__grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 375px) {
+  .app-header {
+    padding: 0 var(--space-3);
+  }
+
+  .app-header__center {
+    display: none;
+  }
+
+  .app-sidebar {
+    width: 160px;
+  }
+
+  .app-sidebar__name {
+    font-size: 12px;
+  }
+
+  .app-content {
+    padding: var(--space-3);
+  }
+
+  .modal,
+  .modal--large {
+    width: calc(100vw - 16px);
+    margin: 8px;
+  }
+
+  .onboarding {
+    padding: 0 var(--space-3);
+  }
+
+  .onboarding__grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--space-2);
+  }
+
+  .provider-detail__table-header,
+  .provider-detail__table-row {
+    grid-template-columns: 1fr;
+    gap: var(--space-2);
+  }
+
+  .provider-detail__table-header {
+    display: none;
   }
 }
 
