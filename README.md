@@ -50,7 +50,15 @@ LLM Status Manager gives you **one place to see every key's health** — with in
 
 ## Screenshots
 
-> *Coming soon — app screenshots will be added after first release.*
+### Main Dashboard
+
+![LLM Status Dashboard](screenshots/initial.png)
+
+### Provider Detail
+
+![Provider Detail View](screenshots/final.png)
+
+> *More screenshots coming soon — app is actively being developed.*
 
 ## Tech Stack
 

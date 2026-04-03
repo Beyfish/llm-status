@@ -1,6 +1,7 @@
 import { ipcMain, shell } from 'electron';
 import http from 'http';
 import axios from 'axios';
+import { randomBytes } from 'crypto';
 
 interface OAuthConfig {
   provider: string;
@@ -75,7 +76,7 @@ export function registerOAuthHandlers(): void {
     try {
       let port = 17171;
       const redirectUri = config.redirectUri || `http://localhost:${port}/oauth/callback`;
-      const state = Math.random().toString(36).substring(2) + Date.now().toString(36);
+      const state = randomBytes(32).toString('hex');
       const authUrl = `${config.authUrl}?response_type=code&client_id=${config.clientId}&redirect_uri=${encodeURIComponent(redirectUri)}&scope=${encodeURIComponent(config.scope)}&state=${state}&access_type=offline&prompt=consent`;
 
       shell.openExternal(authUrl);
