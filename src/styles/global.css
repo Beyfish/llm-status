@@ -1109,3 +1109,58 @@ code, pre, .mono {
     width: min(640px, calc(100vw - 32px));
   }
 }
+
+/* Key validation feedback */
+.onboarding__key-feedback {
+  margin-top: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.onboarding__key-issues {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.onboarding__key-issue {
+  font-size: 12px;
+  color: var(--yellow);
+  line-height: 1.4;
+}
+
+.onboarding__key-suggestion {
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.onboarding__key-suggestion--high {
+  color: var(--green);
+}
+
+.onboarding__key-suggestion--medium {
+  color: var(--yellow);
+}
+
+.onboarding__key-suggestion--low {
+  color: var(--text-muted);
+}
+
+.onboarding__key-provider {
+  font-size: 11px;
+  color: var(--accent);
+  font-weight: 500;
+}
+
+.onboarding__input--valid {
+  border-color: var(--green) !important;
+}
+
+.onboarding__input--invalid {
+  border-color: var(--red) !important;
+}
+
+.onboarding__input--neutral {
+  border-color: var(--border-color);
+}

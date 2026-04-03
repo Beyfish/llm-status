@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { Provider, ProviderType, CredentialType } from '@/types';
+import { validateApiKey, cleanApiKey, type KeyValidationResult } from '@/utils/keyValidation';
 
 interface OnboardingFlowProps {
   onComplete: (provider: Provider) => void;
@@ -39,8 +40,20 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({ onComplete, onSk
   const [providerName, setProviderName] = useState('');
   const [verifying, setVerifying] = useState(false);
   const [verifyResult, setVerifyResult] = useState<'success' | 'error' | null>(null);
+  const [keyValidation, setKeyValidation] = useState<KeyValidationResult>({
+    isValid: false,
+    confidence: 'none',
+    issues: [],
+    suggestions: ['Paste your API key here'],
+  });
 
   const totalSteps = 5;
+
+  const handleApiKeyChange = (value: string) => {
+    setApiKey(value);
+    const validation = validateApiKey(value, selectedType || undefined);
+    setKeyValidation(validation);
+  };
 
   const handleSelectProvider = (type: ProviderType) => {
     setSelectedType(type);
@@ -80,15 +93,16 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({ onComplete, onSk
   const handleConfirm = () => {
     if (!selectedType) return;
 
+    const cleanedKey = cleanApiKey(apiKey);
     const provider: Provider = {
       id: `${selectedType}-${Date.now()}`,
       type: selectedType,
       name: providerName || selectedType,
       baseUrl,
-      credentials: apiKey ? [{
+      credentials: cleanedKey ? [{
         id: `key-${Date.now()}`,
         type: selectedCredType,
-        value: apiKey,
+        value: cleanedKey,
         encrypted: true,
         status: verifyResult === 'success' ? 'valid' : 'unknown',
       }] : [],
@@ -181,10 +195,31 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({ onComplete, onSk
             <input
               type="password"
               value={apiKey}
-              onChange={(e) => setApiKey(e.target.value)}
-              className="onboarding__input"
+              onChange={(e) => handleApiKeyChange(e.target.value)}
+              className={`onboarding__input onboarding__input--${keyValidation.confidence === 'high' ? 'valid' : keyValidation.issues.length > 0 ? 'invalid' : 'neutral'}`}
               placeholder="sk-..."
+              autoComplete="off"
+              spellCheck={false}
             />
+            {apiKey && (
+              <div className="onboarding__key-feedback">
+                {keyValidation.issues.length > 0 && (
+                  <div className="onboarding__key-issues">
+                    {keyValidation.issues.map((issue, i) => (
+                      <span key={i} className="onboarding__key-issue">⚠️ {issue}</span>
+                    ))}
+                  </div>
+                )}
+                {keyValidation.suggestions.length > 0 && !keyValidation.issues.length && (
+                  <div className={`onboarding__key-suggestion onboarding__key-suggestion--${keyValidation.confidence}`}>
+                    {keyValidation.confidence === 'high' ? '✅' : keyValidation.confidence === 'medium' ? '🔍' : '❓'} {keyValidation.suggestions[0]}
+                  </div>
+                )}
+                {keyValidation.detectedProvider && (
+                  <div className="onboarding__key-provider">Detected: {keyValidation.detectedProvider}</div>
+                )}
+              </div>
+            )}
           </div>
         )}
         <button
