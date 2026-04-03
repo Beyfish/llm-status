@@ -75,12 +75,18 @@ export function registerOAuthHandlers(): void {
     try {
       let port = 17171;
       const redirectUri = config.redirectUri || `http://localhost:${port}/oauth/callback`;
-      const state = Math.random().toString(36).substring(2);
+      const state = Math.random().toString(36).substring(2) + Date.now().toString(36);
       const authUrl = `${config.authUrl}?response_type=code&client_id=${config.clientId}&redirect_uri=${encodeURIComponent(redirectUri)}&scope=${encodeURIComponent(config.scope)}&state=${state}&access_type=offline&prompt=consent`;
 
       shell.openExternal(authUrl);
 
-      const { code } = await startOAuthServer(port);
+      const { code, state: returnedState } = await startOAuthServer(port);
+
+      // Validate state to prevent CSRF
+      if (returnedState !== state) {
+        throw new Error(`OAuth state mismatch: expected ${state}, got ${returnedState}`);
+      }
+
       const tokens = await exchangeCodeForToken(config, code, redirectUri);
       return tokens;
     } catch (err: any) {

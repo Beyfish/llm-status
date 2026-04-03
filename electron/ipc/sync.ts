@@ -1,10 +1,31 @@
-import { ipcMain, dialog } from 'electron';
+import { ipcMain, dialog, safeStorage } from 'electron';
 import { createClient } from 'webdav';
 import { S3Client, PutObjectCommand, GetObjectCommand } from '@aws-sdk/client-s3';
 import { Readable } from 'stream';
 import { google } from 'googleapis';
 
 const REMOTE_PATH = 'llm-status/config.json';
+
+function encryptForSync(data: string): string {
+  if (!safeStorage.isEncryptionAvailable()) {
+    return data; // Fallback: send plaintext (better than crashing)
+  }
+  const encrypted = safeStorage.encryptString(data);
+  return encrypted.toString('base64');
+}
+
+function decryptFromSync(encryptedBase64: string): string {
+  try {
+    if (!safeStorage.isEncryptionAvailable()) {
+      return encryptedBase64; // Can't decrypt, return as-is
+    }
+    const buffer = Buffer.from(encryptedBase64, 'base64');
+    return safeStorage.decryptString(buffer);
+  } catch {
+    // Fallback: treat as plaintext JSON (backward compat with old unencrypted sync data)
+    return encryptedBase64;
+  }
+}
 
 interface SyncRequest {
   protocol: string;
@@ -183,18 +204,19 @@ export function registerSyncHandlers(): void {
   ipcMain.handle('sync:upload', async (_event, req: SyncRequest): Promise<{ success: boolean; timestamp: string }> => {
     try {
       const configData = JSON.stringify(req.config);
+      const encryptedData = encryptForSync(configData);
       switch (req.protocol) {
         case 'webdav':
-          await webdavUpload(req.config, configData);
+          await webdavUpload(req.config, encryptedData);
           break;
         case 's3':
-          await s3Upload(req.config, configData);
+          await s3Upload(req.config, encryptedData);
           break;
         case 'gdrive':
-          await gdriveUpload(req.config, configData);
+          await gdriveUpload(req.config, encryptedData);
           break;
         case 'onedrive':
-          await onedriveUpload(req.config, configData);
+          await onedriveUpload(req.config, encryptedData);
           break;
         default:
           throw new Error(`Unknown protocol: ${req.protocol}`);
@@ -225,7 +247,18 @@ export function registerSyncHandlers(): void {
         default:
           throw new Error(`Unknown protocol: ${req.protocol}`);
       }
-      return { success: true, data: JSON.parse(content), timestamp: new Date().toISOString() };
+
+      // Try to decrypt; if fails, assume plaintext (backward compat)
+      let parsedData: any;
+      try {
+        const decrypted = decryptFromSync(content);
+        parsedData = JSON.parse(decrypted);
+      } catch {
+        // Fallback: treat as plaintext JSON
+        parsedData = JSON.parse(content);
+      }
+
+      return { success: true, data: parsedData, timestamp: new Date().toISOString() };
     } catch (err: any) {
       _event.sender.send('sync:error', { protocol: req.protocol, error: err.code || 'UNKNOWN', message: err.message });
       throw err;
