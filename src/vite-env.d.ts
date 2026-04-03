@@ -14,13 +14,23 @@ interface ElectronAPI {
   onSyncError: (cb: (data: any) => void) => void;
   exportPush: (req: { target: string; data: object; url?: string; apiKey?: string }) => Promise<void>;
   exportFile: (req: { target: string; data: object }) => Promise<void>;
+  exportClipboard: (data: object) => Promise<void>;
   onExportError: (cb: (data: any) => void) => void;
   oauthStart: (req: { provider: string; state: string }) => Promise<void>;
   onOAuthCallback: (cb: (data: any) => void) => void;
   onOAuthComplete: (cb: (data: any) => void) => void;
   onOAuthError: (cb: (data: any) => void) => void;
   onNotify: (cb: (data: any) => void) => void;
+  encryptValue: (value: string) => Promise<string>;
+  decryptValue: (encrypted: string) => Promise<string>;
   onUsageError: (cb: (data: any) => void) => void;
+  webhookSend: (config: unknown, message: unknown) => Promise<void>;
+  webhookTest: (config: unknown) => Promise<{ success: boolean; message: string }>;
+  notifyDesktop: (message: unknown) => Promise<void>;
+  notifyAll: (webhooks: unknown[], message: unknown) => Promise<{ sent: number; failed: number }>;
+  usageFetch: (req: unknown) => Promise<any>;
+  credentialFileExport: (config: Record<string, unknown>, passphrase: string) => Promise<{ success: boolean; message: string }>;
+  credentialFileImport: (passphrase: string) => Promise<{ success: boolean; data?: { providers: any[]; settings?: Record<string, unknown>; mergeStrategy: string }; message: string }>;
   onConfigMigrate: (cb: (data: any) => void) => void;
 }
 

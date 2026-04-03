@@ -100,6 +100,12 @@ const electronAPI = {
   notifyDesktop: (message: unknown) => ipcRenderer.invoke('notify:desktop', message),
   notifyAll: (webhooks: unknown[], message: unknown) => ipcRenderer.invoke('notify:all', webhooks, message),
 
+  // Credential file import/export
+  credentialFileExport: (config: Record<string, unknown>, passphrase: string) =>
+    ipcRenderer.invoke('credentialFile:export', config, passphrase),
+  credentialFileImport: (passphrase: string) =>
+    ipcRenderer.invoke('credentialFile:import', passphrase),
+
   // Usage
   usageFetch: (req: unknown) => ipcRenderer.invoke('usage:fetch', req),
 
