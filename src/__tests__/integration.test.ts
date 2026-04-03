@@ -149,7 +149,7 @@ describe('User Flow: Latency Checking', () => {
     await useStore.getState().loadProviders();
 
     // Start checkAll (don't await since it waits for IPC)
-    const checkAllPromise = useStore.getState().checkAll('full', 5, 10);
+    void useStore.getState().checkAll('full', 5, 10);
 
     // bulkChecking should be true immediately
     expect(useStore.getState().bulkChecking).toBe(true);
@@ -164,7 +164,7 @@ describe('User Flow: Latency Checking', () => {
     useStore.setState((s) => ({
       bulkChecking: true,
       latencyStatus: { ...s.latencyStatus, 'openai-1': 'checking' },
-      latencyResults: { ...s.latencyResults, 'openai-1': { providerId: 'openai-1', latency: 150, status: 'success' as const } },
+      latencyResults: { ...s.latencyResults, 'openai-1': { providerId: 'openai-1', latency: 150, status: 'success' as const, timestamp: new Date().toISOString() } },
     }));
 
     expect(useStore.getState().bulkChecking).toBe(true);
@@ -178,8 +178,8 @@ describe('User Flow: Latency Checking', () => {
     useStore.setState({
       latencyStatus: { 'openai-1': 'done', 'anthropic-1': 'error' },
       latencyResults: {
-        'openai-1': { providerId: 'openai-1', latency: 150, status: 'success' as const },
-        'anthropic-1': { providerId: 'anthropic-1', latency: 0, status: 'error' as const, error: 'Auth failed' },
+        'openai-1': { providerId: 'openai-1', latency: 150, status: 'success' as const, timestamp: new Date().toISOString() },
+        'anthropic-1': { providerId: 'anthropic-1', latency: 0, status: 'error' as const, timestamp: new Date().toISOString(), error: 'Auth failed' },
       },
       bulkChecking: false,
     });

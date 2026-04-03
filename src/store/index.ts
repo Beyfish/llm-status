@@ -7,6 +7,7 @@ import type {
   LatencyMode,
   ViewMode,
   Theme,
+  UsageRecord,
 } from '@/types';
 
 interface StoreState {
@@ -23,6 +24,9 @@ interface StoreState {
   lastSyncAt: string | null;
   // Export
   exportStatus: Record<string, 'idle' | 'exporting' | 'done' | 'error'>;
+  // Usage
+  usageData: Record<string, UsageRecord[]>;
+  usageSummary: { totalCost: number; totalChecks: number; totalPrompts: number; byProvider: Record<string, { cost: number; checks: number; prompts: number }> } | null;
   // UI
   viewMode: ViewMode;
   theme: Theme;
@@ -47,6 +51,9 @@ interface StoreState {
   setTheme: (theme: Theme) => void;
   setSearchQuery: (query: string) => void;
   toggleCommandPalette: () => void;
+  fetchUsage: (providerId: string) => Promise<void>;
+  fetchUsageSummary: () => Promise<void>;
+  recordUsage: (record: UsageRecord) => Promise<void>;
   updateSettings: (settings: Partial<AppSettings>) => Promise<void>;
 }
 
@@ -69,6 +76,8 @@ export const useStore = create<StoreState>()((set, get) => ({
   syncConflict: null,
   lastSyncAt: null,
   exportStatus: {},
+  usageData: {},
+  usageSummary: null,
   viewMode: 'card',
   theme: 'dark',
   searchQuery: '',
@@ -239,6 +248,33 @@ export const useStore = create<StoreState>()((set, get) => ({
   setSearchQuery: (query: string) => set({ searchQuery: query }),
   toggleCommandPalette: () =>
     set((s) => ({ commandPaletteOpen: !s.commandPaletteOpen })),
+
+  // Usage methods
+  fetchUsage: async (providerId: string) => {
+    try {
+      const result = await window.electronAPI.usageFetch(providerId);
+      set((s) => ({
+        usageData: { ...s.usageData, [providerId]: result.records || [] },
+      }));
+    } catch {
+      // Silently fail — usage data is non-critical
+    }
+  },
+  fetchUsageSummary: async () => {
+    try {
+      const data = await window.electronAPI.usageFetch('summary');
+      set({ usageSummary: data });
+    } catch {
+      set({ usageSummary: null });
+    }
+  },
+  recordUsage: async (record: UsageRecord) => {
+    try {
+      await window.electronAPI.usageFetch({ type: 'record', record });
+    } catch {
+      // Silently fail
+    }
+  },
 
   // Settings methods
   updateSettings: async (settings: Partial<AppSettings>) => {

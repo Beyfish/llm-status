@@ -62,6 +62,15 @@ export interface Credential {
 
 export type ProviderEnvironment = 'personal' | 'work' | 'production' | 'staging' | 'custom';
 
+export interface UsageRecord {
+  providerId: string;
+  timestamp: string;
+  estimatedTokens: number;
+  estimatedCost: number;
+  checkCount: number;
+  promptCount: number;
+}
+
 export interface LatencyRecord {
   timestamp: string;
   latency: number;
