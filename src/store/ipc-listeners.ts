@@ -5,16 +5,19 @@ let cleanupFns: Array<() => void> = [];
 
 export function setupIPCListeners(): void {
   if (typeof window === 'undefined' || !window.electronAPI) return;
+
+  // Clean up existing listeners first (prevents HMR accumulation)
   cleanupFns.forEach((fn) => fn());
   cleanupFns = [];
 
   const cleanupProgress = window.electronAPI.onLatencyProgress((data: any) => {
     useStore.setState((s) => ({
+      bulkChecking: true,
       latencyStatus: { ...s.latencyStatus, [data.providerId]: 'checking' },
       latencyResults: { ...s.latencyResults, [data.providerId]: data },
     }));
   });
-  cleanupFns.push(cleanupProgress as unknown as () => void);
+  if (cleanupProgress) cleanupFns.push(cleanupProgress);
 
   const cleanupComplete = window.electronAPI.onLatencyComplete((data: any) => {
     const newStatus: Record<string, 'idle' | 'checking' | 'done' | 'error'> = {};
@@ -23,14 +26,14 @@ export function setupIPCListeners(): void {
       newStatus[r.providerId] = r.status === 'success' ? 'done' : 'error';
       newResults[r.providerId] = r;
     });
-    useStore.setState({ latencyStatus: newStatus, latencyResults: newResults });
+    useStore.setState({ latencyStatus: newStatus, latencyResults: newResults, bulkChecking: false });
   });
-  cleanupFns.push(cleanupComplete as unknown as () => void);
+  if (cleanupComplete) cleanupFns.push(cleanupComplete);
 
   const cleanupSync = window.electronAPI.onSyncStatus((data: any) => {
     useStore.setState({ syncStatus: data.status });
   });
-  cleanupFns.push(cleanupSync as unknown as () => void);
+  if (cleanupSync) cleanupFns.push(cleanupSync);
 }
 
 export function cleanupIPCListeners(): void {

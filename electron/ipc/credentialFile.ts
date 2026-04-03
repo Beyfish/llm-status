@@ -87,13 +87,13 @@ export function registerCredentialFileHandlers(): void {
 
       // Encrypt the entire config with passphrase
       const configJson = JSON.stringify(config);
-      const encryptedConfig = encryptWithPassphrase(configJson, passphrase);
+      const _encryptedConfig = encryptWithPassphrase(configJson, passphrase);
 
       const exportData: CredentialFileExport = {
         schemaVersion: SCHEMA_VERSION,
         exportedAt: new Date().toISOString(),
         providers: (config.providers as any[]) || [],
-        settings: config.settings as Record<string, unknown> | undefined,
+        settings: config.settings ? { __encrypted: encryptWithPassphrase(JSON.stringify(config.settings), passphrase) } : undefined,
       };
 
       // Encrypt the providers' credential values
@@ -142,11 +142,21 @@ export function registerCredentialFileHandlers(): void {
         })),
       }));
 
+      // Decrypt settings if encrypted
+      let decryptedSettings = importData.settings;
+      if (decryptedSettings && (decryptedSettings as any).__encrypted) {
+        try {
+          decryptedSettings = JSON.parse(decryptWithPassphrase((decryptedSettings as any).__encrypted, passphrase));
+        } catch {
+          decryptedSettings = undefined;
+        }
+      }
+
       return {
         success: true,
         data: {
           providers: decryptedProviders,
-          settings: importData.settings,
+          settings: decryptedSettings,
           mergeStrategy: 'merge',
         },
         message: `Imported from ${filePath}`,

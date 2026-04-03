@@ -8,6 +8,7 @@ import { OnboardingFlow } from './components/OnboardingFlow';
 import { SyncModal } from './components/SyncModal';
 import { ExportModal } from './components/ExportModal';
 import { useStore } from './store';
+import { setupIPCListeners, cleanupIPCListeners } from './store/ipc-listeners';
 import { useTranslation } from 'react-i18next';
 
 import type { ProviderEnvironment } from '@/types';
@@ -31,9 +32,11 @@ const App: React.FC = () => {
   const [showExportModal, setShowExportModal] = useState(false);
   const [showSyncModal, setShowSyncModal] = useState(false);
 
-  // Load providers on mount
+  // Load providers on mount and setup IPC listeners
   useEffect(() => {
+    setupIPCListeners();
     loadProviders();
+    return () => cleanupIPCListeners();
   }, []);
 
   // Update tray icon based on provider status

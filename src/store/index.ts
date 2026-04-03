@@ -249,27 +249,5 @@ export const useStore = create<StoreState>()((set, get) => ({
   },
 }));
 
-// Setup IPC listeners
-if (typeof window !== 'undefined' && window.electronAPI) {
-  window.electronAPI.onLatencyProgress((data: any) => {
-    useStore.setState((s) => ({
-      bulkChecking: true,
-      latencyStatus: { ...s.latencyStatus, [data.providerId]: 'checking' },
-      latencyResults: { ...s.latencyResults, [data.providerId]: data },
-    }));
-  });
-
-  window.electronAPI.onLatencyComplete((data: any) => {
-    const newStatus: Record<string, 'idle' | 'checking' | 'done' | 'error'> = {};
-    const newResults: Record<string, LatencyResult> = {};
-    data.results?.forEach((r: LatencyResult) => {
-      newStatus[r.providerId] = r.status === 'success' ? 'done' : 'error';
-      newResults[r.providerId] = r;
-    });
-    useStore.setState({ latencyStatus: newStatus, latencyResults: newResults, bulkChecking: false });
-  });
-
-  window.electronAPI.onSyncStatus((data: any) => {
-    useStore.setState({ syncStatus: data.status });
-  });
-}
+// IPC listeners are set up via setupIPCListeners() from ipc-listeners.ts
+// Do NOT register listeners here — they accumulate on HMR reload
