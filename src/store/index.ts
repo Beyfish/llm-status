@@ -32,6 +32,9 @@ interface StoreState {
   theme: Theme;
   searchQuery: string;
   commandPaletteOpen: boolean;
+  showSyncModal: boolean;
+  showExportModal: boolean;
+  showSettingsModal: boolean;
   // Settings
   settings: Partial<AppSettings>;
   // Methods
@@ -51,6 +54,9 @@ interface StoreState {
   setTheme: (theme: Theme) => void;
   setSearchQuery: (query: string) => void;
   toggleCommandPalette: () => void;
+  setShowSyncModal: (show: boolean) => void;
+  setShowExportModal: (show: boolean) => void;
+  setShowSettingsModal: (show: boolean) => void;
   fetchUsage: (providerId: string) => Promise<void>;
   fetchUsageSummary: () => Promise<void>;
   recordUsage: (record: UsageRecord) => Promise<void>;
@@ -82,6 +88,9 @@ export const useStore = create<StoreState>()((set, get) => ({
   theme: 'dark',
   searchQuery: '',
   commandPaletteOpen: false,
+  showSyncModal: false,
+  showExportModal: false,
+  showSettingsModal: false,
   settings: {},
 
   // Provider methods
@@ -248,6 +257,9 @@ export const useStore = create<StoreState>()((set, get) => ({
   setSearchQuery: (query: string) => set({ searchQuery: query }),
   toggleCommandPalette: () =>
     set((s) => ({ commandPaletteOpen: !s.commandPaletteOpen })),
+  setShowSyncModal: (show: boolean) => set({ showSyncModal: show }),
+  setShowExportModal: (show: boolean) => set({ showExportModal: show }),
+  setShowSettingsModal: (show: boolean) => set({ showSettingsModal: show }),
 
   // Usage methods
   fetchUsage: async (providerId: string) => {

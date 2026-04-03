@@ -29,9 +29,9 @@ export const SyncModal: React.FC<SyncModalProps> = ({ onClose }) => {
     setError(null);
     try {
       if (direction === 'upload') {
-        await uploadSync(protocol, config);
+        await uploadSync();
       } else {
-        await downloadSync(protocol, config);
+        await downloadSync();
       }
     } catch (err: any) {
       setError(err.message || 'Sync failed');
