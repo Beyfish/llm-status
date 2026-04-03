@@ -30,6 +30,7 @@ interface ElectronAPI {
   notifyDesktop: (message: unknown) => Promise<void>;
   notifyAll: (webhooks: unknown[], message: unknown) => Promise<{ sent: number; failed: number }>;
   usageFetch: (req: unknown) => Promise<any>;
+  trayUpdateStatus: (status: 'green' | 'yellow' | 'red' | 'gray') => Promise<void>;
   credentialFileExport: (config: Record<string, unknown>, passphrase: string) => Promise<{ success: boolean; message: string }>;
   credentialFileImport: (passphrase: string) => Promise<{ success: boolean; data?: { providers: any[]; settings?: Record<string, unknown>; mergeStrategy: string }; message: string }>;
   onConfigMigrate: (cb: (data: any) => void) => void;

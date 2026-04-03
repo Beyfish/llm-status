@@ -32,6 +32,26 @@ const App: React.FC = () => {
     loadProviders();
   }, []);
 
+  // Update tray icon based on provider status
+  useEffect(() => {
+    if (!window.electronAPI?.trayUpdateStatus) return;
+    if (providers.length === 0) {
+      window.electronAPI.trayUpdateStatus('gray');
+      return;
+    }
+
+    const hasError = providers.some((p) => p.status === 'error');
+    const hasWarning = providers.some((p) => p.status === 'warning');
+
+    if (hasError) {
+      window.electronAPI.trayUpdateStatus('red');
+    } else if (hasWarning) {
+      window.electronAPI.trayUpdateStatus('yellow');
+    } else {
+      window.electronAPI.trayUpdateStatus('green');
+    }
+  }, [providers]);
+
   // Check for expiring credentials after providers load
   useEffect(() => {
     if (providers.length === 0) return;

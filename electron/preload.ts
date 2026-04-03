@@ -100,6 +100,10 @@ const electronAPI = {
   notifyDesktop: (message: unknown) => ipcRenderer.invoke('notify:desktop', message),
   notifyAll: (webhooks: unknown[], message: unknown) => ipcRenderer.invoke('notify:all', webhooks, message),
 
+  // Tray
+  trayUpdateStatus: (status: 'green' | 'yellow' | 'red' | 'gray') =>
+    ipcRenderer.invoke('tray:updateStatus', status),
+
   // Credential file import/export
   credentialFileExport: (config: Record<string, unknown>, passphrase: string) =>
     ipcRenderer.invoke('credentialFile:export', config, passphrase),
