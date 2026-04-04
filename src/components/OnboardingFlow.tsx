@@ -62,7 +62,7 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({ onComplete, onSk
     const prov = PROVIDER_OPTIONS.find((p) => p.type === type);
     setProviderName(prov?.name || type);
     setBaseUrl(prov?.defaultBaseUrl || '');
-    setStep(1);
+    setStep(2);
   };
 
   const handleVerify = async () => {
