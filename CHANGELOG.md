@@ -33,6 +33,15 @@ All notable changes to this project will be documented in this file.
 - Keyboard navigation now works on all interactive elements (Enter/Space support)
 - Settings tabs now have proper ARIA roles for screen readers
 
+## [0.2.0.2] - 2026-04-04
+
+### Added
+- You can now protect credentials from screen capture on macOS with the screen recording protection toggle
+- Audit log tab in Settings to track all credential access events (view, copy, export, modify)
+
+### Changed
+- Test framework now excludes nested worktree and submodule directories to prevent false failures
+
 ## [0.2.0.1] - 2026-04-04
 
 ### Added
