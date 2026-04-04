@@ -55,9 +55,13 @@ export const ProviderDetail: React.FC<ProviderDetailProps> = ({ provider, onClos
   -H "Authorization: Bearer ${cred.value}"`;
     }
 
-    await navigator.clipboard.writeText(curl);
-    setCopiedCredId(credId);
-    setTimeout(() => setCopiedCredId(null), 2000);
+    const delayMs = 30000; // 30 seconds auto-clear
+    const result = await window.electronAPI.clipboardWriteAndClear(curl, delayMs);
+
+    if (result.success) {
+      setCopiedCredId(credId);
+      setTimeout(() => setCopiedCredId(null), 2000);
+    }
   };
 
   const handlePromptTest = async () => {
@@ -199,7 +203,7 @@ export const ProviderDetail: React.FC<ProviderDetailProps> = ({ provider, onClos
                     onClick={() => handleCopyCurl(cred.id)}
                     title="Copy curl command for testing"
                   >
-                    {copiedCredId === cred.id ? '✅ Copied' : '📋 Copy curl'}
+                    {copiedCredId === cred.id ? '✅ 30s' : '📋 Copy curl'}
                   </button>
                 </div>
               </div>
