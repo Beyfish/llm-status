@@ -69,14 +69,7 @@ Updated: 2026-04-03
 
 ### TODO #11: Set up CI/CD pipeline
 
-**What:** GitHub Actions workflow for automated testing and building
-**Why:** Ensures code quality on every PR and automates release builds
-**Pros:** Catch regressions early, automated release process, contributor confidence
-**Cons:** Initial setup complexity
-**Context:** Currently builds are manual. Need automated typecheck, test, and build on every PR.
-**Effort:** M (human: ~1 day / CC: ~20 min)
-**Priority:** P1
-**Depends on:** None
+**Completed:** v0.2.0.1 (2026-04-04) — Implemented GitHub Actions workflow in `.github/workflows/ci-cd.yml` with typecheck, test, and multi-platform builds (Windows/macOS/Linux) on every PR.
 
 ---
 
@@ -121,11 +114,4 @@ Updated: 2026-04-03
 
 ### TODO #15: Improve OAuth state token randomness
 
-**What:** Replace `Math.random()` with `crypto.randomBytes()` for OAuth state generation
-**Why:** `Math.random()` is not cryptographically secure
-**Pros:** Stronger CSRF protection
-**Cons:** Minor change, low risk in current desktop context
-**Context:** Current implementation uses `Math.random().toString(36)` which is sufficient for desktop but not cryptographically strong.
-**Effort:** S (human: ~30 min / CC: ~5 min)
-**Priority:** P2
-**Depends on:** None
+**Completed:** v0.2.0 (2026-04-03) — Replaced `Math.random()` with `crypto.randomBytes()` for OAuth state generation.
