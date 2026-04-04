@@ -123,6 +123,10 @@ const electronAPI = {
     ipcRenderer.on('config:migrate', handler);
     return () => { ipcRenderer.off('config:migrate', handler); };
   },
+
+  // Clipboard auto-clear
+  clipboardWriteAndClear: (text: string, delayMs?: number) =>
+    ipcRenderer.invoke('clipboard:writeAndClear', text, delayMs),
 };
 
 contextBridge.exposeInMainWorld('electronAPI', electronAPI);
