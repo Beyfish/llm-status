@@ -114,7 +114,7 @@ const zhCN = {
     },
     clipboard: {
       autoClear: '✅ {{seconds}}s后清除',
-      copied: '✅ 已复制',
+      copyCurl: '📋 Copy curl',
     },
   },
 };
@@ -232,7 +232,7 @@ const enUS = {
     },
     clipboard: {
       autoClear: '✅ Clears in {{seconds}}s',
-      copied: '✅ Copied',
+      copyCurl: '📋 Copy curl',
     },
   },
 };

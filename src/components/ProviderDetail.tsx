@@ -199,7 +199,7 @@ export const ProviderDetail: React.FC<ProviderDetailProps> = ({ provider, onClos
                     onClick={() => handleCopyCurl(cred.id)}
                     title="Copy curl command for testing"
                   >
-                    {copiedCredId === cred.id ? t('clipboard.autoClear', { seconds: 30 }) : '📋 Copy curl'}
+                    {copiedCredId === cred.id ? t('clipboard.autoClear', { seconds: 30 }) : t('clipboard.copyCurl', '📋 Copy curl')}
                   </button>
                 </div>
               </div>

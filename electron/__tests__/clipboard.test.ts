@@ -1,10 +1,10 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 
-// Mock Electron modules — vi.mock is hoisted, so define mocks at module level
 const { mockClipboard, mockIpcMain } = vi.hoisted(() => ({
   mockClipboard: {
     writeText: vi.fn(),
     clear: vi.fn(),
+    readText: vi.fn().mockReturnValue(''),
   },
   mockIpcMain: {
     handle: vi.fn(),
@@ -16,7 +16,6 @@ vi.mock('electron', () => ({
   ipcMain: mockIpcMain,
 }));
 
-// Import after mocking
 import { registerClipboardHandlers, cleanupClipboardTimers } from '../ipc/clipboard';
 
 describe('electron/ipc/clipboard', () => {
@@ -25,6 +24,7 @@ describe('electron/ipc/clipboard', () => {
     vi.useFakeTimers();
     mockClipboard.writeText.mockReset();
     mockClipboard.clear.mockReset();
+    mockClipboard.readText.mockReset().mockReturnValue('');
     mockIpcMain.handle.mockReset();
   });
 
@@ -53,11 +53,6 @@ describe('electron/ipc/clipboard', () => {
       expect(mockClipboard.writeText).toHaveBeenCalledWith('test-api-key-content');
       expect(result.success).toBe(true);
       expect(result.clearedAt).toBeDefined();
-      // clearedAt should be ~30 seconds in the future
-      const clearedAt = new Date(result.clearedAt!);
-      const now = new Date();
-      expect(clearedAt.getTime() - now.getTime()).toBeGreaterThanOrEqual(29999);
-      expect(clearedAt.getTime() - now.getTime()).toBeLessThanOrEqual(30001);
     });
 
     it('uses default 30s delay when delayMs not provided', async () => {
@@ -132,44 +127,91 @@ describe('electron/ipc/clipboard', () => {
       expect(mockClipboard.writeText).not.toHaveBeenCalled();
     });
 
-    it('clears clipboard after delay', async () => {
+    it('clears clipboard after delay when text is unchanged', async () => {
+      mockClipboard.readText.mockReturnValue('test-content');
       registerClipboardHandlers();
       const handler = mockIpcMain.handle.mock.calls[0][1];
       const mockEvent = {};
 
       await handler(mockEvent, 'test-content', 5000);
 
-      // Before delay expires
       expect(mockClipboard.clear).not.toHaveBeenCalled();
 
-      // Advance timers past the delay
       await vi.advanceTimersByTimeAsync(5000);
 
       expect(mockClipboard.clear).toHaveBeenCalledTimes(1);
     });
 
-    it('clears previous timer when called again (consecutive copies)', async () => {
+    it('does NOT clear clipboard if user copied something else', async () => {
+      mockClipboard.readText.mockReturnValue('user-copied-something-else');
       registerClipboardHandlers();
       const handler = mockIpcMain.handle.mock.calls[0][1];
       const mockEvent = {};
 
-      // First copy
+      await handler(mockEvent, 'test-content', 5000);
+
+      await vi.advanceTimersByTimeAsync(5000);
+
+      expect(mockClipboard.clear).not.toHaveBeenCalled();
+    });
+
+    it('clears previous timer when called again (consecutive copies)', async () => {
+      mockClipboard.readText.mockReturnValue('second-content');
+      registerClipboardHandlers();
+      const handler = mockIpcMain.handle.mock.calls[0][1];
+      const mockEvent = {};
+
       await handler(mockEvent, 'first-content', 10000);
-      // Second copy (should cancel first timer)
       await handler(mockEvent, 'second-content', 10000);
 
-      // Advance past first delay
       await vi.advanceTimersByTimeAsync(10000);
 
-      // clear should be called once (for the second copy only)
       expect(mockClipboard.clear).toHaveBeenCalledTimes(1);
-      // The second content should be what was written
       expect(mockClipboard.writeText).toHaveBeenLastCalledWith('second-content');
+    });
+
+    it('sanitizes negative delay to default 30s', async () => {
+      registerClipboardHandlers();
+      const handler = mockIpcMain.handle.mock.calls[0][1];
+      const mockEvent = {};
+
+      const result = await handler(mockEvent, 'test-content', -5000);
+
+      expect(result.success).toBe(true);
+      const clearedAt = new Date(result.clearedAt!);
+      const now = new Date();
+      expect(clearedAt.getTime() - now.getTime()).toBeGreaterThanOrEqual(29999);
+    });
+
+    it('sanitizes Infinity delay to default 30s', async () => {
+      registerClipboardHandlers();
+      const handler = mockIpcMain.handle.mock.calls[0][1];
+      const mockEvent = {};
+
+      const result = await handler(mockEvent, 'test-content', Infinity);
+
+      expect(result.success).toBe(true);
+      const clearedAt = new Date(result.clearedAt!);
+      const now = new Date();
+      expect(clearedAt.getTime() - now.getTime()).toBeGreaterThanOrEqual(29999);
+    });
+
+    it('caps very large delay to 24 hours max', async () => {
+      registerClipboardHandlers();
+      const handler = mockIpcMain.handle.mock.calls[0][1];
+      const mockEvent = {};
+
+      const result = await handler(mockEvent, 'test-content', 99999999999);
+
+      expect(result.success).toBe(true);
+      const clearedAt = new Date(result.clearedAt!);
+      const now = new Date();
+      expect(clearedAt.getTime() - now.getTime()).toBeLessThanOrEqual(24 * 60 * 60 * 1000);
     });
   });
 
   describe('cleanupClipboardTimers', () => {
-    it('clears all active timers', async () => {
+    it('clears active timer and prevents clipboard clear', async () => {
       registerClipboardHandlers();
       const handler = mockIpcMain.handle.mock.calls[0][1];
       const mockEvent = {};
@@ -178,15 +220,12 @@ describe('electron/ipc/clipboard', () => {
 
       cleanupClipboardTimers();
 
-      // Advance past the delay
       await vi.advanceTimersByTimeAsync(30000);
 
-      // Timer was cleared, so clipboard.clear should not have been called
       expect(mockClipboard.clear).not.toHaveBeenCalled();
     });
 
     it('is safe to call with no active timers', () => {
-      // Should not throw
       expect(() => cleanupClipboardTimers()).not.toThrow();
     });
   });

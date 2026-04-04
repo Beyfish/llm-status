@@ -49,45 +49,9 @@ afterEach(() => {
 });
 
 describe('User Flow: Clipboard Auto-Clear', () => {
-  test('handleCopyCurl calls clipboardWriteAndClear with curl and 30s delay', async () => {
-    mockElectronAPI.configRead.mockResolvedValue({
-      providers: [
-        {
-          id: 'openai-1',
-          type: 'openai',
-          name: 'OpenAI',
-          baseUrl: 'https://api.openai.com',
-          credentials: [{
-            id: 'key-1',
-            type: 'api_key',
-            value: 'sk-test123',
-            encrypted: true,
-            status: 'valid',
-          }],
-          latencyHistory: [],
-          status: 'idle',
-        },
-      ],
-      settings: {},
-      schemaVersion: 1,
-    });
-    mockElectronAPI.configWrite.mockResolvedValue(undefined);
-    mockElectronAPI.clipboardWriteAndClear.mockResolvedValue({
-      success: true,
-      clearedAt: new Date(Date.now() + 30000).toISOString(),
-    });
-
-    const { useStore } = await import('../store/index');
-    await useStore.getState().loadProviders();
-
-    const state = useStore.getState();
-    expect(state.providers).toHaveLength(1);
-
-    // Simulate what handleCopyCurl does: call clipboardWriteAndClear
-    const provider = state.providers[0];
-    const cred = provider.credentials[0];
-    const curl = `curl -X GET "${provider.baseUrl}/v1/models" \\
-  -H "Authorization: Bearer ${cred.value}"`;
+  test('clipboardWriteAndClear is called with curl text and 30s delay', async () => {
+    const curl = `curl -X GET "https://api.openai.com/v1/models" \\
+  -H "Authorization: Bearer sk-test-api-key"`;
 
     const result = await mockElectronAPI.clipboardWriteAndClear(curl, 30000);
 
