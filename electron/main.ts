@@ -11,6 +11,7 @@ import { registerCredentialFileHandlers } from './ipc/credentialFile';
 import { registerWebhookHandlers } from './ipc/webhook';
 import { registerUsageHandlers } from './ipc/usage';
 import { registerPromptTestHandlers } from './ipc/promptTest';
+import { registerClipboardHandlers, cleanupClipboardTimers } from './ipc/clipboard';
 
 if (process.platform === 'win32' && process.env.LLM_STATUS_VERBOSE_CHROMIUM_LOGS !== '1') {
   app.commandLine.appendSwitch('log-level', '3');
@@ -168,6 +169,7 @@ app.whenReady().then(() => {
   registerWebhookHandlers();
   registerUsageHandlers();
   registerPromptTestHandlers();
+  registerClipboardHandlers();
 
   createTray();
   createWindow();
@@ -191,6 +193,10 @@ app.whenReady().then(() => {
       createWindow();
     }
   });
+});
+
+app.on('will-quit', () => {
+  cleanupClipboardTimers();
 });
 
 app.on('window-all-closed', () => {

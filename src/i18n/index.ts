@@ -112,6 +112,10 @@ const zhCN = {
     keyValidation: {
       expiresAt: '过期日期（可选）',
     },
+    clipboard: {
+      autoClear: '✅ {{seconds}}s后清除',
+      copied: '✅ 已复制',
+    },
   },
 };
 
@@ -225,6 +229,10 @@ const enUS = {
     },
     keyValidation: {
       expiresAt: 'Expiry date (optional)',
+    },
+    clipboard: {
+      autoClear: '✅ Clears in {{seconds}}s',
+      copied: '✅ Copied',
     },
   },
 };
