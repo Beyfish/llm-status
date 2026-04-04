@@ -35,6 +35,9 @@ All notable changes to this project will be documented in this file.
 
 ## [0.2.0.1] - 2026-04-04
 
+### Added
+- You can now auto-clear the clipboard 30 seconds after copying credentials — no more accidental key leaks from clipboard history
+
 ### Fixed
 - Electron main process no longer crashes on startup when WebDAV (ESM-only) is loaded — now uses dynamic import instead of static require
 - Preload script path corrected so the IPC bridge works reliably in packaged builds

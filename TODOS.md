@@ -1,7 +1,7 @@
 # TODOS.md
 
 Generated: 2026-04-03
-Updated: 2026-04-03
+Updated: 2026-04-04
 
 ## Completed
 
@@ -88,14 +88,7 @@ Updated: 2026-04-03
 
 ### TODO #13: Add clipboard auto-clear after copy
 
-**What:** Automatically clear clipboard 30-60 seconds after copying a key
-**Why:** Prevents accidental credential exposure via clipboard history
-**Pros:** Reduces credential leak risk, zero user effort
-**Cons:** May interfere with legitimate clipboard use
-**Context:** Identified in SECURITY.md as a known limitation.
-**Effort:** S (human: ~2 hours / CC: ~10 min)
-**Priority:** P2
-**Depends on:** None
+**Completed:** v0.2.0.2 (2026-04-04) — Implemented in `electron/ipc/clipboard.ts` with main-process IPC handler that writes to clipboard and auto-clears after 30 seconds. Includes clipboard content verification before clearing, timer cleanup on app quit, and 16 unit tests + 3 integration tests.
 
 ---
 
