@@ -130,6 +130,10 @@ const zhCN = {
         import: '导入',
       },
     },
+    security: {
+      screenProtection: 'Screen Recording Protection',
+      screenProtectionDesc: 'Prevents credentials from being captured by screen recording or screenshots (macOS only)',
+    },
   },
 };
 
@@ -261,6 +265,10 @@ const enUS = {
         delete: 'Delete',
         import: 'Import',
       },
+    },
+    security: {
+      screenProtection: 'Screen Recording Protection',
+      screenProtectionDesc: 'Prevents credentials from being captured by screen recording or screenshots (macOS only)',
     },
   },
 };

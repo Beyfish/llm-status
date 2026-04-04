@@ -128,6 +128,10 @@ const electronAPI = {
     ipcRenderer.invoke('audit:fetch', providerId),
   auditClear: () => ipcRenderer.invoke('audit:clear'),
 
+  // Screen recording protection
+  setScreenProtection: (enabled: boolean) =>
+    ipcRenderer.invoke('screenProtection:set', enabled),
+
   // Config migration
   onConfigMigrate: (cb: (data: unknown) => void) => {
     const handler = (_e: Electron.IpcRendererEvent, data: unknown) => cb(data);

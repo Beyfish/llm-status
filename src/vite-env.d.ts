@@ -39,6 +39,7 @@ interface ElectronAPI {
   auditRecord: (entry: { providerId: string; action: string; detail?: string }) => Promise<void>;
   auditFetch: (providerId?: string) => Promise<{ entries: Array<{ timestamp: string; providerId: string; action: string; detail?: string }> }>;
   auditClear: () => Promise<void>;
+  setScreenProtection: (enabled: boolean) => Promise<void>;
 }
 
 interface Window {

@@ -199,6 +199,31 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ onClose }) => {
                   <code className="mono" style={{ fontSize: '12px' }}>~/.llm-status/config.json</code>
                 </div>
 
+                {process.platform !== 'win32' && (
+                  <>
+                    <div className="modal__divider" />
+
+                    <div className="settings-field">
+                      <label>{t('security.screenProtection')}</label>
+                      <p style={{ fontSize: '12px', color: 'var(--text-secondary)', marginBottom: '8px' }}>
+                        {t('security.screenProtectionDesc')}
+                      </p>
+                      <label className="toggle-label">
+                        <input
+                          type="checkbox"
+                          checked={settings.screenRecordingProtection || false}
+                          onChange={(e) => {
+                            updateSettings({ screenRecordingProtection: e.target.checked });
+                            window.electronAPI.setScreenProtection(e.target.checked);
+                          }}
+                          className="toggle-input"
+                        />
+                        <span className="toggle-slider" />
+                      </label>
+                    </div>
+                  </>
+                )}
+
                 <div className="modal__divider" />
 
                 <div className="settings-field">

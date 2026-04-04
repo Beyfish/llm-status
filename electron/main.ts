@@ -190,6 +190,13 @@ app.whenReady().then(() => {
     }
   });
 
+  // Screen recording protection (macOS only)
+  ipcMain.handle('screenProtection:set', (_event, enabled: boolean) => {
+    if (mainWindow && process.platform === 'darwin') {
+      mainWindow.setContentProtection(enabled);
+    }
+  });
+
   app.on('activate', () => {
     if (BrowserWindow.getAllWindows().length === 0) {
       createWindow();
