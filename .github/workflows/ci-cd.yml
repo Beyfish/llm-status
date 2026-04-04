@@ -27,7 +27,7 @@ jobs:
         with:
           bun-version: latest
       - run: bun install --frozen-lockfile
-      - run: bun test
+      - run: npx vitest run
 
   build-win:
     name: Build Windows
@@ -39,7 +39,7 @@ jobs:
           bun-version: latest
       - run: bun install --frozen-lockfile
       - run: bun run typecheck
-      - run: bun test
+      - run: npx vitest run
       - name: Build Windows portable
         run: bun run build:win
         env:
@@ -61,7 +61,7 @@ jobs:
           bun-version: latest
       - run: bun install --frozen-lockfile
       - run: bun run typecheck
-      - run: bun test
+      - run: npx vitest run
       - name: Build macOS
         run: bun run build:mac
         env:
@@ -83,7 +83,7 @@ jobs:
           bun-version: latest
       - run: bun install --frozen-lockfile
       - run: bun run typecheck
-      - run: bun test
+      - run: npx vitest run
       - name: Build Linux
         run: bun run build:linux
         env:
