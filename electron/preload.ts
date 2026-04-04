@@ -121,6 +121,13 @@ const electronAPI = {
   clipboardWriteAndClear: (text: string, delayMs?: number) =>
     ipcRenderer.invoke('clipboard:writeAndClear', text, delayMs),
 
+  // Audit logging
+  auditRecord: (entry: { providerId: string; action: string; detail?: string }) =>
+    ipcRenderer.invoke('audit:record', entry),
+  auditFetch: (providerId?: string) =>
+    ipcRenderer.invoke('audit:fetch', providerId),
+  auditClear: () => ipcRenderer.invoke('audit:clear'),
+
   // Config migration
   onConfigMigrate: (cb: (data: unknown) => void) => {
     const handler = (_e: Electron.IpcRendererEvent, data: unknown) => cb(data);

@@ -56,6 +56,14 @@ export const ProviderDetail: React.FC<ProviderDetailProps> = ({ provider, onClos
     }
 
     await window.electronAPI.clipboardWriteAndClear(curl, 30000);
+
+    // Record audit event
+    await window.electronAPI.auditRecord({
+      providerId: provider.id,
+      action: 'copy',
+      detail: 'curl command copied to clipboard',
+    });
+
     setCopiedCredId(credId);
     setTimeout(() => setCopiedCredId(null), 2000);
   };

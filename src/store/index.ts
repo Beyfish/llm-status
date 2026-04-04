@@ -61,6 +61,7 @@ interface StoreState {
   fetchUsageSummary: () => Promise<void>;
   recordUsage: (record: UsageRecord) => Promise<void>;
   updateSettings: (settings: Partial<AppSettings>) => Promise<void>;
+  auditRecord: (entry: { providerId: string; action: string; detail?: string }) => Promise<void>;
 }
 
 function getConfig(state: StoreState): Partial<AppConfig> {
@@ -294,6 +295,11 @@ export const useStore = create<StoreState>()((set, get) => ({
     const newSettings = { ...state.settings, ...settings };
     await window.electronAPI.configWrite({ ...getConfig(state), settings: newSettings });
     set({ settings: newSettings });
+  },
+
+  // Audit methods
+  auditRecord: async (entry: { providerId: string; action: string; detail?: string }) => {
+    await window.electronAPI.auditRecord(entry);
   },
 }));
 

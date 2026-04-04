@@ -36,6 +36,9 @@ interface ElectronAPI {
   credentialFileImport: (passphrase: string) => Promise<{ success: boolean; data?: { providers: any[]; settings?: Record<string, unknown>; mergeStrategy: string }; message: string }>;
   onConfigMigrate: (cb: (data: any) => void) => void;
   clipboardWriteAndClear: (text: string, delayMs?: number) => Promise<{ success: boolean; clearedAt?: string }>;
+  auditRecord: (entry: { providerId: string; action: string; detail?: string }) => Promise<void>;
+  auditFetch: (providerId?: string) => Promise<{ entries: Array<{ timestamp: string; providerId: string; action: string; detail?: string }> }>;
+  auditClear: () => Promise<void>;
 }
 
 interface Window {

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useStore } from '@/store';
 
@@ -9,7 +9,7 @@ interface SettingsModalProps {
 export const SettingsModal: React.FC<SettingsModalProps> = ({ onClose }) => {
   const { t, i18n } = useTranslation();
   const { settings, updateSettings, theme, setTheme, providers } = useStore();
-  const [activeTab, setActiveTab] = useState<'general' | 'detection' | 'appearance' | 'advanced'>('general');
+  const [activeTab, setActiveTab] = useState<'general' | 'detection' | 'appearance' | 'advanced' | 'audit'>('general');
   const [backupPassphrase, setBackupPassphrase] = useState('');
   const [backupStatus, setBackupStatus] = useState<'idle' | 'exporting' | 'importing' | 'success' | 'error'>('idle');
   const [backupMessage, setBackupMessage] = useState('');
@@ -19,7 +19,29 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ onClose }) => {
     { id: 'detection' as const, label: t('settings.detection') },
     { id: 'appearance' as const, label: t('settings.appearance') },
     { id: 'advanced' as const, label: t('settings.advanced') },
+    { id: 'audit' as const, label: t('audit.title') },
   ];
+
+  // Audit log state
+  const [auditEntries, setAuditEntries] = useState<Array<{ timestamp: string; providerId: string; action: string; detail?: string }>>([]);
+
+  const fetchAuditLog = useCallback(async () => {
+    const result = await window.electronAPI.auditFetch();
+    setAuditEntries(result.entries);
+  }, []);
+
+  useEffect(() => {
+    if (activeTab === 'audit') {
+      fetchAuditLog();
+    }
+  }, [activeTab, fetchAuditLog]);
+
+  const handleClearAudit = async () => {
+    if (window.confirm(t('audit.clearConfirm'))) {
+      await window.electronAPI.auditClear();
+      setAuditEntries([]);
+    }
+  };
 
   const handleExportCredentials = async () => {
     if (!backupPassphrase || backupPassphrase.length < 8) {
@@ -222,6 +244,38 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ onClose }) => {
                   )}
                 </div>
               </>
+            )}
+            {activeTab === 'audit' && (
+              <div className="audit-log-tab">
+                <div className="audit-log-header">
+                  <h3>{t('audit.title')}</h3>
+                  {auditEntries.length > 0 && (
+                    <button onClick={handleClearAudit} className="audit-clear-btn">
+                      Clear Log
+                    </button>
+                  )}
+                </div>
+                {auditEntries.length === 0 ? (
+                  <p className="audit-empty">{t('audit.noEntries')}</p>
+                ) : (
+                  <div className="audit-log-list">
+                    {auditEntries.slice().reverse().map((entry, index) => (
+                      <div key={index} className="audit-log-entry">
+                        <span className="audit-timestamp">
+                          {new Date(entry.timestamp).toLocaleString()}
+                        </span>
+                        <span className={`audit-action audit-action-${entry.action}`}>
+                          {t(`audit.actions.${entry.action}`)}
+                        </span>
+                        <span className="audit-provider">{entry.providerId}</span>
+                        {entry.detail && (
+                          <span className="audit-detail">{entry.detail}</span>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
             )}
           </div>
         </div>

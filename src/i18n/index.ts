@@ -116,6 +116,20 @@ const zhCN = {
       autoClear: '✅ {{seconds}}s后清除',
       copyCurl: '📋 Copy curl',
     },
+    audit: {
+      title: '审计日志',
+      noEntries: '暂无审计记录',
+      clearConfirm: '确定要清除所有审计日志吗？',
+      cleared: '审计日志已清除',
+      actions: {
+        view: '查看',
+        copy: '复制',
+        export: '导出',
+        modify: '修改',
+        delete: '删除',
+        import: '导入',
+      },
+    },
   },
 };
 
@@ -233,6 +247,20 @@ const enUS = {
     clipboard: {
       autoClear: '✅ Clears in {{seconds}}s',
       copyCurl: '📋 Copy curl',
+    },
+    audit: {
+      title: 'Audit Log',
+      noEntries: 'No audit entries yet',
+      clearConfirm: 'Are you sure you want to clear all audit logs?',
+      cleared: 'Audit log cleared',
+      actions: {
+        view: 'View',
+        copy: 'Copy',
+        export: 'Export',
+        modify: 'Modify',
+        delete: 'Delete',
+        import: 'Import',
+      },
     },
   },
 };
