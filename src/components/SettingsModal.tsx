@@ -36,6 +36,13 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ onClose }) => {
     }
   }, [activeTab, fetchAuditLog]);
 
+  // Apply screen protection on mount if enabled
+  useEffect(() => {
+    if (window.electronAPI.isMac && settings.screenRecordingProtection) {
+      window.electronAPI.setScreenProtection(true);
+    }
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
   const handleClearAudit = async () => {
     if (window.confirm(t('audit.clearConfirm'))) {
       await window.electronAPI.auditClear();
@@ -198,6 +205,32 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ onClose }) => {
                   <label>{t('settings.configPath')}</label>
                   <code className="mono" style={{ fontSize: '12px' }}>~/.llm-status/config.json</code>
                 </div>
+
+                {window.electronAPI.isMac && (
+                  <>
+                    <div className="modal__divider" />
+
+                    <div className="settings-field">
+                      <label id="screen-protection-label">{t('security.screenProtection')}</label>
+                      <p style={{ fontSize: '12px', color: 'var(--text-secondary)', marginBottom: '8px' }}>
+                        {t('security.screenProtectionDesc')}
+                      </p>
+                      <label className="toggle-label">
+                        <input
+                          type="checkbox"
+                          checked={settings.screenRecordingProtection || false}
+                          onChange={(e) => {
+                            updateSettings({ screenRecordingProtection: e.target.checked });
+                            window.electronAPI.setScreenProtection(e.target.checked);
+                          }}
+                          className="toggle-input"
+                          aria-labelledby="screen-protection-label"
+                        />
+                        <span className="toggle-slider" />
+                      </label>
+                    </div>
+                  </>
+                )}
 
                 <div className="modal__divider" />
 

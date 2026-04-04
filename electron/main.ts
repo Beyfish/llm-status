@@ -1,5 +1,7 @@
 import { app, BrowserWindow, ipcMain, shell, Tray, Menu, nativeImage } from 'electron';
 import { join } from 'path';
+import { readFileSync, existsSync } from 'fs';
+import { homedir } from 'os';
 import { is } from '@electron-toolkit/utils';
 import { registerConfigHandlers } from './ipc/config';
 import { registerLatencyHandlers } from './ipc/latency';
@@ -176,6 +178,21 @@ app.whenReady().then(() => {
   createTray();
   createWindow();
 
+  // Apply screen recording protection on startup if previously enabled
+  if (process.platform === 'darwin') {
+    try {
+      const configPath = join(homedir(), '.llm-status', 'config.json');
+      if (existsSync(configPath)) {
+        const config = JSON.parse(readFileSync(configPath, 'utf-8'));
+        if (config.settings?.screenRecordingProtection) {
+          mainWindow?.setContentProtection(true);
+        }
+      }
+    } catch {
+      // Silently ignore config read errors
+    }
+  }
+
   // Listen for tray status updates from renderer
   ipcMain.handle('tray:updateStatus', (_event, status: 'green' | 'yellow' | 'red' | 'gray') => {
     updateTrayIcon(status);
@@ -187,6 +204,13 @@ app.whenReady().then(() => {
         gray: 'LLM Status - Initializing...',
       };
       tray.setToolTip(tooltips[status] || tooltips.gray);
+    }
+  });
+
+  // Screen recording protection (macOS only)
+  ipcMain.handle('screenProtection:set', (_event, enabled: boolean) => {
+    if (mainWindow && process.platform === 'darwin') {
+      mainWindow.setContentProtection(enabled);
     }
   });
 

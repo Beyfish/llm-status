@@ -1,6 +1,7 @@
 /// <reference types="vite/client" />
 
 interface ElectronAPI {
+  isMac: boolean;
   configRead: () => Promise<any>;
   configWrite: (config: object) => Promise<void>;
   latencyCheck: (req: { providerId: string; mode: string; credentialId: string }) => Promise<void>;
@@ -39,6 +40,7 @@ interface ElectronAPI {
   auditRecord: (entry: { providerId: string; action: string; detail?: string }) => Promise<void>;
   auditFetch: (providerId?: string) => Promise<{ entries: Array<{ timestamp: string; providerId: string; action: string; detail?: string }> }>;
   auditClear: () => Promise<void>;
+  setScreenProtection: (enabled: boolean) => Promise<void>;
 }
 
 interface Window {

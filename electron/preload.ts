@@ -1,6 +1,9 @@
-import { contextBridge, ipcRenderer } from 'electron';
+import { contextBridge, ipcRenderer, process as electronProcess } from 'electron';
 
 const electronAPI = {
+  // Platform info (renderer-safe)
+  isMac: electronProcess.platform === 'darwin',
+
   // Config
   configRead: () => ipcRenderer.invoke('config:read'),
   configWrite: (config: object) => ipcRenderer.invoke('config:write', config),
@@ -127,6 +130,10 @@ const electronAPI = {
   auditFetch: (providerId?: string) =>
     ipcRenderer.invoke('audit:fetch', providerId),
   auditClear: () => ipcRenderer.invoke('audit:clear'),
+
+  // Screen recording protection
+  setScreenProtection: (enabled: boolean) =>
+    ipcRenderer.invoke('screenProtection:set', enabled),
 
   // Config migration
   onConfigMigrate: (cb: (data: unknown) => void) => {
