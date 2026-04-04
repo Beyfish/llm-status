@@ -10,6 +10,11 @@ export default defineConfig({
     environmentMatchGlobs: [
       ['src/__tests__/onboarding-flow.test.tsx', 'jsdom'],
     ],
+    exclude: [
+      '**/node_modules/**',
+      '**/llm-status/**',
+      '**/.worktrees/**',
+    ],
   },
   resolve: {
     alias: {
