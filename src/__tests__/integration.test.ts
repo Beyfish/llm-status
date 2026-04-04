@@ -35,6 +35,7 @@ const mockElectronAPI = {
   trayUpdateStatus: vi.fn(),
   credentialFileExport: vi.fn(),
   credentialFileImport: vi.fn(),
+  clipboardWriteAndClear: vi.fn(),
   onConfigMigrate: vi.fn(() => () => {}),
 };
 
