@@ -1,4 +1,4 @@
-import { describe, expect, test } from 'bun:test';
+import { describe, expect, test } from 'vitest';
 
 describe('latency check logic', () => {
   // Test the latency calculation and status mapping logic
