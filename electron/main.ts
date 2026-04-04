@@ -12,6 +12,7 @@ import { registerWebhookHandlers } from './ipc/webhook';
 import { registerUsageHandlers } from './ipc/usage';
 import { registerPromptTestHandlers } from './ipc/promptTest';
 import { registerClipboardHandlers, cleanupClipboardTimers } from './ipc/clipboard';
+import { registerAuditHandlers } from './ipc/audit';
 
 if (process.platform === 'win32' && process.env.LLM_STATUS_VERBOSE_CHROMIUM_LOGS !== '1') {
   app.commandLine.appendSwitch('log-level', '3');
@@ -170,6 +171,7 @@ app.whenReady().then(() => {
   registerUsageHandlers();
   registerPromptTestHandlers();
   registerClipboardHandlers();
+  registerAuditHandlers();
 
   createTray();
   createWindow();
