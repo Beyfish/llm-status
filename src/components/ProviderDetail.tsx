@@ -201,9 +201,9 @@ export const ProviderDetail: React.FC<ProviderDetailProps> = ({ provider, onClos
                     className="btn btn--ghost"
                     style={{ fontSize: '11px', padding: '0 8px', height: '28px' }}
                     onClick={() => handleCopyCurl(cred.id)}
-                    title="Copy curl command for testing"
+                    title={t('detail.copyCurl')}
                   >
-                    {copiedCredId === cred.id ? '✅ 30s' : '📋 Copy curl'}
+                    {copiedCredId === cred.id ? t('detail.clipboardAutoClear', { seconds: 30 }) : t('detail.copyCurl')}
                   </button>
                 </div>
               </div>
