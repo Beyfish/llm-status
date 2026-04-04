@@ -1,8 +1,19 @@
 import { ipcMain, dialog, safeStorage } from 'electron';
-import { createClient } from 'webdav';
 import { S3Client, PutObjectCommand, GetObjectCommand } from '@aws-sdk/client-s3';
 import { Readable } from 'stream';
 import { google } from 'googleapis';
+
+// Lazy-load webdav to avoid top-level require('webdav') crash.
+// webdav v5.x is ESM-only (type: module); Electron main process is CommonJS.
+// Dynamic import defers resolution until the function is actually called.
+let _webdavCreateClient: typeof import('webdav').createClient | null = null;
+async function getWebdavCreateClient() {
+  if (!_webdavCreateClient) {
+    const { createClient } = await import('webdav');
+    _webdavCreateClient = createClient;
+  }
+  return _webdavCreateClient;
+}
 
 const REMOTE_PATH = 'llm-status/config.json';
 
@@ -36,6 +47,7 @@ interface SyncRequest {
 
 // WebDAV
 async function webdavUpload(config: Record<string, string>, data: string): Promise<void> {
+  const createClient = await getWebdavCreateClient();
   const client = createClient(config.url, {
     username: config.username,
     password: config.password,
@@ -44,6 +56,7 @@ async function webdavUpload(config: Record<string, string>, data: string): Promi
 }
 
 async function webdavDownload(config: Record<string, string>): Promise<string> {
+  const createClient = await getWebdavCreateClient();
   const client = createClient(config.url, {
     username: config.username,
     password: config.password,
@@ -381,6 +394,7 @@ export function registerSyncHandlers(): void {
     try {
       switch (req.protocol) {
         case 'webdav': {
+          const createClient = await getWebdavCreateClient();
           const client = createClient(req.config.url, {
             username: req.config.username,
             password: req.config.password,

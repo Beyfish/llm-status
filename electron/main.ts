@@ -12,6 +12,10 @@ import { registerWebhookHandlers } from './ipc/webhook';
 import { registerUsageHandlers } from './ipc/usage';
 import { registerPromptTestHandlers } from './ipc/promptTest';
 
+if (process.platform === 'win32' && process.env.LLM_STATUS_VERBOSE_CHROMIUM_LOGS !== '1') {
+  app.commandLine.appendSwitch('log-level', '3');
+}
+
 let mainWindow: BrowserWindow | null = null;
 let tray: Tray | null = null;
 
@@ -113,7 +117,7 @@ function createWindow(): void {
     autoHideMenuBar: true,
     backgroundColor: '#0F0F0F',
     webPreferences: {
-      preload: join(__dirname, '../preload.js'),
+      preload: join(__dirname, 'preload.js'),
       sandbox: true,
       contextIsolation: true,
       nodeIntegration: false,
@@ -136,7 +140,20 @@ function createWindow(): void {
   if (is.dev && process.env['ELECTRON_RENDERER_URL']) {
     mainWindow.loadURL(process.env['ELECTRON_RENDERER_URL']);
   } else {
-    mainWindow.loadFile(join(__dirname, '../renderer/index.html'));
+    const path = require('path');
+    const rendererPath = path.join(__dirname, '../renderer/index.html');
+    const distPublicPath = path.join(__dirname, '../dist/public/index.html');
+    const distPath = path.join(__dirname, '../dist/index.html');
+    const { existsSync } = require('fs');
+    if (existsSync(rendererPath)) {
+      mainWindow.loadFile(rendererPath);
+    } else if (existsSync(distPublicPath)) {
+      mainWindow.loadFile(distPublicPath);
+    } else if (existsSync(distPath)) {
+      mainWindow.loadFile(distPath);
+    } else {
+      mainWindow.loadFile(path.join(__dirname, '../public/index.html'));
+    }
   }
 }
 
