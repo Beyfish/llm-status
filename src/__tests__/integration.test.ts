@@ -36,6 +36,7 @@ const mockElectronAPI = {
   credentialFileExport: vi.fn(),
   credentialFileImport: vi.fn(),
   onConfigMigrate: vi.fn(() => () => {}),
+  clipboardWriteAndClear: vi.fn().mockResolvedValue({ success: true, clearedAt: new Date().toISOString() }),
 };
 
 beforeEach(() => {

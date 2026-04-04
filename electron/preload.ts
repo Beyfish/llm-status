@@ -117,6 +117,10 @@ const electronAPI = {
   // Usage
   usageFetch: (req: unknown) => ipcRenderer.invoke('usage:fetch', req),
 
+  // Clipboard auto-clear
+  clipboardWriteAndClear: (text: string, delayMs?: number) =>
+    ipcRenderer.invoke('clipboard:writeAndClear', text, delayMs),
+
   // Config migration
   onConfigMigrate: (cb: (data: unknown) => void) => {
     const handler = (_e: Electron.IpcRendererEvent, data: unknown) => cb(data);

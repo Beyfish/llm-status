@@ -55,7 +55,7 @@ export const ProviderDetail: React.FC<ProviderDetailProps> = ({ provider, onClos
   -H "Authorization: Bearer ${cred.value}"`;
     }
 
-    await navigator.clipboard.writeText(curl);
+    await window.electronAPI.clipboardWriteAndClear(curl, 30000);
     setCopiedCredId(credId);
     setTimeout(() => setCopiedCredId(null), 2000);
   };
@@ -199,7 +199,7 @@ export const ProviderDetail: React.FC<ProviderDetailProps> = ({ provider, onClos
                     onClick={() => handleCopyCurl(cred.id)}
                     title="Copy curl command for testing"
                   >
-                    {copiedCredId === cred.id ? '✅ Copied' : '📋 Copy curl'}
+                    {copiedCredId === cred.id ? t('clipboard.autoClear', { seconds: 30 }) : t('clipboard.copyCurl', '📋 Copy curl')}
                   </button>
                 </div>
               </div>

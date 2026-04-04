@@ -35,6 +35,7 @@ interface ElectronAPI {
   credentialFileExport: (config: Record<string, unknown>, passphrase: string) => Promise<{ success: boolean; message: string }>;
   credentialFileImport: (passphrase: string) => Promise<{ success: boolean; data?: { providers: any[]; settings?: Record<string, unknown>; mergeStrategy: string }; message: string }>;
   onConfigMigrate: (cb: (data: any) => void) => void;
+  clipboardWriteAndClear: (text: string, delayMs?: number) => Promise<{ success: boolean; clearedAt?: string }>;
 }
 
 interface Window {
