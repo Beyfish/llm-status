@@ -12,6 +12,10 @@ import { registerWebhookHandlers } from './ipc/webhook';
 import { registerUsageHandlers } from './ipc/usage';
 import { registerPromptTestHandlers } from './ipc/promptTest';
 
+if (process.platform === 'win32' && process.env.LLM_STATUS_VERBOSE_CHROMIUM_LOGS !== '1') {
+  app.commandLine.appendSwitch('log-level', '3');
+}
+
 let mainWindow: BrowserWindow | null = null;
 let tray: Tray | null = null;
 
@@ -113,7 +117,7 @@ function createWindow(): void {
     autoHideMenuBar: true,
     backgroundColor: '#0F0F0F',
     webPreferences: {
-      preload: join(__dirname, '../preload.js'),
+      preload: join(__dirname, 'preload.js'),
       sandbox: true,
       contextIsolation: true,
       nodeIntegration: false,

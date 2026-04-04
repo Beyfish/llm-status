@@ -1,4 +1,4 @@
-import { describe, expect, test } from 'bun:test';
+import { describe, expect, test } from 'vitest';
 
 describe('User Flow: Usage Tracking', () => {
   test('usage recording stores data correctly', async () => {
