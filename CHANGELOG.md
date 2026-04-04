@@ -18,7 +18,7 @@ All notable changes to this project will be documented in this file.
 - You can now resolve cloud sync conflicts by choosing which version to keep
 - Full Chinese (zh-CN) and English (en-US) translations for all new features
 - DESIGN.md design system documentation
-- 71 automated tests (up from 2)
+- 71 automated tests (up from 2) — later migrated to Vitest, now 84 tests
 
 ### Fixed
 - Production app no longer loads localhost renderer — now uses bundled files
@@ -32,6 +32,21 @@ All notable changes to this project will be documented in this file.
 - App now adapts to mobile viewports (375px+) with responsive breakpoints
 - Keyboard navigation now works on all interactive elements (Enter/Space support)
 - Settings tabs now have proper ARIA roles for screen readers
+
+## [0.2.0.1] - 2026-04-04
+
+### Fixed
+- Electron main process no longer crashes on startup when WebDAV (ESM-only) is loaded — now uses dynamic import instead of static require
+- Preload script path corrected so the IPC bridge works reliably in packaged builds
+- Onboarding flow now advances to the credential type screen after selecting a provider (was stuck on provider selection)
+- Local builds no longer attempt GitHub publishing by default — use `npm run publish:*` for releases
+- Windows Chromium startup log noise suppressed (configurable via `LLM_STATUS_VERBOSE_CHROMIUM_LOGS=1`)
+- Missing `@electron-toolkit/utils` dependency declared explicitly in package.json
+
+### Changed
+- Migrated all 84 tests from `bun:test` to Vitest — now runs under a single test framework
+- Added source-level regression tests for WebDAV import safety, preload path correctness, and onboarding step progression
+- CI/CD pipeline now runs typecheck, tests, and multi-platform builds on every PR
 
 ## [0.1.0.0] - 2026-04-01
 
