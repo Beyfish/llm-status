@@ -94,14 +94,7 @@ Updated: 2026-04-04
 
 ### TODO #14: Add screen recording protection (macOS)
 
-**What:** Request screen recording permission and mask credential fields
-**Why:** Prevents credentials from being captured by screen recording software
-**Pros:** Additional security layer for macOS users
-**Cons:** macOS-only, requires user permission grant
-**Context:** Identified in SECURITY.md as a known limitation.
-**Effort:** S (human: ~4 hours / CC: ~15 min)
-**Priority:** P2
-**Depends on:** macOS only
+**Completed:** v0.2.0.3 (2026-04-04) — Implemented in `electron/main.ts` with `setContentProtection(true)` on macOS. Toggle in SettingsModal advanced tab with i18n support. Persists across restarts via config.json.
 
 ---
 
