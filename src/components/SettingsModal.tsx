@@ -36,6 +36,13 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ onClose }) => {
     }
   }, [activeTab, fetchAuditLog]);
 
+  // Apply screen protection on mount if enabled
+  useEffect(() => {
+    if (window.electronAPI.isMac && settings.screenRecordingProtection) {
+      window.electronAPI.setScreenProtection(true);
+    }
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
   const handleClearAudit = async () => {
     if (window.confirm(t('audit.clearConfirm'))) {
       await window.electronAPI.auditClear();
@@ -199,12 +206,12 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ onClose }) => {
                   <code className="mono" style={{ fontSize: '12px' }}>~/.llm-status/config.json</code>
                 </div>
 
-                {process.platform !== 'win32' && (
+                {window.electronAPI.isMac && (
                   <>
                     <div className="modal__divider" />
 
                     <div className="settings-field">
-                      <label>{t('security.screenProtection')}</label>
+                      <label id="screen-protection-label">{t('security.screenProtection')}</label>
                       <p style={{ fontSize: '12px', color: 'var(--text-secondary)', marginBottom: '8px' }}>
                         {t('security.screenProtectionDesc')}
                       </p>
@@ -217,6 +224,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ onClose }) => {
                             window.electronAPI.setScreenProtection(e.target.checked);
                           }}
                           className="toggle-input"
+                          aria-labelledby="screen-protection-label"
                         />
                         <span className="toggle-slider" />
                       </label>

@@ -130,6 +130,7 @@ export interface AppSettings {
       secret?: string;
     }>;
   };
+  screenRecordingProtection?: boolean;
 }
 
 export interface CloudSyncConfig {

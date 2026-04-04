@@ -1317,8 +1317,17 @@ code, pre, .mono {
   gap: 8px;
 }
 
+/* Visually hidden but focusable for accessibility */
 .toggle-input {
-  display: none;
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
 }
 
 .toggle-slider {
@@ -1349,4 +1358,9 @@ code, pre, .mono {
 
 .toggle-input:checked + .toggle-slider::before {
   transform: translateX(20px);
+}
+
+.toggle-input:focus-visible + .toggle-slider {
+  outline: 2px solid var(--blue);
+  outline-offset: 2px;
 }
