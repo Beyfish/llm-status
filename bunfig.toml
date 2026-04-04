@@ -1,0 +1,2 @@
+[test]
+exclude = ["src/__tests__/onboarding-flow.test.tsx"]
