@@ -2,10 +2,10 @@
 
 All notable changes to this project will be documented in this file.
 
-## [0.2.0.6] - 2026-04-05
+## [0.2.0.7] - 2026-04-05
 
 ### Changed
-- Release creation now happens in the same successful master push pipeline after auto-tagging, avoiding GitHub Actions recursion limits on workflow-triggered tag events
+- Release notes generation now prefers the explicit version argument and no longer mistakes branch names like `master` for a release version
 
 ## [0.2.0.0] - 2026-04-03
 
