@@ -2,10 +2,10 @@
 
 All notable changes to this project will be documented in this file.
 
-## [0.2.0.4] - 2026-04-05
+## [0.2.0.5] - 2026-04-05
 
 ### Changed
-- Release automation now auto-tags versioned merges on `master`, builds artifacts in CI, and publishes GitHub Releases using the matching `CHANGELOG.md` section as release notes
+- CI/CD now listens to release tag pushes so auto-tagged releases continue all the way through artifact build and GitHub Release publication
 
 ## [0.2.0.0] - 2026-04-03
 
