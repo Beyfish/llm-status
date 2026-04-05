@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.2.0.8] - 2026-04-05
+
+### Fixed
+- GitHub Actions release job now has `contents: write` permission to create releases
+
+## [0.2.0.7] - 2026-04-05
+
+### Changed
+- Release notes generation now prefers the explicit version argument and no longer mistakes branch names like `master` for a release version
+
 ## [0.2.0.0] - 2026-04-03
 
 ### Added
