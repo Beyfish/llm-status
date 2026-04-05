@@ -192,7 +192,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ onClose }) => {
                         className={`btn ${theme === t ? 'btn--primary' : 'btn--ghost'}`}
                         onClick={() => setTheme(t)}
                       >
-                        {t === 'dark' ? '🌙' : t === 'light' ? '☀️' : '💻'} {t}
+                        {t === 'dark' ? 'Dark' : t === 'light' ? 'Light' : 'System'}
                       </button>
                     ))}
                   </div>
@@ -259,20 +259,20 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ onClose }) => {
                       onClick={handleExportCredentials}
                       disabled={backupStatus === 'exporting' || backupStatus === 'importing'}
                     >
-                      {backupStatus === 'exporting' ? 'Exporting...' : '📤 Export Credentials'}
+                      {backupStatus === 'exporting' ? 'Exporting...' : 'Export Credentials'}
                     </button>
                     <button
                       className="btn btn--ghost"
                       onClick={handleImportCredentials}
                       disabled={backupStatus === 'exporting' || backupStatus === 'importing'}
                     >
-                      {backupStatus === 'importing' ? 'Importing...' : '📥 Import Credentials'}
+                      {backupStatus === 'importing' ? 'Importing...' : 'Import Credentials'}
                     </button>
                   </div>
 
                   {backupMessage && (
                     <div className={backupStatus === 'success' ? 'onboarding__success' : 'onboarding__error'} style={{ marginTop: '12px' }}>
-                      {backupStatus === 'success' ? '✅' : '❌'} {backupMessage}
+                      {backupStatus === 'success' ? '✓' : '✕'} {backupMessage}
                     </div>
                   )}
                 </div>

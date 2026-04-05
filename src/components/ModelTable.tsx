@@ -35,7 +35,7 @@ export const ModelTable: React.FC<ModelTableProps> = ({ models, providerName }) 
           <span className="mono">{m.name}</span>
           <span className="mono" style={{ color: 'var(--text-secondary)' }}>{m.price}</span>
           <span>{m.capabilities}</span>
-          <span>{m.available ? '✅' : '⚠️'}</span>
+          <span>{m.available ? '✓' : '–'}</span>
         </div>
       ))}
     </div>

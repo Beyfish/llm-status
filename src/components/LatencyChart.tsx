@@ -41,12 +41,12 @@ export const LatencyChart: React.FC<LatencyChartProps> = ({ data, range, isDark 
       {
         label: 'Latency (ms)',
         data: filteredData.map((d) => d.latency),
-        borderColor: '#007AFF',
+        borderColor: '#c96442',
         backgroundColor: (context: any) => {
           const ctx = context.chart.ctx;
           const gradient = ctx.createLinearGradient(0, 0, 0, 300);
-          gradient.addColorStop(0, 'rgba(0, 122, 255, 0.3)');
-          gradient.addColorStop(1, 'rgba(0, 122, 255, 0)');
+          gradient.addColorStop(0, 'rgba(201, 100, 66, 0.3)');
+          gradient.addColorStop(1, 'rgba(201, 100, 66, 0)');
           return gradient;
         },
         fill: true,
@@ -58,8 +58,8 @@ export const LatencyChart: React.FC<LatencyChartProps> = ({ data, range, isDark 
     ],
   };
 
-  const textColor = isDark ? 'rgba(255, 255, 255, 0.6)' : 'rgba(0, 0, 0, 0.6)';
-  const gridColor = isDark ? 'rgba(255, 255, 255, 0.06)' : 'rgba(0, 0, 0, 0.06)';
+  const textColor = isDark ? 'rgba(176, 174, 165, 0.85)' : '#5e5d59';
+  const gridColor = isDark ? 'rgba(209, 207, 197, 0.08)' : 'rgba(240, 238, 230, 0.8)';
 
   const options = {
     responsive: true,
@@ -67,10 +67,10 @@ export const LatencyChart: React.FC<LatencyChartProps> = ({ data, range, isDark 
     plugins: {
       legend: { display: false },
       tooltip: {
-        backgroundColor: isDark ? '#2C2C2E' : '#FFFFFF',
-        titleColor: isDark ? 'rgba(255, 255, 255, 0.95)' : 'rgba(0, 0, 0, 0.9)',
-        bodyColor: isDark ? 'rgba(255, 255, 255, 0.6)' : 'rgba(0, 0, 0, 0.6)',
-        borderColor: isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.08)',
+        backgroundColor: isDark ? '#30302e' : '#faf9f5',
+        titleColor: isDark ? 'rgba(250, 249, 245, 0.95)' : '#141413',
+        bodyColor: isDark ? 'rgba(176, 174, 165, 0.85)' : '#5e5d59',
+        borderColor: isDark ? 'rgba(209, 207, 197, 0.12)' : '#f0eee6',
         borderWidth: 1,
         padding: 12,
         cornerRadius: 8,

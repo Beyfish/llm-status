@@ -219,7 +219,7 @@ export const SmartImportModal: React.FC<SmartImportModalProps> = ({ onClose, onI
     <div className="modal-overlay" onClick={onClose} role="dialog" aria-modal="true">
       <div className="modal modal--large" onClick={(e) => e.stopPropagation()}>
         <div className="modal__header">
-          <h2>📋 {t('smartImport.title')}</h2>
+          <h2>{t('smartImport.title')}</h2>
           <button className="modal__close" onClick={onClose} aria-label="Close">✕</button>
         </div>
         <div className="modal__body">
@@ -230,7 +230,7 @@ export const SmartImportModal: React.FC<SmartImportModalProps> = ({ onClose, onI
                 className={`btn ${inputType === type ? 'btn--primary' : 'btn--ghost'}`}
                 onClick={() => setInputType(type)}
               >
-                {type === 'text' ? '📝 Text' : type === 'json' ? '📄 JSON' : '🔗 URL'}
+                {type === 'text' ? 'Text' : type === 'json' ? 'JSON' : 'URL'}
               </button>
             ))}
           </div>

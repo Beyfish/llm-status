@@ -9,10 +9,10 @@ interface SyncModalProps {
 type Protocol = 'webdav' | 's3' | 'gdrive' | 'onedrive';
 
 const PROTOCOLS: Array<{ id: Protocol; name: string; icon: string }> = [
-  { id: 'webdav', name: 'WebDAV', icon: '📁' },
-  { id: 's3', name: 'S3 Compatible', icon: '🪣' },
-  { id: 'gdrive', name: 'Google Drive', icon: '📂' },
-  { id: 'onedrive', name: 'OneDrive', icon: '☁️' },
+  { id: 'webdav', name: 'WebDAV', icon: '' },
+  { id: 's3', name: 'S3', icon: '' },
+  { id: 'gdrive', name: 'Google Drive', icon: '' },
+  { id: 'onedrive', name: 'OneDrive', icon: '' },
 ];
 
 export const SyncModal: React.FC<SyncModalProps> = ({ onClose }) => {
@@ -44,7 +44,7 @@ export const SyncModal: React.FC<SyncModalProps> = ({ onClose }) => {
     <div className="modal-overlay" onClick={onClose} role="dialog" aria-modal="true">
       <div className="modal modal--large" onClick={(e) => e.stopPropagation()}>
         <div className="modal__header">
-          <h2>☁️ {t('sync.title', 'Cloud Sync')}</h2>
+          <h2>{t('sync.title', 'Cloud Sync')}</h2>
           <button className="modal__close" onClick={onClose} aria-label="Close">✕</button>
         </div>
         <div className="modal__body">
@@ -56,7 +56,7 @@ export const SyncModal: React.FC<SyncModalProps> = ({ onClose }) => {
                 className={`btn ${protocol === p.id ? 'btn--primary' : 'btn--ghost'}`}
                 onClick={() => setProtocol(p.id)}
               >
-                {p.icon} {p.name}
+                {p.name}
               </button>
             ))}
           </div>
@@ -83,7 +83,7 @@ export const SyncModal: React.FC<SyncModalProps> = ({ onClose }) => {
               <div style={{ textAlign: 'center', padding: '24px', color: 'var(--text-secondary)' }}>
                 <p>OAuth authorization required</p>
                 <button className="btn btn--primary" style={{ marginTop: '12px' }}>
-                  🔐 Authorize {protocol === 'gdrive' ? 'Google Drive' : 'OneDrive'}
+                  Authorize {protocol === 'gdrive' ? 'Google Drive' : 'OneDrive'}
                 </button>
               </div>
             )}
@@ -112,26 +112,26 @@ export const SyncModal: React.FC<SyncModalProps> = ({ onClose }) => {
             </div>
           )}
           {error && (
-            <div style={{ padding: '12px', borderRadius: '8px', background: 'rgba(239, 68, 68, 0.1)', color: 'var(--red)', fontSize: '13px', marginBottom: '12px' }}>
-              ❌ {error}
+            <div style={{ padding: '12px', borderRadius: 'var(--radius-btn)', background: 'color-mix(in srgb, var(--red) 10%, transparent)', color: 'var(--red)', fontSize: '13px', marginBottom: '12px' }}>
+              {error}
             </div>
           )}
           {syncStatus === 'syncing' && (
-            <div style={{ padding: '12px', borderRadius: '8px', background: 'rgba(0, 122, 255, 0.1)', color: 'var(--accent)', fontSize: '13px', marginBottom: '12px' }}>
-              ⏳ Syncing...
+            <div style={{ padding: '12px', borderRadius: 'var(--radius-btn)', background: 'color-mix(in srgb, var(--accent) 10%, transparent)', color: 'var(--accent)', fontSize: '13px', marginBottom: '12px' }}>
+              Syncing...
             </div>
           )}
           {syncStatus === 'conflict' && syncConflict && (
-            <div style={{ padding: '16px', borderRadius: '8px', background: 'rgba(234, 179, 8, 0.1)', border: '1px solid var(--yellow)', marginBottom: '12px' }}>
+            <div style={{ padding: '16px', borderRadius: 'var(--radius-btn)', background: 'color-mix(in srgb, var(--yellow) 10%, transparent)', border: '1px solid var(--yellow)', marginBottom: '12px' }}>
               <div style={{ fontSize: '14px', fontWeight: 600, color: 'var(--yellow)', marginBottom: '8px' }}>
-                ⚠️ Sync Conflict Detected
+                Sync Conflict Detected
               </div>
               <div style={{ fontSize: '12px', color: 'var(--text-secondary)', marginBottom: '12px' }}>
                 Your local version differs from the cloud version. Choose which version to keep:
               </div>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '12px' }}>
-                <div style={{ padding: '12px', borderRadius: '6px', background: 'var(--bg-elevated)' }}>
-                  <div style={{ fontSize: '13px', fontWeight: 600 }}>📱 Local Version</div>
+                <div style={{ padding: '12px', borderRadius: 'var(--radius-btn)', background: 'var(--bg-elevated)' }}>
+                  <div style={{ fontSize: '13px', fontWeight: 600 }}>Local Version</div>
                   <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>
                     Version: {syncConflict.localVersion || 'unknown'}
                   </div>
@@ -141,8 +141,8 @@ export const SyncModal: React.FC<SyncModalProps> = ({ onClose }) => {
                     </div>
                   )}
                 </div>
-                <div style={{ padding: '12px', borderRadius: '6px', background: 'var(--bg-elevated)' }}>
-                  <div style={{ fontSize: '13px', fontWeight: 600 }}>☁️ Cloud Version</div>
+                <div style={{ padding: '12px', borderRadius: 'var(--radius-btn)', background: 'var(--bg-elevated)' }}>
+                  <div style={{ fontSize: '13px', fontWeight: 600 }}>Cloud Version</div>
                   <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>
                     Version: {syncConflict.remoteVersion || 'unknown'}
                   </div>

@@ -28,10 +28,10 @@ export const ProviderDetail: React.FC<ProviderDetailProps> = ({ provider, onClos
     const expiry = new Date(expiresAt);
     const daysLeft = Math.ceil((expiry.getTime() - now.getTime()) / (24 * 60 * 60 * 1000));
 
-    if (daysLeft < 0) return { label: '⚠️ Expired', color: 'var(--red)' };
-    if (daysLeft <= 3) return { label: `⚠️ ${daysLeft}d left`, color: 'var(--red)' };
-    if (daysLeft <= 7) return { label: `🟡 ${daysLeft}d left`, color: 'var(--yellow)' };
-    return { label: `🟢 ${daysLeft}d left`, color: 'var(--green)' };
+    if (daysLeft < 0) return { label: 'Expired', color: 'var(--red)' };
+    if (daysLeft <= 3) return { label: `${daysLeft}d left`, color: 'var(--red)' };
+    if (daysLeft <= 7) return { label: `${daysLeft}d left`, color: 'var(--yellow)' };
+    return { label: `${daysLeft}d left`, color: 'var(--green)' };
   };
 
   const handleCopyCurl = async (credId: string) => {
@@ -126,10 +126,10 @@ export const ProviderDetail: React.FC<ProviderDetailProps> = ({ provider, onClos
               fontSize: '10px',
               padding: '2px 8px',
               borderRadius: '999px',
-              background: provider.environment === 'production' ? 'rgba(239, 68, 68, 0.15)' :
-                provider.environment === 'work' ? 'rgba(0, 122, 255, 0.15)' :
-                provider.environment === 'staging' ? 'rgba(234, 179, 8, 0.15)' :
-                'rgba(107, 114, 128, 0.15)',
+              background: provider.environment === 'production' ? 'color-mix(in srgb, var(--red) 15%, transparent)' :
+                provider.environment === 'work' ? 'color-mix(in srgb, var(--accent) 15%, transparent)' :
+                provider.environment === 'staging' ? 'color-mix(in srgb, var(--yellow) 15%, transparent)' :
+                'color-mix(in srgb, var(--text-muted) 15%, transparent)',
               color: provider.environment === 'production' ? 'var(--red)' :
                 provider.environment === 'work' ? 'var(--accent)' :
                 provider.environment === 'staging' ? 'var(--yellow)' :
@@ -172,7 +172,7 @@ export const ProviderDetail: React.FC<ProviderDetailProps> = ({ provider, onClos
               <span className="mono">{m.name}</span>
               <span className="mono" style={{ color: 'var(--text-secondary)' }}>{m.price}</span>
               <span>{m.capabilities}</span>
-              <span>{m.available ? '✅' : '⚠️'}</span>
+              <span>{m.available ? '✓' : '–'}</span>
             </div>
           ))}
         </div>
@@ -207,7 +207,7 @@ export const ProviderDetail: React.FC<ProviderDetailProps> = ({ provider, onClos
                     onClick={() => handleCopyCurl(cred.id)}
                     title="Copy curl command for testing"
                   >
-                    {copiedCredId === cred.id ? t('clipboard.autoClear', { seconds: 30 }) : t('clipboard.copyCurl', '📋 Copy curl')}
+                    {copiedCredId === cred.id ? t('clipboard.autoClear', { seconds: 30 }) : t('clipboard.copyCurl', 'Copy curl')}
                   </button>
                 </div>
               </div>
@@ -217,7 +217,7 @@ export const ProviderDetail: React.FC<ProviderDetailProps> = ({ provider, onClos
       </div>
 
       <div className="provider-detail__section">
-        <h3 className="provider-detail__section-title">🧪 Prompt Quick Test</h3>
+        <h3 className="provider-detail__section-title">Prompt Quick Test</h3>
         <textarea
           className="smart-import__textarea"
           placeholder="Type a test prompt..."
@@ -235,14 +235,14 @@ export const ProviderDetail: React.FC<ProviderDetailProps> = ({ provider, onClos
         </button>
 
         {promptLoading && (
-          <div style={{ marginTop: '12px', padding: '12px', borderRadius: '8px', background: 'rgba(0, 122, 255, 0.1)', color: 'var(--accent)', fontSize: '13px' }}>
-            ⏳ Waiting for response...
+          <div style={{ marginTop: '12px', padding: '12px', borderRadius: 'var(--radius-btn)', background: 'color-mix(in srgb, var(--accent) 10%, transparent)', color: 'var(--accent)', fontSize: '13px' }}>
+            Waiting for response...
           </div>
         )}
 
         {promptError && (
-          <div style={{ marginTop: '12px', padding: '12px', borderRadius: '8px', background: 'rgba(239, 68, 68, 0.1)', color: 'var(--red)', fontSize: '13px' }}>
-            ❌ {promptError}
+          <div style={{ marginTop: '12px', padding: '12px', borderRadius: 'var(--radius-btn)', background: 'color-mix(in srgb, var(--red) 10%, transparent)', color: 'var(--red)', fontSize: '13px' }}>
+            {promptError}
           </div>
         )}
 

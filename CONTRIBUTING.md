@@ -79,7 +79,7 @@ llm-status/
 ├── electron/           # Main process code
 │   ├── main.ts         # Entry point
 │   ├── preload.ts      # IPC bridge
-│   └── ipc/            # IPC handler modules (10 files)
+│   └── ipc/            # IPC handler modules (12 files)
 ├── src/                # Renderer code
 │   ├── components/     # React components (17 files)
 │   ├── store/          # Zustand state management
@@ -146,6 +146,15 @@ npx vitest
 | `oauth.test.ts` | 11 | OAuth flow, state validation, token parsing |
 | `usage.test.ts` | 4 | Usage recording, 30-day retention, aggregation |
 | `integration.test.ts` | 17 | End-to-end user flows (providers, sync, validation) |
+| `clipboard.test.ts` | 16 | Clipboard auto-clear and timer management |
+| `audit.test.ts` | 4 | Credential access audit logging |
+| `audit-integration.test.ts` | 2 | Audit log UI integration |
+| `clipboard-integration.test.ts` | 3 | Clipboard integration with ProviderDetail |
+| `metadata.test.ts` | 6 | Release metadata parsing and validation |
+| `provider-card-coverage.test.ts` | 16 | ProviderCard component source analysis |
+| `settings-modal-coverage.test.ts` | 30 | SettingsModal component source analysis |
+| `app-coverage.test.ts` | 48 | App root component source analysis |
+| `onboarding-flow-coverage.test.ts` | 43 | OnboardingFlow component source analysis |
 
 ### Writing Tests
 
