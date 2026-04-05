@@ -2,10 +2,10 @@
 
 All notable changes to this project will be documented in this file.
 
-## [0.2.0.5] - 2026-04-05
+## [0.2.0.6] - 2026-04-05
 
 ### Changed
-- CI/CD now listens to release tag pushes so auto-tagged releases continue all the way through artifact build and GitHub Release publication
+- Release creation now happens in the same successful master push pipeline after auto-tagging, avoiding GitHub Actions recursion limits on workflow-triggered tag events
 
 ## [0.2.0.0] - 2026-04-03
 
