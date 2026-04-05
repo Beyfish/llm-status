@@ -79,7 +79,7 @@ llm-status/
 ├── electron/           # Main process code
 │   ├── main.ts         # Entry point
 │   ├── preload.ts      # IPC bridge
-│   └── ipc/            # IPC handler modules (12 files)
+│   └── ipc/            # IPC handler modules (13 files)
 ├── src/                # Renderer code
 │   ├── components/     # React components (17 files)
 │   ├── store/          # Zustand state management

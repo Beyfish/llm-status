@@ -186,13 +186,13 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ onClose }) => {
                 <div className="settings-field">
                   <label>{t('settings.theme')}</label>
                   <div style={{ display: 'flex', gap: '8px' }}>
-                    {(['dark', 'light', 'system'] as const).map((t) => (
+                    {(['dark', 'light', 'system'] as const).map((themeOpt) => (
                       <button
-                        key={t}
-                        className={`btn ${theme === t ? 'btn--primary' : 'btn--ghost'}`}
-                        onClick={() => setTheme(t)}
+                        key={themeOpt}
+                        className={`btn ${theme === themeOpt ? 'btn--primary' : 'btn--ghost'}`}
+                        onClick={() => setTheme(themeOpt)}
                       >
-                        {t === 'dark' ? 'Dark' : t === 'light' ? 'Light' : 'System'}
+                        {themeOpt === 'dark' ? t('themeOptions.dark') : themeOpt === 'light' ? t('themeOptions.light') : t('themeOptions.system')}
                       </button>
                     ))}
                   </div>
@@ -259,14 +259,14 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ onClose }) => {
                       onClick={handleExportCredentials}
                       disabled={backupStatus === 'exporting' || backupStatus === 'importing'}
                     >
-                      {backupStatus === 'exporting' ? 'Exporting...' : 'Export Credentials'}
+                      {backupStatus === 'exporting' ? t('credentialBackup.exporting') : t('credentialBackup.export')}
                     </button>
                     <button
                       className="btn btn--ghost"
                       onClick={handleImportCredentials}
                       disabled={backupStatus === 'exporting' || backupStatus === 'importing'}
                     >
-                      {backupStatus === 'importing' ? 'Importing...' : 'Import Credentials'}
+                      {backupStatus === 'importing' ? t('credentialBackup.importing') : t('credentialBackup.import')}
                     </button>
                   </div>
 

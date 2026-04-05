@@ -11,7 +11,7 @@ const zhCN = {
     detail: { models: '可用模型', credentials: '凭证管理', modelName: '模型名称', price: '价格', capabilities: '能力', status: '状态', provider: '提供商' },
     modal: { latencyTitle: '延迟检测模式', lightweight: '轻量模式', lightweightDesc: '快速，不消耗配额', full: '完整模式', fullDesc: '准确反映真实体验', timeout: '超时时间（秒）', concurrency: '并发数', cancel: '取消', start: '开始检测', checking: '检测中...', done: '完成', close: '关闭' },
     settings: { title: '设置', general: '通用', detection: '检测', appearance: '外观', advanced: '高级', language: '语言', storageMode: '存储方式', encrypted: '加密存储', plaintext: '明文存储', defaultMode: '默认检测模式', autoCheck: '自动检测间隔', off: '关闭', minutes: '分钟', hour: '小时', theme: '主题', configPath: '配置文件路径' },
-    smartImport: { title: '智能导入', textPlaceholder: '粘贴配置文本，例如：\nURL: https://api.openai.com\nKey: sk-xxx...\nModel: gpt-4o', jsonPlaceholder: '粘贴 JSON 配置...', urlPlaceholder: '粘贴 API 端点 URL...', parse: '🔍 解析配置', result: '解析结果', providerType: '提供商', baseUrl: '端点', apiKey: 'API Key', confidence: '置信度', edit: '✏️ 编辑', name: '名称', confirm: '✅ 确认导入' },
+    smartImport: { title: '智能导入', textPlaceholder: '粘贴配置文本，例如：\nURL: https://api.openai.com\nKey: sk-xxx...\nModel: gpt-4o', jsonPlaceholder: '粘贴 JSON 配置...', urlPlaceholder: '粘贴 API 端点 URL...', parse: '🔍 解析配置', result: '解析结果', providerType: '提供商', baseUrl: '端点', apiKey: 'API Key', confidence: '置信度', edit: '✏️ 编辑', name: '名称', confirm: '✅ 确认导入', inputType: { text: '文本', json: 'JSON', url: 'URL' } },
     onboarding: {
       welcome: '欢迎使用 LLM Status',
       welcomeDesc: '在一个地方管理所有你的 LLM API。检测状态、管理凭证、跨设备同步。',
@@ -89,8 +89,8 @@ const zhCN = {
       desc: '使用密码加密导出或导入所有提供商凭证。',
       passphrase: '密码（至少 8 个字符）',
       passphrasePlaceholder: '输入强密码',
-      export: '📤 导出凭证',
-      import: '📥 导入凭证',
+      export: '导出凭证',
+      import: '导入凭证',
       exporting: '导出中...',
       importing: '导入中...',
     },
@@ -113,8 +113,8 @@ const zhCN = {
       expiresAt: '过期日期（可选）',
     },
     clipboard: {
-      autoClear: '✅ {{seconds}}s后清除',
-      copyCurl: '📋 Copy curl',
+      autoClear: '{{seconds}}s后清除',
+      copyCurl: '复制 curl',
     },
     audit: {
       title: '审计日志',
@@ -134,6 +134,16 @@ const zhCN = {
       screenProtection: '屏幕录制保护',
       screenProtectionDesc: '防止凭证被屏幕录制或截图捕获（仅限 macOS）',
     },
+    themeOptions: {
+      dark: '暗色',
+      light: '亮色',
+      system: '跟随系统',
+    },
+    providerDetail: {
+      expired: '已过期',
+      daysLeft: '{{count}}天剩余',
+      waitingForResponse: '等待响应中...',
+    },
   },
 };
 
@@ -147,7 +157,7 @@ const enUS = {
     detail: { models: 'Available Models', credentials: 'Credentials', modelName: 'Model', price: 'Price', capabilities: 'Capabilities', status: 'Status', provider: 'Provider' },
     modal: { latencyTitle: 'Latency Check Mode', lightweight: 'Lightweight', lightweightDesc: 'Fast, no quota usage', full: 'Full', fullDesc: 'Accurate real-world experience', timeout: 'Timeout (seconds)', concurrency: 'Concurrency', cancel: 'Cancel', start: 'Start Check', checking: 'Checking...', done: 'Done', close: 'Close' },
     settings: { title: 'Settings', general: 'General', detection: 'Detection', appearance: 'Appearance', advanced: 'Advanced', language: 'Language', storageMode: 'Storage Mode', encrypted: 'Encrypted', plaintext: 'Plaintext', defaultMode: 'Default Mode', autoCheck: 'Auto-check Interval', off: 'Off', minutes: 'min', hour: 'hour', theme: 'Theme', configPath: 'Config Path' },
-    smartImport: { title: 'Smart Import', textPlaceholder: 'Paste config text, e.g.:\nURL: https://api.openai.com\nKey: sk-xxx...\nModel: gpt-4o', jsonPlaceholder: 'Paste JSON config...', urlPlaceholder: 'Paste API endpoint URL...', parse: '🔍 Parse Config', result: 'Parsed Result', providerType: 'Provider', baseUrl: 'Endpoint', apiKey: 'API Key', confidence: 'Confidence', edit: '✏️ Edit', name: 'Name', confirm: '✅ Confirm Import' },
+    smartImport: { title: 'Smart Import', textPlaceholder: 'Paste config text, e.g.:\nURL: https://api.openai.com\nKey: sk-xxx...\nModel: gpt-4o', jsonPlaceholder: 'Paste JSON config...', urlPlaceholder: 'Paste API endpoint URL...', parse: '🔍 Parse Config', result: 'Parsed Result', providerType: 'Provider', baseUrl: 'Endpoint', apiKey: 'API Key', confidence: 'Confidence', edit: '✏️ Edit', name: 'Name', confirm: '✅ Confirm Import', inputType: { text: 'Text', json: 'JSON', url: 'URL' } },
     onboarding: {
       welcome: 'Welcome to LLM Status',
       welcomeDesc: 'Manage all your LLM APIs in one place. Check status, manage credentials, sync across devices.',
@@ -225,8 +235,8 @@ const enUS = {
       desc: 'Export or import all provider credentials with passphrase-based encryption.',
       passphrase: 'Passphrase (min 8 characters)',
       passphrasePlaceholder: 'Enter a strong passphrase',
-      export: '📤 Export Credentials',
-      import: '📥 Import Credentials',
+      export: 'Export Credentials',
+      import: 'Import Credentials',
       exporting: 'Exporting...',
       importing: 'Importing...',
     },
@@ -249,8 +259,8 @@ const enUS = {
       expiresAt: 'Expiry date (optional)',
     },
     clipboard: {
-      autoClear: '✅ Clears in {{seconds}}s',
-      copyCurl: '📋 Copy curl',
+      autoClear: 'Clears in {{seconds}}s',
+      copyCurl: 'Copy curl',
     },
     audit: {
       title: 'Audit Log',
@@ -269,6 +279,16 @@ const enUS = {
     security: {
       screenProtection: 'Screen Recording Protection',
       screenProtectionDesc: 'Prevents credentials from being captured by screen recording or screenshots (macOS only)',
+    },
+    themeOptions: {
+      dark: 'Dark',
+      light: 'Light',
+      system: 'System',
+    },
+    providerDetail: {
+      expired: 'Expired',
+      daysLeft: '{{count}}d left',
+      waitingForResponse: 'Waiting for response...',
     },
   },
 };

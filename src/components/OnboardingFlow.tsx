@@ -8,18 +8,18 @@ interface OnboardingFlowProps {
   onSkip: () => void;
 }
 
-const PROVIDER_OPTIONS: Array<{ type: ProviderType; name: string; icon: string; defaultBaseUrl: string }> = [
-  { type: 'openai', name: 'OpenAI', icon: '', defaultBaseUrl: 'https://api.openai.com' },
-  { type: 'anthropic', name: 'Anthropic', icon: '', defaultBaseUrl: 'https://api.anthropic.com' },
-  { type: 'google', name: 'Google', icon: '', defaultBaseUrl: 'https://us-central1-aiplatform.googleapis.com' },
-  { type: 'azure-openai', name: 'Azure OpenAI', icon: '', defaultBaseUrl: '' },
-  { type: 'zhipu', name: '智谱 AI', icon: '', defaultBaseUrl: 'https://open.bigmodel.cn/api/paas/v4' },
-  { type: 'dashscope', name: '通义千问', icon: '', defaultBaseUrl: 'https://dashscope.aliyuncs.com/compatible-mode/v1' },
-  { type: 'qianfan', name: '百度文心', icon: '', defaultBaseUrl: 'https://aip.baidubce.com' },
-  { type: 'ollama', name: 'Ollama', icon: '', defaultBaseUrl: 'http://localhost:11434' },
-  { type: 'vllm', name: 'vLLM', icon: '', defaultBaseUrl: '' },
-  { type: 'localai', name: 'LocalAI', icon: '', defaultBaseUrl: '' },
-  { type: 'custom', name: 'Custom', icon: '', defaultBaseUrl: '' },
+const PROVIDER_OPTIONS: Array<{ type: ProviderType; name: string; defaultBaseUrl: string }> = [
+  { type: 'openai', name: 'OpenAI', defaultBaseUrl: 'https://api.openai.com' },
+  { type: 'anthropic', name: 'Anthropic', defaultBaseUrl: 'https://api.anthropic.com' },
+  { type: 'google', name: 'Google', defaultBaseUrl: 'https://us-central1-aiplatform.googleapis.com' },
+  { type: 'azure-openai', name: 'Azure OpenAI', defaultBaseUrl: '' },
+  { type: 'zhipu', name: '智谱 AI', defaultBaseUrl: 'https://open.bigmodel.cn/api/paas/v4' },
+  { type: 'dashscope', name: '通义千问', defaultBaseUrl: 'https://dashscope.aliyuncs.com/compatible-mode/v1' },
+  { type: 'qianfan', name: '百度文心', defaultBaseUrl: 'https://aip.baidubce.com' },
+  { type: 'ollama', name: 'Ollama', defaultBaseUrl: 'http://localhost:11434' },
+  { type: 'vllm', name: 'vLLM', defaultBaseUrl: '' },
+  { type: 'localai', name: 'LocalAI', defaultBaseUrl: '' },
+  { type: 'custom', name: 'Custom', defaultBaseUrl: '' },
 ];
 
 const CREDENTIAL_TYPES: Array<{ type: CredentialType; name: string; desc: string }> = [
@@ -146,7 +146,6 @@ export const OnboardingFlow: React.FC<OnboardingFlowProps> = ({ onComplete, onSk
             className={`onboarding__card ${selectedType === p.type ? 'onboarding__card--selected' : ''}`}
             onClick={() => handleSelectProvider(p.type)}
           >
-            <span className="onboarding__card-icon">{p.icon}</span>
             <span className="onboarding__card-name">{p.name}</span>
           </button>
         ))}

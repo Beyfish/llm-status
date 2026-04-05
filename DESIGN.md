@@ -5,8 +5,7 @@ Updated: 2026-04-05
 
 ## Design System: Claude (Anthropic) Adaptation
 
-This design system is adapted from the Claude (Anthropic) design template located at
-`C:\Users\Beyfish Wang\.design-md\awesome-design-md\design-md\claude\DESIGN.md`.
+This design system is adapted from the Claude (Anthropic) design template.
 
 The original Claude design is a warm parchment editorial aesthetic. It has been adapted
 for a desktop tool application — the serif typography and warm tones are preserved, but

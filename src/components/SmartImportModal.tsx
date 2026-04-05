@@ -230,7 +230,7 @@ export const SmartImportModal: React.FC<SmartImportModalProps> = ({ onClose, onI
                 className={`btn ${inputType === type ? 'btn--primary' : 'btn--ghost'}`}
                 onClick={() => setInputType(type)}
               >
-                {type === 'text' ? 'Text' : type === 'json' ? 'JSON' : 'URL'}
+                {type === 'text' ? t('smartImport.inputType.text') : type === 'json' ? t('smartImport.inputType.json') : t('smartImport.inputType.url')}
               </button>
             ))}
           </div>

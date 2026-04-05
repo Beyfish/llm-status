@@ -118,37 +118,37 @@ export const SyncModal: React.FC<SyncModalProps> = ({ onClose }) => {
           )}
           {syncStatus === 'syncing' && (
             <div style={{ padding: '12px', borderRadius: 'var(--radius-btn)', background: 'color-mix(in srgb, var(--accent) 10%, transparent)', color: 'var(--accent)', fontSize: '13px', marginBottom: '12px' }}>
-              Syncing...
+              {t('sync.syncing')}
             </div>
           )}
           {syncStatus === 'conflict' && syncConflict && (
             <div style={{ padding: '16px', borderRadius: 'var(--radius-btn)', background: 'color-mix(in srgb, var(--yellow) 10%, transparent)', border: '1px solid var(--yellow)', marginBottom: '12px' }}>
               <div style={{ fontSize: '14px', fontWeight: 600, color: 'var(--yellow)', marginBottom: '8px' }}>
-                Sync Conflict Detected
+                {t('sync.conflict')}
               </div>
               <div style={{ fontSize: '12px', color: 'var(--text-secondary)', marginBottom: '12px' }}>
-                Your local version differs from the cloud version. Choose which version to keep:
+                {t('sync.conflictDesc')}
               </div>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '12px' }}>
                 <div style={{ padding: '12px', borderRadius: 'var(--radius-btn)', background: 'var(--bg-elevated)' }}>
-                  <div style={{ fontSize: '13px', fontWeight: 600 }}>Local Version</div>
+                  <div style={{ fontSize: '13px', fontWeight: 600 }}>{t('sync.localVersion')}</div>
                   <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>
                     Version: {syncConflict.localVersion || 'unknown'}
                   </div>
                   {syncConflict.localModifiedAt && (
                     <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>
-                      Modified: {new Date(syncConflict.localModifiedAt).toLocaleString()}
+                      {t('sync.modified')}: {new Date(syncConflict.localModifiedAt).toLocaleString()}
                     </div>
                   )}
                 </div>
                 <div style={{ padding: '12px', borderRadius: 'var(--radius-btn)', background: 'var(--bg-elevated)' }}>
-                  <div style={{ fontSize: '13px', fontWeight: 600 }}>Cloud Version</div>
+                  <div style={{ fontSize: '13px', fontWeight: 600 }}>{t('sync.cloudVersion')}</div>
                   <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>
                     Version: {syncConflict.remoteVersion || 'unknown'}
                   </div>
                   {syncConflict.remoteModifiedAt && (
                     <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>
-                      Modified: {new Date(syncConflict.remoteModifiedAt).toLocaleString()}
+                      {t('sync.modified')}: {new Date(syncConflict.remoteModifiedAt).toLocaleString()}
                     </div>
                   )}
                 </div>
@@ -159,14 +159,14 @@ export const SyncModal: React.FC<SyncModalProps> = ({ onClose }) => {
                   onClick={() => resolveSyncConflict('local')}
                   style={{ flex: 1 }}
                 >
-                  ↑ Keep Local (Upload)
+                  {t('sync.keepLocal')}
                 </button>
                 <button
                   className="btn btn--ghost"
                   onClick={() => resolveSyncConflict('remote')}
                   style={{ flex: 1 }}
                 >
-                  ↓ Keep Cloud (Download)
+                  {t('sync.keepCloud')}
                 </button>
               </div>
             </div>

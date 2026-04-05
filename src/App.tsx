@@ -201,19 +201,19 @@ const App: React.FC = () => {
             {i18n.language === 'zh-CN' ? 'EN' : '中文'}
           </button>
           <button className="app-header__btn" onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')} title={t('header.theme')}>
-            {theme === 'dark' ? 'Light' : 'Dark'}
+            {theme === 'dark' ? t('themeOptions.light') : t('themeOptions.dark')}
           </button>
           <button className="app-header__btn" onClick={() => setShowLatencyModal(true)} title={t('header.checkAll')}>
-            Check All
+            {t('header.checkAll')}
           </button>
           <button className="app-header__btn" onClick={() => setShowExportModal(true)} title={t('header.export')}>
-            Export
+            {t('header.export')}
           </button>
           <button className="app-header__btn" onClick={() => setShowSyncModal(true)} title={t('header.sync')}>
-            Sync
+            {t('header.sync')}
           </button>
           <button className="app-header__btn" onClick={() => setShowSettingsModal(true)} title={t('header.settings')}>
-            Settings
+            {t('header.settings')}
           </button>
         </div>
       </header>
