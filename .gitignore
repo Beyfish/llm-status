@@ -7,3 +7,9 @@ dist-electron/
 .env
 .env.local
 .worktrees/
+.gstack/
+.opencode/
+.sisyphus/
+docs/
+llm-status/
+
