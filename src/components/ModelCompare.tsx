@@ -49,7 +49,7 @@ export const ModelCompare: React.FC<ModelCompareProps> = ({ providers: _provider
     <div className="modal-overlay" onClick={onClose} role="dialog" aria-modal="true">
       <div className="modal modal--large" onClick={(e) => e.stopPropagation()}>
         <div className="modal__header">
-          <h2>⚖️ {t('compare.title')}</h2>
+          <h2>{t('compare.title')}</h2>
           <button className="modal__close" onClick={onClose} aria-label="Close">✕</button>
         </div>
         <div className="modal__body">

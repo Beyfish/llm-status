@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 
 interface ThemeToggleProps {
   currentTheme: 'light' | 'dark' | 'system';
@@ -6,10 +7,11 @@ interface ThemeToggleProps {
 }
 
 export const ThemeToggle: React.FC<ThemeToggleProps> = ({ currentTheme, onChange }) => {
+  const { t } = useTranslation();
   const themes = [
-    { id: 'light' as const, icon: '☀️' },
-    { id: 'dark' as const, icon: '🌙' },
-    { id: 'system' as const, icon: '💻' },
+    { id: 'light' as const, label: t('themeOptions.light') },
+    { id: 'dark' as const, label: t('themeOptions.dark') },
+    { id: 'system' as const, label: t('themeOptions.system') },
   ];
 
   return (
@@ -22,7 +24,7 @@ export const ThemeToggle: React.FC<ThemeToggleProps> = ({ currentTheme, onChange
           title={`${t.id} theme`}
           style={{ padding: '0 8px', minWidth: '32px' }}
         >
-          {t.icon}
+          {t.label}
         </button>
       ))}
     </div>

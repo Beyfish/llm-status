@@ -1,7 +1,68 @@
 # LLM Status Design System
 
 Status: Active
-Updated: 2026-04-03
+Updated: 2026-04-05
+
+## Design System: Claude (Anthropic) Adaptation
+
+This design system is adapted from the Claude (Anthropic) design template.
+
+The original Claude design is a warm parchment editorial aesthetic. It has been adapted
+for a desktop tool application — the serif typography and warm tones are preserved, but
+the layout remains a sidebar-detail control room, not a marketing page.
+
+### Color Palette (Claude Warm Tones)
+
+| Token | Dark Value | Light Value | Role |
+|-------|-----------|-------------|------|
+| `--bg-primary` | `#141413` (Near Black) | `#f5f4ed` (Parchment) | Page background |
+| `--bg-surface` | `#30302e` (Dark Surface) | `#faf9f5` (Ivory) | Card/panel surfaces |
+| `--bg-elevated` | `#3d3d3a` (Charcoal Warm) | `#e8e6dc` (Warm Sand) | Elevated surfaces |
+| `--border-color` | `rgba(209,207,197,0.12)` | `#f0eee6` (Border Cream) | Borders, dividers |
+| `--text-primary` | `rgba(250,249,245,0.95)` | `#141413` (Near Black) | Primary text |
+| `--text-secondary` | `rgba(176,174,165,0.85)` | `#5e5d59` (Olive Gray) | Secondary text |
+| `--text-muted` | `rgba(135,134,127,0.7)` | `#87867f` (Stone Gray) | Muted metadata |
+| `--accent` | `#c96442` (Terracotta) | `#c96442` (Terracotta) | Focus, primary action |
+| `--green` | `#22C55E` | `#16A34A` | Success (operational) |
+| `--yellow` | `#d4a017` (warm) | `#b8860b` (warm) | Warning (operational) |
+| `--red` | `#b53333` (warm crimson) | `#b53333` (warm crimson) | Error (operational) |
+| `--focus-blue` | `#3898ec` | `#3898ec` | Input focus ring only |
+
+### Typography
+
+- **App title**: Georgia, serif — 18px, weight 500 (Claude Serif substitute)
+- **Section headings**: Georgia, serif — 15px, weight 500
+- **Provider detail name**: Georgia, serif — 20px, weight 500
+- **Body / UI**: system font stack (unchanged — this is a tool, not a marketing page)
+- **Code / credentials**: JetBrains Mono / Fira Code / Cascadia Code
+
+### Shadow System (Claude Ring Shadows)
+
+- Cards: `0px 0px 0px 1px var(--border-color)` — ring shadow instead of drop shadow
+- Hover: ring shadow + soft lift `rgba(0,0,0,0.05) 0px 4px 24px`
+- Modals: ring shadow + `rgba(0,0,0,0.15) 0px 8px 32px`
+
+### Geometry
+
+- Buttons / badges: `10px` radius (was 8px)
+- Cards: `14px` radius (was 12px)
+- Modals: `18px` radius (was 16px)
+- Inputs: `10px` radius (was 8px)
+
+### Design Decisions
+
+1. **Serif only for titles** — Georgia serif is used for app title, section headings,
+   and provider detail names. All functional UI text (buttons, labels, inputs, tables)
+   remains sans-serif for readability and efficiency.
+2. **Terracotta accent only for primary actions** — `#c96442` is the brand color but
+   is restricted to primary buttons, focus states, and active indicators. Operational
+   colors (green/yellow/red) remain for status.
+3. **All emojis removed** — Replaced with text labels and simple Unicode characters
+   (✓, ✕, ~, ?, ⚠). The app is a professional tool, not a consumer app.
+4. **Warm dark mode** — `#141413` replaces `#0F0F0F`. The olive undertone is gentler
+   on the eyes during extended use.
+5. **Sidebar-detail architecture preserved** — This is the core interaction pattern
+   and is confirmed correct by the existing DESIGN.md.
 
 ## Product Character
 
@@ -91,6 +152,12 @@ Base UI font stack:
 - `'Segoe UI'`
 - `sans-serif`
 
+Serif headings (Georgia — Claude Serif substitute):
+- App title: `18px`, weight `500`
+- Section headings: `15px`, weight `500`
+- Provider detail name: `20px`, weight `500`
+- Empty state titles: `24px`, weight `500`
+
 Code / credential / latency numeric text:
 - `'JetBrains Mono'`
 - `'Fira Code'`
@@ -99,8 +166,9 @@ Code / credential / latency numeric text:
 
 ### Type scale
 
-- App title / primary panel title: `24px`, weight `600`
-- Section title: `14px`, weight `600`, uppercase allowed only for dense metadata sections
+- App title: `18px`, Georgia serif, weight `500`
+- Section title: `15px`, Georgia serif, weight `500`
+- Provider detail name: `20px`, Georgia serif, weight `500`
 - Body text: `13px` to `14px`
 - Secondary/meta text: `12px`
 - Key numeric metric (latency): `20px` to `24px`, mono, weight `700`
@@ -148,9 +216,9 @@ Use the spacing scale from `tokens.css`:
 - `--space-7` = 48px
 
 Radius rules:
-- Inputs / buttons: `8px`
-- Cards: `12px`
-- Modals: `16px`
+- Inputs / buttons: `10px`
+- Cards: `14px`
+- Modals: `18px`
 
 Do not increase radius globally just to make the UI feel "modern." Calm geometry wins.
 

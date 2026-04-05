@@ -25,11 +25,11 @@ export const CommandPalette: React.FC = () => {
   if (!commandPaletteOpen) return null;
 
   const commands = [
-    { icon: '⚡', label: t('header.checkAll'), action: () => { checkAll('full', 5, 10); toggleCommandPalette(); } },
-    { icon: '☁️', label: t('header.sync'), action: () => { setShowSyncModal(true); toggleCommandPalette(); } },
-    { icon: '📤', label: t('header.export'), action: () => { setShowExportModal(true); toggleCommandPalette(); } },
-    { icon: '🌙', label: t('header.theme'), action: () => { setTheme(theme === 'dark' ? 'light' : 'dark'); toggleCommandPalette(); } },
-    { icon: '⚙️', label: t('header.settings'), action: () => { setShowSettingsModal(true); toggleCommandPalette(); } },
+    { label: t('header.checkAll'), action: () => { checkAll('full', 5, 10); toggleCommandPalette(); } },
+    { label: t('header.sync'), action: () => { setShowSyncModal(true); toggleCommandPalette(); } },
+    { label: t('header.export'), action: () => { setShowExportModal(true); toggleCommandPalette(); } },
+    { label: t('header.theme'), action: () => { setTheme(theme === 'dark' ? 'light' : 'dark'); toggleCommandPalette(); } },
+    { label: t('header.settings'), action: () => { setShowSettingsModal(true); toggleCommandPalette(); } },
   ];
 
   return (
@@ -47,7 +47,6 @@ export const CommandPalette: React.FC = () => {
             onClick={cmd.action}
             type="button"
           >
-            <span>{cmd.icon}</span>
             <span>{cmd.label}</span>
           </button>
         ))}

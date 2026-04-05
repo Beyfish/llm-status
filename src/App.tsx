@@ -185,7 +185,7 @@ const App: React.FC = () => {
     <div className={`app app--${theme === 'system' ? (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light') : theme}`}>
       <header className="app-header">
         <div className="app-header__left">
-          <span className="app-header__logo">⚡ LLM Status</span>
+          <span className="app-header__logo">LLM Status</span>
         </div>
         <div className="app-header__center">
           <input
@@ -198,22 +198,22 @@ const App: React.FC = () => {
         </div>
         <div className="app-header__right">
           <button className="app-header__btn" onClick={() => i18n.changeLanguage(i18n.language === 'zh-CN' ? 'en-US' : 'zh-CN')} title={t('header.language')}>
-            🌐 {i18n.language === 'zh-CN' ? 'EN' : '中文'}
+            {i18n.language === 'zh-CN' ? 'EN' : '中文'}
           </button>
           <button className="app-header__btn" onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')} title={t('header.theme')}>
-            {theme === 'dark' ? '🌙' : '☀️'}
+            {theme === 'dark' ? t('themeOptions.light') : t('themeOptions.dark')}
           </button>
           <button className="app-header__btn" onClick={() => setShowLatencyModal(true)} title={t('header.checkAll')}>
-            ⚡
+            {t('header.checkAll')}
           </button>
           <button className="app-header__btn" onClick={() => setShowExportModal(true)} title={t('header.export')}>
-            📤
+            {t('header.export')}
           </button>
           <button className="app-header__btn" onClick={() => setShowSyncModal(true)} title={t('header.sync')}>
-            ☁️
+            {t('header.sync')}
           </button>
           <button className="app-header__btn" onClick={() => setShowSettingsModal(true)} title={t('header.settings')}>
-            ⚙️
+            {t('header.settings')}
           </button>
         </div>
       </header>
@@ -265,7 +265,6 @@ const App: React.FC = () => {
         <section className="app-content">
           {!hasProviders && (
             <div className="app-empty-state" role="status" aria-live="polite">
-              <div className="app-empty-state__icon">⚡</div>
               <h2 className="app-empty-state__title">{t('onboarding.welcomeTitle', 'Add your first provider')}</h2>
               <p className="app-empty-state__desc">
                 {t('onboarding.welcomeDesc', 'Paste an API key, verify it instantly, and keep your provider health in one place.')}
@@ -285,7 +284,6 @@ const App: React.FC = () => {
 
           {hasProviders && !selectedProvider && (
             <div className="app-empty-state app-empty-state--panel" role="status" aria-live="polite">
-              <div className="app-empty-state__icon">👈</div>
               <h2 className="app-empty-state__title">Select a provider</h2>
               <p className="app-empty-state__desc">
                 Pick a provider from the sidebar to inspect credentials, run checks, and diagnose latency.

@@ -7,17 +7,17 @@ interface ExportModalProps {
 }
 
 const TARGETS = [
-  { id: 'one-api', name: 'One API', icon: '🔗', pushMode: true },
-  { id: 'new-api', name: 'New API', icon: '🔗', pushMode: true },
-  { id: 'sub2api', name: 'sub2api', icon: '🔗', pushMode: true },
-  { id: 'litellm', name: 'LiteLLM', icon: '🔗', pushMode: true },
-  { id: 'openrouter', name: 'OpenRouter', icon: '🌐', pushMode: true },
-  { id: 'cherry-studio', name: 'Cherry Studio', icon: '🍒', pushMode: false },
-  { id: 'lobechat', name: 'LobeChat', icon: '💬', pushMode: false },
-  { id: 'chatgpt-next-web', name: 'ChatGPT Next Web', icon: '🤖', pushMode: false },
-  { id: 'dify', name: 'Dify', icon: '🧩', pushMode: false },
-  { id: 'anythingllm', name: 'AnythingLLM', icon: '🗂️', pushMode: false },
-  { id: 'json', name: 'Generic JSON', icon: '📄', pushMode: false },
+  { id: 'one-api', name: 'One API', icon: '', pushMode: true },
+  { id: 'new-api', name: 'New API', icon: '', pushMode: true },
+  { id: 'sub2api', name: 'sub2api', icon: '', pushMode: true },
+  { id: 'litellm', name: 'LiteLLM', icon: '', pushMode: true },
+  { id: 'openrouter', name: 'OpenRouter', icon: '', pushMode: true },
+  { id: 'cherry-studio', name: 'Cherry Studio', icon: '', pushMode: false },
+  { id: 'lobechat', name: 'LobeChat', icon: '', pushMode: false },
+  { id: 'chatgpt-next-web', name: 'ChatGPT Next Web', icon: '', pushMode: false },
+  { id: 'dify', name: 'Dify', icon: '', pushMode: false },
+  { id: 'anythingllm', name: 'AnythingLLM', icon: '', pushMode: false },
+  { id: 'json', name: 'Generic JSON', icon: '', pushMode: false },
 ];
 
 export const ExportModal: React.FC<ExportModalProps> = ({ onClose }) => {
@@ -93,7 +93,7 @@ export const ExportModal: React.FC<ExportModalProps> = ({ onClose }) => {
     <div className="modal-overlay" onClick={onClose} role="dialog" aria-modal="true">
       <div className="modal modal--large" onClick={(e) => e.stopPropagation()}>
         <div className="modal__header">
-          <h2>📤 {t('export.title', 'Export Configuration')}</h2>
+          <h2>{t('export.title', 'Export Configuration')}</h2>
           <button className="modal__close" onClick={onClose} aria-label="Close">✕</button>
         </div>
         <div className="modal__body">
@@ -106,8 +106,7 @@ export const ExportModal: React.FC<ExportModalProps> = ({ onClose }) => {
                 onClick={() => setSelectedTarget(tg.id)}
                 style={{ flexDirection: 'column', gap: '4px', padding: '12px' }}
               >
-                <span style={{ fontSize: '20px' }}>{tg.icon}</span>
-                <span style={{ fontSize: '12px' }}>{tg.name}</span>
+                <span style={{ fontSize: '12px', fontWeight: 500 }}>{tg.name}</span>
                 <span style={{ fontSize: '10px', color: 'var(--text-muted)' }}>
                   {tg.pushMode ? 'API Push' : 'File Export'}
                 </span>
@@ -125,13 +124,13 @@ export const ExportModal: React.FC<ExportModalProps> = ({ onClose }) => {
 
           {/* Status */}
           {error && (
-            <div style={{ padding: '12px', borderRadius: '8px', background: 'rgba(239, 68, 68, 0.1)', color: 'var(--red)', fontSize: '13px', marginBottom: '12px' }}>
-              ❌ {error}
+            <div style={{ padding: '12px', borderRadius: 'var(--radius-btn)', background: 'color-mix(in srgb, var(--red) 10%, transparent)', color: 'var(--red)', fontSize: '13px', marginBottom: '12px' }}>
+              {error}
             </div>
           )}
           {success && (
-            <div style={{ padding: '12px', borderRadius: '8px', background: 'rgba(34, 197, 94, 0.1)', color: 'var(--green)', fontSize: '13px', marginBottom: '12px' }}>
-              ✅ {success}
+            <div style={{ padding: '12px', borderRadius: 'var(--radius-btn)', background: 'color-mix(in srgb, var(--green) 10%, transparent)', color: 'var(--green)', fontSize: '13px', marginBottom: '12px' }}>
+              {success}
             </div>
           )}
         </div>

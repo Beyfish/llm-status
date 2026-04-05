@@ -84,7 +84,7 @@ const LOGOS: Record<string, React.FC<{ size: number }>> = {
   custom: ({ size }) => (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
       <rect width={size} height={size} rx={size * 0.15} fill="#71717A"/>
-      <text x="50%" y="58%" dominantBaseline="middle" textAnchor="middle" fill="#fff" fontSize={size * 0.35} fontWeight="700">⚙️</text>
+      <text x="50%" y="58%" dominantBaseline="middle" textAnchor="middle" fill="#fff" fontSize={size * 0.25} fontWeight="700">⚙</text>
     </svg>
   ),
 };

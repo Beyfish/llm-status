@@ -18,7 +18,7 @@ interface Step {
 const PLATFORM_GUIDES: Record<string, { name: string; icon: string; steps: Step[] }> = {
   openrouter: {
     name: 'OpenRouter',
-    icon: '🌐',
+    icon: '',
     steps: [
       {
         title: 'Step 1: Open OpenRouter',
@@ -45,7 +45,7 @@ const PLATFORM_GUIDES: Record<string, { name: string; icon: string; steps: Step[
   },
   siliconflow: {
     name: '硅基流动 (SiliconFlow)',
-    icon: '🔬',
+    icon: '',
     steps: [
       {
         title: '第一步：打开硅基流动官网',
@@ -72,7 +72,7 @@ const PLATFORM_GUIDES: Record<string, { name: string; icon: string; steps: Step[
   },
   alibaba: {
     name: '阿里云百炼 (Alibaba Bailian)',
-    icon: '☁️',
+    icon: '',
     steps: [
       {
         title: '第一步：打开阿里云百炼控制台',
@@ -99,7 +99,7 @@ const PLATFORM_GUIDES: Record<string, { name: string; icon: string; steps: Step[
   },
   zhipu: {
     name: '智谱 AI (Zhipu)',
-    icon: '🧠',
+    icon: '',
     steps: [
       {
         title: '第一步：打开智谱 AI 开放平台',
@@ -163,7 +163,7 @@ export const SetupGuideModal: React.FC<SetupGuideModalProps> = ({ platform, onCl
     <div className="modal-overlay" onClick={onClose} role="dialog" aria-modal="true">
       <div className="modal modal--large" onClick={(e) => e.stopPropagation()}>
         <div className="modal__header">
-          <h2>{guide.icon} {guide.name} {t('setupGuide.title', 'Setup Guide')}</h2>
+          <h2>{guide.name} {t('setupGuide.title', 'Setup Guide')}</h2>
           <button className="modal__close" onClick={onClose} aria-label="Close">✕</button>
         </div>
         <div className="modal__body">
@@ -197,7 +197,7 @@ export const SetupGuideModal: React.FC<SetupGuideModalProps> = ({ platform, onCl
                 className="btn btn--ghost"
                 style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', marginBottom: '16px', textDecoration: 'none' }}
               >
-                🔗 {step.link.text}
+                {step.link.text}
               </a>
             )}
 
@@ -218,8 +218,8 @@ export const SetupGuideModal: React.FC<SetupGuideModalProps> = ({ platform, onCl
             )}
 
             {step.action === 'confirm' && (
-              <div style={{ padding: '16px', borderRadius: '8px', background: 'rgba(34, 197, 94, 0.1)', color: 'var(--green)', fontSize: '14px', textAlign: 'center' }}>
-                ✅ {t('setupGuide.ready', 'Ready to connect!')}
+              <div style={{ padding: '16px', borderRadius: 'var(--radius-btn)', background: 'color-mix(in srgb, var(--green) 10%, transparent)', color: 'var(--green)', fontSize: '14px', textAlign: 'center' }}>
+                {t('setupGuide.ready', 'Ready to connect!')}
               </div>
             )}
           </div>

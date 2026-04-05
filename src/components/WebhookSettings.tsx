@@ -8,12 +8,12 @@ interface WebhookSettingsProps {
 
 type PlatformType = 'dingtalk' | 'wecom' | 'feishu' | 'slack' | 'discord';
 
-const PLATFORMS: Array<{ id: PlatformType; name: string; icon: string; needsSecret: boolean; secretLabel: string; guideUrl: string }> = [
-  { id: 'dingtalk', name: '钉钉 (DingTalk)', icon: '🔔', needsSecret: true, secretLabel: '加签密钥', guideUrl: 'https://open.dingtalk.com/document/orgapp/custom-robots-send-group-messages' },
-  { id: 'wecom', name: '企业微信 (WeCom)', icon: '💼', needsSecret: false, secretLabel: '', guideUrl: 'https://developer.work.weixin.qq.com/document/path/91770' },
-  { id: 'feishu', name: '飞书 (Feishu)', icon: '✈️', needsSecret: false, secretLabel: '', guideUrl: 'https://open.feishu.cn/document/client-docs/bot-v3/add-custom-bot' },
-  { id: 'slack', name: 'Slack', icon: '💬', needsSecret: false, secretLabel: '', guideUrl: 'https://api.slack.com/messaging/webhooks' },
-  { id: 'discord', name: 'Discord', icon: '🎮', needsSecret: false, secretLabel: '', guideUrl: 'https://support.discord.com/hc/en-us/articles/228383668-Intro-to-Webhooks' },
+const PLATFORMS: Array<{ id: PlatformType; name: string; needsSecret: boolean; secretLabel: string; guideUrl: string }> = [
+  { id: 'dingtalk', name: '钉钉 (DingTalk)', needsSecret: true, secretLabel: '加签密钥', guideUrl: 'https://open.dingtalk.com/document/orgapp/custom-robots-send-group-messages' },
+  { id: 'wecom', name: '企业微信 (WeCom)', needsSecret: false, secretLabel: '', guideUrl: 'https://developer.work.weixin.qq.com/document/path/91770' },
+  { id: 'feishu', name: '飞书 (Feishu)', needsSecret: false, secretLabel: '', guideUrl: 'https://open.feishu.cn/document/client-docs/bot-v3/add-custom-bot' },
+  { id: 'slack', name: 'Slack', needsSecret: false, secretLabel: '', guideUrl: 'https://api.slack.com/messaging/webhooks' },
+  { id: 'discord', name: 'Discord', needsSecret: false, secretLabel: '', guideUrl: 'https://support.discord.com/hc/en-us/articles/228383668-Intro-to-Webhooks' },
 ];
 
 interface WebhookEntry {
@@ -57,7 +57,7 @@ export const WebhookSettings: React.FC<WebhookSettingsProps> = ({ onClose, onSav
     <div className="modal-overlay" onClick={onClose} role="dialog" aria-modal="true">
       <div className="modal modal--large" onClick={(e) => e.stopPropagation()}>
         <div className="modal__header">
-          <h2>🔔 {t('webhook.title', 'Webhook Alerts')}</h2>
+          <h2>{t('webhook.title', 'Webhook Alerts')}</h2>
           <button className="modal__close" onClick={onClose} aria-label="Close">✕</button>
         </div>
         <div className="modal__body">
@@ -72,8 +72,7 @@ export const WebhookSettings: React.FC<WebhookSettingsProps> = ({ onClose, onSav
                 return (
                   <div key={i} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '8px 12px', background: 'var(--bg-elevated)', borderRadius: '8px', marginBottom: '4px' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                      <span>{p?.icon}</span>
-                      <span style={{ fontSize: '13px' }}>{p?.name}</span>
+                      <span style={{ fontSize: '13px', fontWeight: 500 }}>{p?.name}</span>
                       <span style={{ fontSize: '11px', color: 'var(--text-muted)', fontFamily: 'monospace' }}>
                         {w.url.substring(0, 40)}...
                       </span>
@@ -102,7 +101,7 @@ export const WebhookSettings: React.FC<WebhookSettingsProps> = ({ onClose, onSav
                   onClick={() => setSelectedPlatform(p.id)}
                   style={{ fontSize: '12px', padding: '0 10px' }}
                 >
-                  {p.icon} {p.name}
+                  {p.name}
                 </button>
               ))}
             </div>
@@ -145,7 +144,7 @@ export const WebhookSettings: React.FC<WebhookSettingsProps> = ({ onClose, onSav
                   rel="noopener noreferrer"
                   style={{ fontSize: '12px', color: 'var(--accent)', textDecoration: 'none' }}
                 >
-                  📖 {t('webhook.guide', 'How to get webhook URL')}
+                  {t('webhook.guide', 'How to get webhook URL')}
                 </a>
 
                 <button
