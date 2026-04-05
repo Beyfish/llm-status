@@ -7,7 +7,11 @@ const root = process.cwd();
 const versionText = readFileSync(resolve(root, 'VERSION'), 'utf8');
 const changelogText = readFileSync(resolve(root, 'CHANGELOG.md'), 'utf8');
 const result = validateReleaseInputs({ versionText, changelogText });
-const explicitVersion = process.env.GITHUB_REF_NAME?.replace(/^v/, '') || process.argv[2];
+const cliVersion = process.argv[2];
+const refNameVersion = process.env.GITHUB_REF_NAME?.startsWith('v')
+  ? process.env.GITHUB_REF_NAME.replace(/^v/, '')
+  : undefined;
+const explicitVersion = cliVersion || refNameVersion;
 
 if (!result.ok) {
   console.error(result.reason);
