@@ -197,10 +197,13 @@ Include:
 
 ## Release Process
 
-1. Bump version in `VERSION` file
-2. Update `CHANGELOG.md`
-3. Create a GitHub Release
-4. Build and upload binaries
+See [RELEASE.md](RELEASE.md) for the release contract.
+
+In short:
+1. Update `VERSION`
+2. Add matching notes to `CHANGELOG.md`
+3. Merge to `master`
+4. CI auto-tags and publishes the release
 
 ## Getting Help
 
