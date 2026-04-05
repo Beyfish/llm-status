@@ -46,4 +46,16 @@ describe('release metadata', () => {
       expect(result.reason).toContain('CHANGELOG');
     }
   });
+
+  it('treats a matching version entry as explicit release intent', () => {
+    const result = validateReleaseInputs({
+      versionText: '0.2.0.2\n',
+      changelogText: '## [0.2.0.2] - 2026-04-06\n\n### Added\n- release automation',
+    });
+
+    expect(result.ok).toBe(true);
+    if (result.ok) {
+      expect(result.version).toBe('0.2.0.2');
+    }
+  });
 });
