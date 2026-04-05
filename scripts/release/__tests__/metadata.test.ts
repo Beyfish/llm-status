@@ -58,4 +58,20 @@ describe('release metadata', () => {
       expect(result.version).toBe('0.2.0.2');
     }
   });
+
+  it('extracts only the selected version section without the next release notes', () => {
+    const changelog = `## [0.2.0.2] - 2026-04-06
+
+### Added
+- first
+
+## [0.2.0.1] - 2026-04-04
+
+### Fixed
+- second`;
+
+    const notes = extractReleaseNotes(changelog, '0.2.0.2');
+    expect(notes).toContain('first');
+    expect(notes).not.toContain('second');
+  });
 });

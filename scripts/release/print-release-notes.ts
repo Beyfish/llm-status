@@ -7,6 +7,7 @@ const root = process.cwd();
 const versionText = readFileSync(resolve(root, 'VERSION'), 'utf8');
 const changelogText = readFileSync(resolve(root, 'CHANGELOG.md'), 'utf8');
 const result = validateReleaseInputs({ versionText, changelogText });
+const explicitVersion = process.env.GITHUB_REF_NAME?.replace(/^v/, '') || process.argv[2];
 
 if (!result.ok) {
   console.error(result.reason);
@@ -18,4 +19,4 @@ if (process.argv.includes('--validate')) {
   process.exit(0);
 }
 
-console.log(extractReleaseNotes(changelogText, result.version));
+console.log(extractReleaseNotes(changelogText, explicitVersion || result.version));
