@@ -103,12 +103,12 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ onClose }) => {
 
   return (
     <div className="modal-overlay" onClick={onClose} role="dialog" aria-modal="true">
-      <div className="modal modal--large" onClick={(e) => e.stopPropagation()}>
+      <div className="modal modal--large settings-modal" onClick={(e) => e.stopPropagation()}>
         <div className="modal__header">
           <h2>{t('settings.title')}</h2>
           <button className="modal__close" onClick={onClose} aria-label="Close">✕</button>
         </div>
-        <div className="modal__body modal__body--settings">
+        <div className="modal__body modal__body--settings settings-modal__body">
           <nav className="settings-tabs" role="tablist" aria-label="Settings sections">
             {tabs.map((tab) => (
               <button
@@ -185,7 +185,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ onClose }) => {
               <>
                 <div className="settings-field">
                   <label>{t('settings.theme')}</label>
-                  <div style={{ display: 'flex', gap: '8px' }}>
+                  <div className="settings-theme-row">
                     {(['dark', 'light', 'system'] as const).map((themeOpt) => (
                       <button
                         key={themeOpt}
@@ -203,7 +203,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ onClose }) => {
               <>
                 <div className="settings-field">
                   <label>{t('settings.configPath')}</label>
-                  <code className="mono" style={{ fontSize: '12px' }}>~/.llm-status/config.json</code>
+                  <code className="mono settings-advanced__code">~/.llm-status/config.json</code>
                 </div>
 
                 {window.electronAPI.isMac && (
@@ -212,7 +212,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ onClose }) => {
 
                     <div className="settings-field">
                       <label id="screen-protection-label">{t('security.screenProtection')}</label>
-                      <p style={{ fontSize: '12px', color: 'var(--text-secondary)', marginBottom: '8px' }}>
+                      <p className="settings-advanced__helper">
                         {t('security.screenProtectionDesc')}
                       </p>
                       <label className="toggle-label">
@@ -236,7 +236,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ onClose }) => {
 
                 <div className="settings-field">
                   <label>Credential Backup & Restore</label>
-                  <p style={{ fontSize: '12px', color: 'var(--text-secondary)', marginBottom: '12px' }}>
+                  <p className="settings-advanced__helper">
                     Export or import all provider credentials with passphrase-based encryption.
                     This allows migration between machines.
                   </p>
@@ -247,13 +247,12 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ onClose }) => {
                       type="password"
                       value={backupPassphrase}
                       onChange={(e) => setBackupPassphrase(e.target.value)}
-                      className="settings-select"
+                      className="settings-select settings-advanced__input"
                       placeholder="Enter a strong passphrase"
-                      style={{ width: '100%', height: '40px' }}
                     />
                   </div>
 
-                  <div style={{ display: 'flex', gap: '8px', marginTop: '12px' }}>
+                  <div className="settings-advanced__actions">
                     <button
                       className="btn btn--primary"
                       onClick={handleExportCredentials}
@@ -271,7 +270,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ onClose }) => {
                   </div>
 
                   {backupMessage && (
-                    <div className={backupStatus === 'success' ? 'onboarding__success' : 'onboarding__error'} style={{ marginTop: '12px' }}>
+                    <div className={backupStatus === 'success' ? 'onboarding__success settings-feedback settings-feedback--success' : 'onboarding__error settings-feedback settings-feedback--error'}>
                       {backupStatus === 'success' ? '✓' : '✕'} {backupMessage}
                     </div>
                   )}
