@@ -17,6 +17,12 @@
   --radius-badge: 8px;
   --radius-input: 10px;
 
+  /* Settings Modal — semantic layout and feedback tokens */
+  --settings-tab-width: 180px;
+  --settings-panel-min-height: 320px;
+  --settings-feedback-success-bg: rgba(34, 197, 94, 0.12);
+  --settings-feedback-error-bg: rgba(181, 51, 51, 0.12);
+
   /* Shadows — Claude ring shadow system */
   --shadow-card: 0px 0px 0px 1px var(--border-color);
   --shadow-card-hover: 0px 0px 0px 1px var(--border-color), rgba(0, 0, 0, 0.05) 0px 4px 24px;
