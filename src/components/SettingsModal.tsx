@@ -203,7 +203,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ onClose }) => {
               <>
                 <div className="settings-field">
                   <label>{t('settings.configPath')}</label>
-                  <code className="mono settings-advanced__code">~/.llm-status/config.json</code>
+                  <code className="mono settings-code-inline">~/.llm-status/config.json</code>
                 </div>
 
                 {window.electronAPI.isMac && (
@@ -212,7 +212,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ onClose }) => {
 
                     <div className="settings-field">
                       <label id="screen-protection-label">{t('security.screenProtection')}</label>
-                      <p className="settings-advanced__helper">
+                      <p className="settings-helper-text">
                         {t('security.screenProtectionDesc')}
                       </p>
                       <label className="toggle-label">
@@ -236,7 +236,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ onClose }) => {
 
                 <div className="settings-field">
                   <label>Credential Backup & Restore</label>
-                  <p className="settings-advanced__helper">
+                  <p className="settings-helper-text">
                     Export or import all provider credentials with passphrase-based encryption.
                     This allows migration between machines.
                   </p>
@@ -247,12 +247,12 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ onClose }) => {
                       type="password"
                       value={backupPassphrase}
                       onChange={(e) => setBackupPassphrase(e.target.value)}
-                      className="settings-select settings-advanced__input"
+                      className="settings-select settings-input settings-input--password"
                       placeholder="Enter a strong passphrase"
                     />
                   </div>
 
-                  <div className="settings-advanced__actions">
+                  <div className="settings-action-row">
                     <button
                       className="btn btn--primary"
                       onClick={handleExportCredentials}
@@ -270,7 +270,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ onClose }) => {
                   </div>
 
                   {backupMessage && (
-                    <div className={backupStatus === 'success' ? 'onboarding__success settings-feedback settings-feedback--success' : 'onboarding__error settings-feedback settings-feedback--error'}>
+                    <div className={backupStatus === 'success' ? 'settings-feedback settings-feedback--success' : 'settings-feedback settings-feedback--error'}>
                       {backupStatus === 'success' ? '✓' : '✕'} {backupMessage}
                     </div>
                   )}
