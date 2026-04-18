@@ -698,6 +698,71 @@ code, pre, .mono {
   box-shadow: 0px 0px 0px 1px var(--focus-blue);
 }
 
+.settings-modal {
+  background: var(--bg-surface);
+}
+
+.settings-modal__body {
+  background: var(--bg-surface);
+  min-height: var(--settings-panel-min-height);
+}
+
+.settings-theme-row {
+  display: flex;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+}
+
+.settings-helper-text {
+  margin-bottom: var(--space-2);
+  color: var(--text-secondary);
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.settings-code-inline {
+  display: inline-block;
+  font-size: 12px;
+}
+
+.settings-input--password {
+  height: 40px;
+}
+
+.settings-action-row {
+  display: flex;
+  gap: var(--space-2);
+  margin-top: var(--space-3);
+  flex-wrap: wrap;
+}
+
+.settings-feedback {
+  margin-top: var(--space-3);
+  padding: var(--space-3);
+  border-radius: var(--radius-btn);
+  font-size: 13px;
+}
+
+.settings-feedback--success {
+  background: var(--settings-feedback-success-bg);
+  color: var(--green);
+}
+
+.settings-feedback--error {
+  background: var(--settings-feedback-error-bg);
+  color: var(--red);
+}
+
+.settings-tab:focus-visible,
+.settings-select:focus-visible,
+.settings-theme-row .btn:focus-visible {
+  outline-offset: 2px;
+}
+
+.settings-action-row .btn:disabled {
+  opacity: 0.5;
+}
+
 /* Sidebar Active */
 .app-sidebar__item--active {
   background: var(--bg-elevated);
