@@ -439,7 +439,6 @@ code, pre, .mono {
 .modal__body--settings {
   padding: 0;
   display: flex;
-  min-height: 360px;
 }
 
 .modal__footer {
@@ -699,11 +698,9 @@ code, pre, .mono {
 }
 
 .settings-modal {
-  background: var(--bg-surface);
 }
 
 .settings-modal__body {
-  background: var(--bg-surface);
   min-height: var(--settings-panel-min-height);
 }
 
