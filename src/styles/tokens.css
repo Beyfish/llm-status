@@ -19,7 +19,7 @@
 
   /* Settings Modal — semantic layout and feedback tokens */
   --settings-tab-width: 180px;
-  --settings-panel-min-height: 320px;
+  --settings-panel-min-height: 360px;
   --settings-feedback-success-bg: rgba(34, 197, 94, 0.12);
   --settings-feedback-error-bg: rgba(181, 51, 51, 0.12);
 
