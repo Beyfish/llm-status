@@ -60,9 +60,9 @@
 /* Light Theme — Warm Parchment */
 [data-theme='light'],
 .app--light {
-  --bg-primary: #f5f4ed;
-  --bg-surface: #faf9f5;
-  --bg-elevated: #e8e6dc;
+  --bg-primary: #f4f1e8;
+  --bg-surface: #f9f6ef;
+  --bg-elevated: #e7e1d5;
   --border-color: #f0eee6;
   --text-primary: #141413;
   --text-secondary: #5e5d59;
