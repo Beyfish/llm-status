@@ -712,6 +712,7 @@ code, pre, .mono {
   color: var(--text-secondary);
   font-size: 12px;
   line-height: 1.5;
+  max-width: 56ch;
 }
 
 .settings-code-inline {
@@ -727,6 +728,7 @@ code, pre, .mono {
   display: flex;
   gap: var(--space-2);
   margin-top: var(--space-3);
+  align-items: center;
   flex-wrap: wrap;
 }
 
@@ -735,6 +737,7 @@ code, pre, .mono {
   padding: var(--space-3);
   border-radius: var(--radius-btn);
   font-size: 13px;
+  line-height: 1.4;
 }
 
 .settings-feedback--success {
