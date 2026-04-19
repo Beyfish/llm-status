@@ -55,6 +55,7 @@ describe('SettingsModal UI polish guardrails', () => {
   beforeEach(() => {
     (window as any).electronAPI = {
       isMac: false,
+      configPath: '%USERPROFILE%\\.llm-status\\config.json',
       setScreenProtection: vi.fn(),
       auditFetch: vi.fn().mockResolvedValue({ entries: [] }),
       auditClear: vi.fn().mockResolvedValue(undefined),
@@ -128,10 +129,12 @@ describe('SettingsModal UI polish guardrails', () => {
     expect((feedback?.getAttribute('style') ?? '')).not.toMatch(/\bmargin-top\b/i);
   });
 
-  it('must not display only a tilde-shortened config path in settings advanced panel', () => {
-    const source = readFileSync(SETTINGS_MODAL_SOURCE, 'utf-8');
+  it('must render the real config path from the bridge in advanced settings', async () => {
+    const { getByRole, getByText } = await renderSettingsModal();
+    fireEvent.click(getByRole('tab', { name: 'settings.advanced' }));
 
-    expect(source).not.toContain('~/.llm-status/config.json');
+    expect(getByText(window.electronAPI.configPath)).not.toBeNull();
+    expect(readFileSync(SETTINGS_MODAL_SOURCE, 'utf-8')).not.toContain('~/.llm-status/config.json');
   });
 
   it('must keep settings tab semantics and active state class', async () => {

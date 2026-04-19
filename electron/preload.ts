@@ -1,8 +1,13 @@
 import { contextBridge, ipcRenderer, process as electronProcess } from 'electron';
+import { homedir } from 'os';
+import { join } from 'path';
 
 const electronAPI = {
   // Platform info (renderer-safe)
   isMac: electronProcess.platform === 'darwin',
+
+  // Config location
+  configPath: join(homedir(), '.llm-status', 'config.json'),
 
   // Config
   configRead: () => ipcRenderer.invoke('config:read'),
