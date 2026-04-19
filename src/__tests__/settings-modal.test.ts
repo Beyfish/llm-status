@@ -145,6 +145,25 @@ describe('SettingsModal UI polish guardrails', () => {
     expect(container.querySelector('.settings-tab--active')).not.toBeNull();
   });
 
+  it('must not keep key settings text at undersized 12px/13px defaults for primary reading surfaces', () => {
+    const globalCss = readFileSync(GLOBAL_STYLES, 'utf-8');
+
+    const getRule = (selector: string) => {
+      const match = globalCss.match(new RegExp(`${selector}\\s*\\{[\\s\\S]*?\\}`));
+
+      expect(match, `missing CSS rule for ${selector}`).not.toBeNull();
+
+      return match![0];
+    };
+
+    expect(getRule('.settings-tab')).not.toContain('font-size: 13px;');
+    expect(getRule('.settings-field label')).not.toContain('font-size: 13px;');
+    expect(getRule('.settings-select')).not.toContain('font-size: 13px;');
+    expect(getRule('.settings-helper-text')).not.toContain('font-size: 12px;');
+    expect(getRule('.app-header__btn')).not.toContain('font-size: 12px;');
+    expect(getRule('.app-sidebar__item')).not.toContain('font-size: 13px;');
+  });
+
   it('must keep settings content mounted inside modal body settings container', async () => {
     const { container } = await renderSettingsModal();
 

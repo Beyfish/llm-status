@@ -90,7 +90,8 @@ code, pre, .mono {
   border-radius: var(--radius-btn);
   background: transparent;
   color: var(--text-secondary);
-  font-size: 12px;
+  font-size: var(--font-size-ui-sm);
+  font-weight: 500;
   cursor: pointer;
   transition: background var(--transition-fast), color var(--transition-fast);
   white-space: nowrap;
@@ -132,7 +133,8 @@ code, pre, .mono {
   border: none;
   background: transparent;
   color: var(--text-primary);
-  font-size: 13px;
+  font-size: var(--font-size-ui-sm);
+  font-weight: 500;
   text-align: left;
   cursor: pointer;
   transition: background var(--transition-fast), box-shadow var(--transition-fast);
@@ -645,7 +647,8 @@ code, pre, .mono {
   border: none;
   background: transparent;
   color: var(--text-secondary);
-  font-size: 13px;
+  font-size: var(--font-size-ui-md);
+  font-weight: 500;
   text-align: left;
   cursor: pointer;
   transition: background var(--transition-fast), color var(--transition-fast);
@@ -674,7 +677,7 @@ code, pre, .mono {
 
 .settings-field label {
   display: block;
-  font-size: 13px;
+  font-size: var(--font-size-ui-md);
   font-weight: 500;
   margin-bottom: var(--space-2);
   color: var(--text-secondary);
@@ -688,7 +691,7 @@ code, pre, .mono {
   border-radius: var(--radius-input);
   background: var(--bg-elevated);
   color: var(--text-primary);
-  font-size: 13px;
+  font-size: var(--font-size-ui-md);
   outline: none;
 }
 
@@ -710,7 +713,7 @@ code, pre, .mono {
 .settings-helper-text {
   margin-bottom: var(--space-2);
   color: var(--text-secondary);
-  font-size: 12px;
+  font-size: var(--font-size-ui-sm);
   line-height: 1.5;
   max-width: 56ch;
 }
