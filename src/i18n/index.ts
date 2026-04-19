@@ -10,7 +10,7 @@ const zhCN = {
     status: { valid: '正常', warning: '慢', error: '异常', idle: '未检测' },
     detail: { models: '可用模型', credentials: '凭证管理', modelName: '模型名称', price: '价格', capabilities: '能力', status: '状态', provider: '提供商' },
     modal: { latencyTitle: '延迟检测模式', lightweight: '轻量模式', lightweightDesc: '快速，不消耗配额', full: '完整模式', fullDesc: '准确反映真实体验', timeout: '超时时间（秒）', concurrency: '并发数', cancel: '取消', start: '开始检测', checking: '检测中...', done: '完成', close: '关闭' },
-    settings: { title: '设置', general: '通用', detection: '检测', appearance: '外观', advanced: '高级', language: '语言', storageMode: '存储方式', encrypted: '加密存储', plaintext: '明文存储', defaultMode: '默认检测模式', autoCheck: '自动检测间隔', off: '关闭', minutes: '分钟', hour: '小时', theme: '主题', configPath: '配置文件路径' },
+    settings: { title: '设置', general: '通用', detection: '检测', appearance: '外观', advanced: '高级', language: '语言', storageMode: '存储方式', encrypted: '加密存储', plaintext: '明文存储', defaultMode: '默认检测模式', autoCheck: '自动检测间隔', off: '关闭', minutes: '分钟', hour: '小时', theme: '主题', configPath: '配置文件路径', configPathResolved: '配置文件绝对路径' },
     smartImport: { title: '智能导入', textPlaceholder: '粘贴配置文本，例如：\nURL: https://api.openai.com\nKey: sk-xxx...\nModel: gpt-4o', jsonPlaceholder: '粘贴 JSON 配置...', urlPlaceholder: '粘贴 API 端点 URL...', parse: '🔍 解析配置', result: '解析结果', providerType: '提供商', baseUrl: '端点', apiKey: 'API Key', confidence: '置信度', edit: '✏️ 编辑', name: '名称', confirm: '✅ 确认导入', inputType: { text: '文本', json: 'JSON', url: 'URL' } },
     onboarding: {
       welcome: '欢迎使用 LLM Status',
@@ -162,7 +162,7 @@ const enUS = {
     status: { valid: 'Normal', warning: 'Slow', error: 'Error', idle: 'Not checked' },
     detail: { models: 'Available Models', credentials: 'Credentials', modelName: 'Model', price: 'Price', capabilities: 'Capabilities', status: 'Status', provider: 'Provider' },
     modal: { latencyTitle: 'Latency Check Mode', lightweight: 'Lightweight', lightweightDesc: 'Fast, no quota usage', full: 'Full', fullDesc: 'Accurate real-world experience', timeout: 'Timeout (seconds)', concurrency: 'Concurrency', cancel: 'Cancel', start: 'Start Check', checking: 'Checking...', done: 'Done', close: 'Close' },
-    settings: { title: 'Settings', general: 'General', detection: 'Detection', appearance: 'Appearance', advanced: 'Advanced', language: 'Language', storageMode: 'Storage Mode', encrypted: 'Encrypted', plaintext: 'Plaintext', defaultMode: 'Default Mode', autoCheck: 'Auto-check Interval', off: 'Off', minutes: 'min', hour: 'hour', theme: 'Theme', configPath: 'Config Path' },
+    settings: { title: 'Settings', general: 'General', detection: 'Detection', appearance: 'Appearance', advanced: 'Advanced', language: 'Language', storageMode: 'Storage Mode', encrypted: 'Encrypted', plaintext: 'Plaintext', defaultMode: 'Default Mode', autoCheck: 'Auto-check Interval', off: 'Off', minutes: 'min', hour: 'hour', theme: 'Theme', configPath: 'Config Path', configPathResolved: 'Resolved Config Path' },
     smartImport: { title: 'Smart Import', textPlaceholder: 'Paste config text, e.g.:\nURL: https://api.openai.com\nKey: sk-xxx...\nModel: gpt-4o', jsonPlaceholder: 'Paste JSON config...', urlPlaceholder: 'Paste API endpoint URL...', parse: '🔍 Parse Config', result: 'Parsed Result', providerType: 'Provider', baseUrl: 'Endpoint', apiKey: 'API Key', confidence: 'Confidence', edit: '✏️ Edit', name: 'Name', confirm: '✅ Confirm Import', inputType: { text: 'Text', json: 'JSON', url: 'URL' } },
     onboarding: {
       welcome: 'Welcome to LLM Status',
