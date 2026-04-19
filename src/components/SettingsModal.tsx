@@ -9,6 +9,7 @@ interface SettingsModalProps {
 export const SettingsModal: React.FC<SettingsModalProps> = ({ onClose }) => {
   const { t, i18n } = useTranslation();
   const { settings, updateSettings, theme, setTheme, providers } = useStore();
+  const electronAPI = window.electronAPI;
   const [activeTab, setActiveTab] = useState<'general' | 'detection' | 'appearance' | 'advanced' | 'audit'>('general');
   const [backupPassphrase, setBackupPassphrase] = useState('');
   const [backupStatus, setBackupStatus] = useState<'idle' | 'exporting' | 'importing' | 'success' | 'error'>('idle');
@@ -26,9 +27,14 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ onClose }) => {
   const [auditEntries, setAuditEntries] = useState<Array<{ timestamp: string; providerId: string; action: string; detail?: string }>>([]);
 
   const fetchAuditLog = useCallback(async () => {
-    const result = await window.electronAPI.auditFetch();
+    if (!electronAPI?.auditFetch) {
+      setAuditEntries([]);
+      return;
+    }
+
+    const result = await electronAPI.auditFetch();
     setAuditEntries(result.entries);
-  }, []);
+  }, [electronAPI]);
 
   useEffect(() => {
     if (activeTab === 'audit') {
@@ -38,14 +44,18 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ onClose }) => {
 
   // Apply screen protection on mount if enabled
   useEffect(() => {
-    if (window.electronAPI.isMac && settings.screenRecordingProtection) {
-      window.electronAPI.setScreenProtection(true);
+    if (electronAPI?.isMac && settings.screenRecordingProtection) {
+      electronAPI.setScreenProtection?.(true);
     }
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [electronAPI, settings.screenRecordingProtection]);
 
   const handleClearAudit = async () => {
+    if (!electronAPI?.auditClear) {
+      return;
+    }
+
     if (window.confirm(t('audit.clearConfirm'))) {
-      await window.electronAPI.auditClear();
+      await electronAPI.auditClear();
       setAuditEntries([]);
     }
   };
@@ -53,14 +63,20 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ onClose }) => {
   const handleExportCredentials = async () => {
     if (!backupPassphrase || backupPassphrase.length < 8) {
       setBackupStatus('error');
-      setBackupMessage('Passphrase must be at least 8 characters');
+      setBackupMessage(t('credentialBackup.passphraseTooShort'));
       return;
     }
     setBackupStatus('exporting');
     setBackupMessage('');
+    if (!electronAPI?.credentialFileExport) {
+      setBackupStatus('error');
+      setBackupMessage(t('credentialBackup.unavailableExport'));
+      return;
+    }
+
     try {
       const config = { providers, settings };
-      const result = await window.electronAPI.credentialFileExport(config, backupPassphrase);
+      const result = await electronAPI.credentialFileExport(config, backupPassphrase);
       if (result.success) {
         setBackupStatus('success');
         setBackupMessage(result.message);
@@ -70,23 +86,29 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ onClose }) => {
       }
     } catch {
       setBackupStatus('error');
-      setBackupMessage('Export failed');
+      setBackupMessage(t('credentialBackup.exportFailed'));
     }
   };
 
   const handleImportCredentials = async () => {
     if (!backupPassphrase || backupPassphrase.length < 8) {
       setBackupStatus('error');
-      setBackupMessage('Passphrase must be at least 8 characters');
+      setBackupMessage(t('credentialBackup.passphraseTooShort'));
       return;
     }
     setBackupStatus('importing');
     setBackupMessage('');
+    if (!electronAPI?.credentialFileImport) {
+      setBackupStatus('error');
+      setBackupMessage(t('credentialBackup.unavailableImport'));
+      return;
+    }
+
     try {
-      const result = await window.electronAPI.credentialFileImport(backupPassphrase);
+      const result = await electronAPI.credentialFileImport(backupPassphrase);
       if (result.success && result.data) {
         setBackupStatus('success');
-        setBackupMessage(`Imported ${result.data.providers.length} providers`);
+        setBackupMessage(t('credentialBackup.importedCount', { count: result.data.providers.length }));
         // Reload providers from imported data
         for (const provider of result.data.providers) {
           await useStore.getState().addProvider(provider as any);
@@ -97,7 +119,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ onClose }) => {
       }
     } catch {
       setBackupStatus('error');
-      setBackupMessage('Import failed');
+      setBackupMessage(t('credentialBackup.importFailed'));
     }
   };
 
@@ -206,7 +228,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ onClose }) => {
                   <code className="mono settings-code-inline">~/.llm-status/config.json</code>
                 </div>
 
-                {window.electronAPI.isMac && (
+                {electronAPI?.isMac && (
                   <>
                     <div className="modal__divider" />
 
@@ -221,7 +243,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ onClose }) => {
                           checked={settings.screenRecordingProtection || false}
                           onChange={(e) => {
                             updateSettings({ screenRecordingProtection: e.target.checked });
-                            window.electronAPI.setScreenProtection(e.target.checked);
+                            electronAPI.setScreenProtection?.(e.target.checked);
                           }}
                           className="toggle-input"
                           aria-labelledby="screen-protection-label"
@@ -235,20 +257,19 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ onClose }) => {
                 <div className="modal__divider" />
 
                 <div className="settings-field">
-                  <label>Credential Backup & Restore</label>
+                  <label>{t('credentialBackup.title')}</label>
                   <p className="settings-helper-text">
-                    Export or import all provider credentials with passphrase-based encryption.
-                    This allows migration between machines.
+                    {t('credentialBackup.desc')}
                   </p>
 
                   <div className="settings-field">
-                    <label>Passphrase (min 8 characters)</label>
+                    <label>{t('credentialBackup.passphrase')}</label>
                     <input
                       type="password"
                       value={backupPassphrase}
                       onChange={(e) => setBackupPassphrase(e.target.value)}
                       className="settings-select settings-input settings-input--password"
-                      placeholder="Enter a strong passphrase"
+                      placeholder={t('credentialBackup.passphrasePlaceholder')}
                     />
                   </div>
 

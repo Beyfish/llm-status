@@ -44,6 +44,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
 const GLOBAL_STYLES = resolve(__dirname, '..', 'styles', 'global.css');
+const SETTINGS_MODAL_SOURCE = resolve(__dirname, '..', 'components', 'SettingsModal.tsx');
 
 async function renderSettingsModal() {
   const { SettingsModal } = await import('../components/SettingsModal');
@@ -72,6 +73,16 @@ describe('SettingsModal UI polish guardrails', () => {
     const styleNodes = Array.from(container.querySelectorAll('[style]'));
 
     expect(styleNodes.some((node) => /background/i.test(node.getAttribute('style') ?? ''))).toBe(false);
+  });
+
+  it('must not keep advanced backup labels and placeholders hardcoded in English', () => {
+    const source = readFileSync(SETTINGS_MODAL_SOURCE, 'utf-8');
+
+    expect(source).not.toContain('Credential Backup & Restore');
+    expect(source).not.toContain('Passphrase (min 8 characters)');
+    expect(source).not.toContain('Enter a strong passphrase');
+    expect(source).not.toContain('Credential export is unavailable in this build');
+    expect(source).not.toContain('Credential import is unavailable in this build');
   });
 
   it('must not keep appearance tab layout driven by inline flex gap style', async () => {
@@ -151,5 +162,19 @@ describe('SettingsModal UI polish guardrails', () => {
     expect(settingsTabsRule).not.toBeNull();
     expect(settingsTabsRule![0]).toContain('width: var(--settings-tab-width);');
     expect(settingsTabsRule![0]).not.toContain('width: 180px;');
+  });
+
+  it('must not use absolute-position translateX animation on centered modal entry', () => {
+    const globalCss = readFileSync(GLOBAL_STYLES, 'utf-8');
+    const slideUpStart = globalCss.indexOf('@keyframes slideUp');
+
+    expect(slideUpStart).toBeGreaterThanOrEqual(0);
+
+    const slideUpBlock = globalCss.slice(slideUpStart, globalCss.indexOf('.modal {', slideUpStart));
+
+    expect(slideUpBlock).toContain('translateY(10px)');
+    expect(slideUpBlock).toContain('translateY(0)');
+    expect(slideUpBlock).not.toMatch(/translate\(-50%,\s*10px\)/);
+    expect(slideUpBlock).not.toMatch(/translate\(-50%,\s*0\)/);
   });
 });
