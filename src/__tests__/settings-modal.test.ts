@@ -4,7 +4,7 @@ import { afterEach, beforeEach, describe, it, expect, vi } from 'vitest';
 import { readFileSync } from 'fs';
 import { resolve, dirname } from 'path';
 import { fileURLToPath } from 'url';
-import { cleanup, render } from '@testing-library/react';
+import { cleanup, fireEvent, render, waitFor } from '@testing-library/react';
 import React from 'react';
 
 const mockStoreState = {
@@ -43,14 +43,22 @@ vi.mock('../store', () => ({
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
-const SETTINGS_MODAL_SOURCE = resolve(__dirname, '..', 'components', 'SettingsModal.tsx');
 const GLOBAL_STYLES = resolve(__dirname, '..', 'styles', 'global.css');
+
+async function renderSettingsModal() {
+  const { SettingsModal } = await import('../components/SettingsModal');
+  return render(React.createElement(SettingsModal, { onClose: vi.fn() }));
+}
 
 describe('SettingsModal UI polish guardrails', () => {
   beforeEach(() => {
     (window as any).electronAPI = {
       isMac: false,
       setScreenProtection: vi.fn(),
+      auditFetch: vi.fn().mockResolvedValue({ entries: [] }),
+      auditClear: vi.fn().mockResolvedValue(undefined),
+      credentialFileExport: vi.fn().mockResolvedValue({ success: true, message: 'Exported' }),
+      credentialFileImport: vi.fn().mockResolvedValue({ success: false, message: 'Import failed' }),
     };
   });
 
@@ -59,50 +67,75 @@ describe('SettingsModal UI polish guardrails', () => {
     delete (window as any).electronAPI;
   });
 
-  const source = readFileSync(SETTINGS_MODAL_SOURCE, 'utf-8');
+  it('must not hardcode modal background colors inline', async () => {
+    const { container } = await renderSettingsModal();
+    const styleNodes = Array.from(container.querySelectorAll('[style]'));
 
-  const componentMatch = source.match(/export const SettingsModal: React\.FC<SettingsModalProps> = \(\{ onClose \}\) => \{([\s\S]*?)\n\};/);
-  expect(componentMatch).not.toBeNull();
-
-  const componentBody = componentMatch![1];
-
-  const jsxMatch = componentBody.match(/return \(([\s\S]*?)\n\s*\);/);
-  expect(jsxMatch).not.toBeNull();
-
-  const jsx = jsxMatch![1];
-
-  it('must not hardcode modal background colors inline', () => {
-    expect(/background\s*:\s*['\"]#30302e['\"]/.test(jsx)).toBe(false);
+    expect(styleNodes.some((node) => /background/i.test(node.getAttribute('style') ?? ''))).toBe(false);
   });
 
-  it('must not keep appearance tab layout driven by inline flex gap style', () => {
-    expect(/style=\{\{\s*display\s*:\s*['\"]flex['\"],\s*gap\s*:\s*['\"]8px['\"]\s*\}\}/.test(jsx)).toBe(false);
+  it('must not keep appearance tab layout driven by inline flex gap style', async () => {
+    const { container, getByRole } = await renderSettingsModal();
+    fireEvent.click(getByRole('tab', { name: 'settings.appearance' }));
+
+    const themeRow = container.querySelector('.settings-theme-row');
+
+    expect(themeRow).not.toBeNull();
+    expect((themeRow?.getAttribute('style') ?? '')).not.toMatch(/\bgap\b/i);
+    expect((themeRow?.getAttribute('style') ?? '')).not.toMatch(/\bdisplay\b/i);
   });
 
-  it('must not keep backup action row driven by inline spacing style', () => {
-    expect(/style=\{\{\s*display\s*:\s*['\"]flex['\"],\s*gap\s*:\s*['\"]8px['\"],\s*marginTop\s*:\s*['\"]12px['\"]\s*\}\}/.test(jsx)).toBe(false);
+  it('must not keep backup action row driven by inline spacing style', async () => {
+    const { container, getByRole } = await renderSettingsModal();
+    fireEvent.click(getByRole('tab', { name: 'settings.advanced' }));
+
+    const actionRow = container.querySelector('.settings-action-row');
+
+    expect(actionRow).not.toBeNull();
+    expect((actionRow?.getAttribute('style') ?? '')).not.toMatch(/\bgap\b/i);
+    expect((actionRow?.getAttribute('style') ?? '')).not.toMatch(/\bmargin-top\b/i);
   });
 
-  it('must not keep settings feedback spacing driven by inline margin style', () => {
-    expect(/style=\{\{\s*marginTop\s*:\s*['\"]12px['\"]\s*\}\}/.test(jsx)).toBe(false);
+  it('must not keep settings feedback spacing driven by inline margin style', async () => {
+    const { container, getByRole } = await renderSettingsModal();
+    fireEvent.click(getByRole('tab', { name: 'settings.advanced' }));
+
+    const passwordInput = container.querySelector('input[type="password"]') as HTMLInputElement;
+    const exportButton = getByRole('button', { name: 'credentialBackup.export' }) as HTMLButtonElement;
+
+    expect(passwordInput).not.toBeNull();
+    expect(exportButton).not.toBeUndefined();
+
+    fireEvent.change(passwordInput, { target: { value: 'passphrase123' } });
+    fireEvent.click(exportButton!);
+
+    await waitFor(() => {
+      expect(container.querySelector('.settings-feedback')).not.toBeNull();
+    });
+
+    const feedback = container.querySelector('.settings-feedback');
+    expect((feedback?.getAttribute('style') ?? '')).not.toMatch(/\bmargin-top\b/i);
   });
 
-  it('must keep settings tab semantics and active state class', () => {
-    expect(jsx).toContain('role="tablist"');
-    expect(jsx).toContain('role="tab"');
-    expect(jsx).toContain('settings-tab--active');
+  it('must keep settings tab semantics and active state class', async () => {
+    const { container } = await renderSettingsModal();
+
+    expect(container.querySelector('[role="tablist"]')).not.toBeNull();
+    expect(container.querySelectorAll('[role="tab"]')).toHaveLength(5);
+    expect(container.querySelector('.settings-tab--active')).not.toBeNull();
   });
 
-  it('must keep settings content mounted inside modal body settings container', () => {
-    expect(jsx).toContain('modal__body modal__body--settings');
-    expect(jsx).toContain('settings-content');
+  it('must keep settings content mounted inside modal body settings container', async () => {
+    const { container } = await renderSettingsModal();
+
+    expect(container.querySelector('.modal__body.modal__body--settings')).not.toBeNull();
+    expect(container.querySelector('.settings-content')).not.toBeNull();
   });
 
   it('must not keep the empty settings-modal shell class on the modal root', async () => {
-    const { SettingsModal } = await import('../components/SettingsModal');
-    const { container: modalContainer } = render(React.createElement(SettingsModal, { onClose: vi.fn() }));
+    const { container: modalContainer } = await renderSettingsModal();
 
-    const modalRoot = modalContainer.querySelector('.modal');
+    const modalRoot = modalContainer.querySelector('.modal.modal--large');
     expect(modalRoot).not.toBeNull();
 
     const classList = (modalRoot as HTMLElement).classList;
@@ -113,7 +146,10 @@ describe('SettingsModal UI polish guardrails', () => {
 
   it('must consume settings tab width from token instead of hardcoded width', () => {
     const globalCss = readFileSync(GLOBAL_STYLES, 'utf-8');
-    expect(globalCss).toMatch(/\.settings-tabs\s*\{[^}]*width:\s*var\(--settings-tab-width\)\s*;[^}]*\}/s);
-    expect(globalCss).not.toMatch(/\.settings-tabs\s*\{[^}]*width:\s*180px\s*;[^}]*\}/s);
+    const settingsTabsRule = globalCss.match(/\.settings-tabs\s*\{[\s\S]*?\}/);
+
+    expect(settingsTabsRule).not.toBeNull();
+    expect(settingsTabsRule![0]).toContain('width: var(--settings-tab-width);');
+    expect(settingsTabsRule![0]).not.toContain('width: 180px;');
   });
 });
