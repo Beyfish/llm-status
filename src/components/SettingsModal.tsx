@@ -224,7 +224,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ onClose }) => {
             {activeTab === 'advanced' && (
               <>
                 <div className="settings-field">
-                  <label>{t('settings.configPath')}</label>
+                  <label>{t('settings.configPathResolved')}</label>
                   <code className="mono settings-code-inline">~/.llm-status/config.json</code>
                 </div>
 

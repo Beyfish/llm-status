@@ -128,6 +128,14 @@ describe('SettingsModal UI polish guardrails', () => {
     expect((feedback?.getAttribute('style') ?? '')).not.toMatch(/\bmargin-top\b/i);
   });
 
+  it('must use the resolved config path label in advanced settings', async () => {
+    const { getByRole, getByText, queryByText } = await renderSettingsModal();
+    fireEvent.click(getByRole('tab', { name: 'settings.advanced' }));
+
+    expect(getByText('settings.configPathResolved')).not.toBeNull();
+    expect(queryByText('settings.configPath')).toBeNull();
+  });
+
   it('must keep settings tab semantics and active state class', async () => {
     const { container } = await renderSettingsModal();
 
