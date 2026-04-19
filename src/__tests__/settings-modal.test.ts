@@ -7,6 +7,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
 const SETTINGS_MODAL_SOURCE = resolve(__dirname, '..', 'components', 'SettingsModal.tsx');
+const GLOBAL_STYLES = resolve(__dirname, '..', 'styles', 'global.css');
 
 describe('SettingsModal UI polish guardrails', () => {
   const source = readFileSync(SETTINGS_MODAL_SOURCE, 'utf-8');
@@ -46,5 +47,16 @@ describe('SettingsModal UI polish guardrails', () => {
   it('must keep settings content mounted inside modal body settings container', () => {
     expect(jsx).toContain('modal__body modal__body--settings');
     expect(jsx).toContain('settings-content');
+  });
+
+  it('must consume settings tab width from token instead of hardcoded width', () => {
+    const globalCss = readFileSync(GLOBAL_STYLES, 'utf-8');
+    const settingsTabsMatch = globalCss.match(/\.settings-tabs\s*\{([\s\S]*?)\n\}/);
+
+    expect(settingsTabsMatch).not.toBeNull();
+
+    const settingsTabsBody = settingsTabsMatch![1];
+    expect(settingsTabsBody).toContain('width: var(--settings-tab-width);');
+    expect(settingsTabsBody).not.toContain('width: 180px;');
   });
 });
