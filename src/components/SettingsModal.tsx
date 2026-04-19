@@ -14,6 +14,9 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ onClose }) => {
   const [backupPassphrase, setBackupPassphrase] = useState('');
   const [backupStatus, setBackupStatus] = useState<'idle' | 'exporting' | 'importing' | 'success' | 'error'>('idle');
   const [backupMessage, setBackupMessage] = useState('');
+  const configPathDisplay = electronAPI?.isMac
+    ? '~/Library/Application Support/llm-status/config.json'
+    : '%USERPROFILE%\\.llm-status\\config.json';
 
   const tabs = [
     { id: 'general' as const, label: t('settings.general') },
@@ -224,8 +227,8 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ onClose }) => {
             {activeTab === 'advanced' && (
               <>
                 <div className="settings-field">
-                  <label>{t('settings.configPathResolved')}</label>
-                  <code className="mono settings-code-inline">~/.llm-status/config.json</code>
+                  <label>{t('settings.configPath')}</label>
+                  <code className="mono settings-code-inline">{configPathDisplay}</code>
                 </div>
 
                 {electronAPI?.isMac && (

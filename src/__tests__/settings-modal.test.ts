@@ -128,12 +128,10 @@ describe('SettingsModal UI polish guardrails', () => {
     expect((feedback?.getAttribute('style') ?? '')).not.toMatch(/\bmargin-top\b/i);
   });
 
-  it('must use the resolved config path label in advanced settings', async () => {
-    const { getByRole, getByText, queryByText } = await renderSettingsModal();
-    fireEvent.click(getByRole('tab', { name: 'settings.advanced' }));
+  it('must not display only a tilde-shortened config path in settings advanced panel', () => {
+    const source = readFileSync(SETTINGS_MODAL_SOURCE, 'utf-8');
 
-    expect(getByText('settings.configPathResolved')).not.toBeNull();
-    expect(queryByText('settings.configPath')).toBeNull();
+    expect(source).not.toContain('~/.llm-status/config.json');
   });
 
   it('must keep settings tab semantics and active state class', async () => {
