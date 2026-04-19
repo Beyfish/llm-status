@@ -49,6 +49,13 @@ describe('SettingsModal UI polish guardrails', () => {
     expect(jsx).toContain('settings-content');
   });
 
+  it('must not keep the empty settings-modal shell class in the modal root or CSS', () => {
+    expect(jsx).toMatch(/<div className="modal modal--large" onClick=\{\(e\) => e\.stopPropagation\(\)\}>/);
+    expect(jsx).not.toMatch(/<div className="modal modal--large settings-modal"/);
+    const globalCss = readFileSync(GLOBAL_STYLES, 'utf-8');
+    expect(globalCss).not.toMatch(/\.settings-modal\s*\{\s*\}/s);
+  });
+
   it('must consume settings tab width from token instead of hardcoded width', () => {
     const globalCss = readFileSync(GLOBAL_STYLES, 'utf-8');
     expect(globalCss).toMatch(/\.settings-tabs\s*\{[^}]*width:\s*var\(--settings-tab-width\)\s*;[^}]*\}/s);

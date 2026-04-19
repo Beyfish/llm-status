@@ -103,7 +103,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ onClose }) => {
 
   return (
     <div className="modal-overlay" onClick={onClose} role="dialog" aria-modal="true">
-      <div className="modal modal--large settings-modal" onClick={(e) => e.stopPropagation()}>
+      <div className="modal modal--large" onClick={(e) => e.stopPropagation()}>
         <div className="modal__header">
           <h2>{t('settings.title')}</h2>
           <button className="modal__close" onClick={onClose} aria-label="Close">✕</button>
