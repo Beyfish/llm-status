@@ -1,7 +1,44 @@
-import { describe, it, expect } from 'vitest';
+// @vitest-environment jsdom
+
+import { afterEach, beforeEach, describe, it, expect, vi } from 'vitest';
 import { readFileSync } from 'fs';
 import { resolve, dirname } from 'path';
 import { fileURLToPath } from 'url';
+import { cleanup, render } from '@testing-library/react';
+import React from 'react';
+
+const mockStoreState = {
+  settings: {
+    language: 'en-US',
+    storageMode: 'encrypted',
+    defaultLatencyMode: 'full',
+    autoCheckInterval: 0,
+    screenRecordingProtection: false,
+  },
+  updateSettings: vi.fn(),
+  theme: 'dark',
+  setTheme: vi.fn(),
+  providers: [],
+};
+
+vi.mock('react-i18next', () => ({
+  useTranslation: () => ({
+    t: (key: string) => key,
+    i18n: {
+      language: 'en-US',
+      changeLanguage: vi.fn(),
+    },
+  }),
+}));
+
+vi.mock('../store', () => ({
+  useStore: Object.assign(() => mockStoreState, {
+    getState: () => ({
+      ...mockStoreState,
+      addProvider: vi.fn(),
+    }),
+  }),
+}));
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -10,6 +47,18 @@ const SETTINGS_MODAL_SOURCE = resolve(__dirname, '..', 'components', 'SettingsMo
 const GLOBAL_STYLES = resolve(__dirname, '..', 'styles', 'global.css');
 
 describe('SettingsModal UI polish guardrails', () => {
+  beforeEach(() => {
+    (window as any).electronAPI = {
+      isMac: false,
+      setScreenProtection: vi.fn(),
+    };
+  });
+
+  afterEach(() => {
+    cleanup();
+    delete (window as any).electronAPI;
+  });
+
   const source = readFileSync(SETTINGS_MODAL_SOURCE, 'utf-8');
 
   const componentMatch = source.match(/export const SettingsModal: React\.FC<SettingsModalProps> = \(\{ onClose \}\) => \{([\s\S]*?)\n\};/);
@@ -49,14 +98,17 @@ describe('SettingsModal UI polish guardrails', () => {
     expect(jsx).toContain('settings-content');
   });
 
-  it('must not keep the empty settings-modal shell class on the modal root', () => {
-    const modalRootMatch = jsx.match(/modal-overlay[\s\S]*?<div[^>]*className="([^"]+)"[^>]*>/);
-    expect(modalRootMatch).not.toBeNull();
+  it('must not keep the empty settings-modal shell class on the modal root', async () => {
+    const { SettingsModal } = await import('../components/SettingsModal');
+    const { container: modalContainer } = render(React.createElement(SettingsModal, { onClose: vi.fn() }));
 
-    const modalRootClasses = modalRootMatch![1].split(/\s+/);
-    expect(modalRootClasses).toContain('modal');
-    expect(modalRootClasses).toContain('modal--large');
-    expect(modalRootClasses).not.toContain('settings-modal');
+    const modalRoot = modalContainer.querySelector('.modal');
+    expect(modalRoot).not.toBeNull();
+
+    const classList = (modalRoot as HTMLElement).classList;
+    expect(classList.contains('modal')).toBe(true);
+    expect(classList.contains('modal--large')).toBe(true);
+    expect(classList.contains('settings-modal')).toBe(false);
   });
 
   it('must consume settings tab width from token instead of hardcoded width', () => {
