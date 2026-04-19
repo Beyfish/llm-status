@@ -51,12 +51,7 @@ describe('SettingsModal UI polish guardrails', () => {
 
   it('must consume settings tab width from token instead of hardcoded width', () => {
     const globalCss = readFileSync(GLOBAL_STYLES, 'utf-8');
-    const settingsTabsMatch = globalCss.match(/\.settings-tabs\s*\{([\s\S]*?)\n\}/);
-
-    expect(settingsTabsMatch).not.toBeNull();
-
-    const settingsTabsBody = settingsTabsMatch![1];
-    expect(settingsTabsBody).toContain('width: var(--settings-tab-width);');
-    expect(settingsTabsBody).not.toContain('width: 180px;');
+    expect(globalCss).toMatch(/\.settings-tabs\s*\{[^}]*width:\s*var\(--settings-tab-width\)\s*;[^}]*\}/s);
+    expect(globalCss).not.toMatch(/\.settings-tabs\s*\{[^}]*width:\s*180px\s*;[^}]*\}/s);
   });
 });
