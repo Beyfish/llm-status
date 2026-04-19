@@ -1,4 +1,4 @@
-@import './tokens.css';
+﻿@import './tokens.css';
 
 /* Reset */
 *, *::before, *::after {
@@ -322,7 +322,7 @@ code, pre, .mono {
   }
 }
 
-/* Buttons — Claude style */
+/* Buttons ? Claude style */
 .btn {
   height: 36px;
   padding: 0 var(--space-4);

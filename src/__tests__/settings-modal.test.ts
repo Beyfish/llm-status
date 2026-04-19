@@ -44,6 +44,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
 const GLOBAL_STYLES = resolve(__dirname, '..', 'styles', 'global.css');
+const APP_SOURCE = resolve(__dirname, '..', 'App.tsx');
 const SETTINGS_MODAL_SOURCE = resolve(__dirname, '..', 'components', 'SettingsModal.tsx');
 
 async function renderSettingsModal() {
@@ -162,6 +163,13 @@ describe('SettingsModal UI polish guardrails', () => {
     expect(getRule('.settings-helper-text')).not.toContain('font-size: 12px;');
     expect(getRule('.app-header__btn')).not.toContain('font-size: 12px;');
     expect(getRule('.app-sidebar__item')).not.toContain('font-size: 13px;');
+  });
+
+  it('must not keep environment filter buttons laid out by inline sidebar styles', () => {
+    const appSource = readFileSync(APP_SOURCE, 'utf-8');
+
+    expect(appSource).not.toContain("style={{ display: 'flex', gap: '4px', marginBottom: '8px', flexWrap: 'wrap' }}");
+    expect(appSource).not.toContain("style={{ fontSize: '10px', padding: '2px 6px', height: '22px' }}");
   });
 
   it('must keep settings content mounted inside modal body settings container', async () => {
