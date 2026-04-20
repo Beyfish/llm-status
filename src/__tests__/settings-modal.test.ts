@@ -56,7 +56,7 @@ describe('SettingsModal UI polish guardrails', () => {
   beforeEach(() => {
     (window as any).electronAPI = {
       isMac: false,
-      configPath: '%USERPROFILE%\\.llm-status\\config.json',
+      configRead: vi.fn().mockResolvedValue({ settings: { configPath: 'C:\\Users\\tester\\AppData\\Roaming\\llm-status\\config.json' } }),
       setScreenProtection: vi.fn(),
       auditFetch: vi.fn().mockResolvedValue({ entries: [] }),
       auditClear: vi.fn().mockResolvedValue(undefined),
@@ -130,12 +130,44 @@ describe('SettingsModal UI polish guardrails', () => {
     expect((feedback?.getAttribute('style') ?? '')).not.toMatch(/\bmargin-top\b/i);
   });
 
+  it('must fall back to localized export/import failure copy when the bridge returns an empty message', async () => {
+    (window as any).electronAPI.credentialFileExport = vi.fn().mockResolvedValue({ success: false, message: '' });
+    (window as any).electronAPI.credentialFileImport = vi.fn().mockResolvedValue({ success: false, message: '' });
+
+    const { container, getByRole } = await renderSettingsModal();
+    fireEvent.click(getByRole('tab', { name: 'settings.advanced' }));
+
+    const passwordInput = container.querySelector('input[type="password"]') as HTMLInputElement;
+    fireEvent.change(passwordInput, { target: { value: 'passphrase123' } });
+
+    fireEvent.click(getByRole('button', { name: 'credentialBackup.export' }));
+    await waitFor(() => {
+      expect(container.textContent).toContain('credentialBackup.exportFailed');
+    });
+
+    fireEvent.click(getByRole('button', { name: 'credentialBackup.import' }));
+    await waitFor(() => {
+      expect(container.textContent).toContain('credentialBackup.importFailed');
+    });
+  });
+
   it('must render the real config path from the bridge in advanced settings', async () => {
     const { getByRole, getByText } = await renderSettingsModal();
     fireEvent.click(getByRole('tab', { name: 'settings.advanced' }));
 
-    expect(getByText(window.electronAPI.configPath)).not.toBeNull();
+    await waitFor(() => {
+      expect(getByText('C:\\Users\\tester\\AppData\\Roaming\\llm-status\\config.json')).not.toBeNull();
+    });
     expect(readFileSync(SETTINGS_MODAL_SOURCE, 'utf-8')).not.toContain('~/.llm-status/config.json');
+  });
+
+  it('must not crash advanced tab when configRead is unavailable', async () => {
+    delete (window as any).electronAPI.configRead;
+
+    const { getByRole, getByText } = await renderSettingsModal();
+    fireEvent.click(getByRole('tab', { name: 'settings.advanced' }));
+
+    expect(getByText('settings.configPathUnavailable')).not.toBeNull();
   });
 
   it('must keep settings tab semantics and active state class', async () => {
@@ -212,5 +244,14 @@ describe('SettingsModal UI polish guardrails', () => {
     expect(slideUpBlock).toContain('translateY(0)');
     expect(slideUpBlock).not.toMatch(/translate\(-50%,\s*10px\)/);
     expect(slideUpBlock).not.toMatch(/translate\(-50%,\s*0\)/);
+  });
+
+  it('must keep advanced tab renderable when the desktop bridge is missing', async () => {
+    delete (window as any).electronAPI;
+
+    const { getByRole, getByText } = await renderSettingsModal();
+    fireEvent.click(getByRole('tab', { name: 'settings.advanced' }));
+
+    expect(getByText('credentialBackup.title')).not.toBeNull();
   });
 });

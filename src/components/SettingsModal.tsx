@@ -9,11 +9,12 @@ interface SettingsModalProps {
 export const SettingsModal: React.FC<SettingsModalProps> = ({ onClose }) => {
   const { t, i18n } = useTranslation();
   const { settings, updateSettings, theme, setTheme, providers } = useStore();
-  const electronAPI = window.electronAPI;
   const [activeTab, setActiveTab] = useState<'general' | 'detection' | 'appearance' | 'advanced' | 'audit'>('general');
   const [backupPassphrase, setBackupPassphrase] = useState('');
   const [backupStatus, setBackupStatus] = useState<'idle' | 'exporting' | 'importing' | 'success' | 'error'>('idle');
   const [backupMessage, setBackupMessage] = useState('');
+  const electronAPI = window.electronAPI;
+  const [configPathDisplay, setConfigPathDisplay] = useState('...');
 
   const tabs = [
     { id: 'general' as const, label: t('settings.general') },
@@ -41,6 +42,38 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ onClose }) => {
       fetchAuditLog();
     }
   }, [activeTab, fetchAuditLog]);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    const loadConfigPath = async () => {
+      if (!electronAPI?.configRead) {
+        if (!cancelled) {
+          setConfigPathDisplay(t('settings.configPathUnavailable'));
+        }
+        return;
+      }
+
+      try {
+        const config = await electronAPI.configRead();
+        const resolvedPath = (config as { settings?: { configPath?: string } })?.settings?.configPath;
+
+        if (!cancelled) {
+          setConfigPathDisplay(resolvedPath || t('settings.configPathUnavailable'));
+        }
+      } catch {
+        if (!cancelled) {
+          setConfigPathDisplay(t('settings.configPathUnavailable'));
+        }
+      }
+    };
+
+    void loadConfigPath();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [electronAPI, t]);
 
   // Apply screen protection on mount if enabled
   useEffect(() => {
@@ -79,10 +112,11 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ onClose }) => {
       const result = await electronAPI.credentialFileExport(config, backupPassphrase);
       if (result.success) {
         setBackupStatus('success');
-        setBackupMessage(result.message);
+        setBackupMessage(result.message || t('credentialBackup.exportSuccess'));
       } else {
         setBackupStatus('error');
-        setBackupMessage(result.message);
+        const message = result.message?.trim();
+        setBackupMessage(message || t('credentialBackup.exportFailed'));
       }
     } catch {
       setBackupStatus('error');
@@ -115,7 +149,8 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ onClose }) => {
         }
       } else {
         setBackupStatus('error');
-        setBackupMessage(result.message);
+        const message = result.message?.trim();
+        setBackupMessage(message || t('credentialBackup.importFailed'));
       }
     } catch {
       setBackupStatus('error');
@@ -225,7 +260,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ onClose }) => {
               <>
                 <div className="settings-field">
                   <label>{t('settings.configPath')}</label>
-                  <code className="mono settings-code-inline">{electronAPI.configPath}</code>
+                  <code className="mono settings-code-inline">{configPathDisplay}</code>
                 </div>
 
                 {electronAPI?.isMac && (

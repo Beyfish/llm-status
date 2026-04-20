@@ -50,6 +50,16 @@ describe('Preload path regression', () => {
     });
   });
 
+  describe('source file: electron/preload.ts', () => {
+    const preloadSource = readFileSync(join(WORKTREE_ROOT, 'electron', 'preload.ts'), 'utf-8');
+
+    it('must not depend on os/path modules for renderer-visible config path', () => {
+      expect(preloadSource).not.toContain("from 'os'");
+      expect(preloadSource).not.toContain("from 'path'");
+      expect(preloadSource).not.toContain('configPath:');
+    });
+  });
+
   describe('build artifacts', () => {
     it('must produce main.js and preload.js as siblings in dist-electron/', () => {
       // Rather than parsing config text with fragile regex, verify the
