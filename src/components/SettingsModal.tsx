@@ -163,7 +163,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ onClose }) => {
       <div className="modal modal--large" onClick={(e) => e.stopPropagation()}>
         <div className="modal__header">
           <h2>{t('settings.title')}</h2>
-          <button className="modal__close" onClick={onClose} aria-label="Close">✕</button>
+          <button className="modal__close" onClick={onClose} aria-label={t('modal.close')}>✕</button>
         </div>
         <div className="modal__body modal__body--settings settings-modal__body">
           <nav className="settings-tabs" role="tablist" aria-label="Settings sections">
@@ -339,7 +339,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ onClose }) => {
                   <h3>{t('audit.title')}</h3>
                   {auditEntries.length > 0 && (
                     <button onClick={handleClearAudit} className="audit-clear-btn">
-                      Clear Log
+                      {t('audit.clear')}
                     </button>
                   )}
                 </div>

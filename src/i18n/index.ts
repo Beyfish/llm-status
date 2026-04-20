@@ -125,6 +125,7 @@ const zhCN = {
     audit: {
       title: '审计日志',
       noEntries: '暂无审计记录',
+      clear: '清空日志',
       clearConfirm: '确定要清除所有审计日志吗？',
       cleared: '审计日志已清除',
       actions: {
@@ -277,6 +278,7 @@ const enUS = {
     audit: {
       title: 'Audit Log',
       noEntries: 'No audit entries yet',
+      clear: 'Clear Log',
       clearConfirm: 'Are you sure you want to clear all audit logs?',
       cleared: 'Audit log cleared',
       actions: {
