@@ -90,7 +90,8 @@ code, pre, .mono {
   border-radius: var(--radius-btn);
   background: transparent;
   color: var(--text-secondary);
-  font-size: 12px;
+  font-size: var(--font-size-ui-sm);
+  font-weight: 500;
   cursor: pointer;
   transition: background var(--transition-fast), color var(--transition-fast);
   white-space: nowrap;
@@ -122,6 +123,24 @@ code, pre, .mono {
   padding: var(--space-3) 0;
 }
 
+.app-sidebar__filters {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-2);
+  padding: 0 var(--space-3);
+  margin-bottom: var(--space-3);
+  align-items: stretch;
+}
+
+.app-sidebar__filter {
+  min-height: 28px;
+  width: 100%;
+  justify-content: center;
+  padding: 0 var(--space-2);
+  font-size: 12px;
+  font-weight: 500;
+}
+
 .app-sidebar__item {
   display: flex;
   align-items: center;
@@ -132,7 +151,8 @@ code, pre, .mono {
   border: none;
   background: transparent;
   color: var(--text-primary);
-  font-size: 13px;
+  font-size: var(--font-size-ui-sm);
+  font-weight: 500;
   text-align: left;
   cursor: pointer;
   transition: background var(--transition-fast), box-shadow var(--transition-fast);
@@ -383,8 +403,8 @@ code, pre, .mono {
 }
 
 @keyframes slideUp {
-  from { opacity: 0; transform: translate(-50%, 10px); }
-  to { opacity: 1; transform: translate(-50%, 0); }
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 .modal {
@@ -439,7 +459,6 @@ code, pre, .mono {
 .modal__body--settings {
   padding: 0;
   display: flex;
-  min-height: 360px;
 }
 
 .modal__footer {
@@ -632,7 +651,7 @@ code, pre, .mono {
 
 /* Settings */
 .settings-tabs {
-  width: 180px;
+  width: var(--settings-tab-width);
   border-right: 1px solid var(--border-color);
   padding: var(--space-3) 0;
   flex-shrink: 0;
@@ -646,7 +665,8 @@ code, pre, .mono {
   border: none;
   background: transparent;
   color: var(--text-secondary);
-  font-size: 13px;
+  font-size: var(--font-size-ui-md);
+  font-weight: 500;
   text-align: left;
   cursor: pointer;
   transition: background var(--transition-fast), color var(--transition-fast);
@@ -675,7 +695,7 @@ code, pre, .mono {
 
 .settings-field label {
   display: block;
-  font-size: 13px;
+  font-size: var(--font-size-ui-md);
   font-weight: 500;
   margin-bottom: var(--space-2);
   color: var(--text-secondary);
@@ -689,13 +709,76 @@ code, pre, .mono {
   border-radius: var(--radius-input);
   background: var(--bg-elevated);
   color: var(--text-primary);
-  font-size: 13px;
+  font-size: var(--font-size-ui-md);
   outline: none;
 }
 
 .settings-select:focus {
   border-color: var(--focus-blue);
   box-shadow: 0px 0px 0px 1px var(--focus-blue);
+}
+
+.settings-modal__body {
+  min-height: var(--settings-panel-min-height);
+}
+
+.settings-theme-row {
+  display: flex;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+}
+
+.settings-helper-text {
+  margin-bottom: var(--space-2);
+  color: var(--text-secondary);
+  font-size: var(--font-size-ui-sm);
+  line-height: 1.5;
+  max-width: 56ch;
+}
+
+.settings-code-inline {
+  display: inline-block;
+  font-size: 12px;
+}
+
+.settings-input--password {
+  height: 40px;
+}
+
+.settings-action-row {
+  display: flex;
+  gap: var(--space-2);
+  margin-top: var(--space-3);
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.settings-feedback {
+  margin-top: var(--space-3);
+  padding: var(--space-3);
+  border-radius: var(--radius-btn);
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+.settings-feedback--success {
+  background: var(--settings-feedback-success-bg);
+  color: var(--green);
+}
+
+.settings-feedback--error {
+  background: var(--settings-feedback-error-bg);
+  color: var(--red);
+}
+
+.settings-tab:focus-visible,
+.settings-select:focus-visible,
+.settings-theme-row .btn:focus-visible {
+  outline-offset: 2px;
+}
+
+.settings-action-row .btn:disabled {
+  opacity: 0.5;
 }
 
 /* Sidebar Active */

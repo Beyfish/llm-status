@@ -2,6 +2,7 @@
 
 interface ElectronAPI {
   isMac: boolean;
+  configPath: string;
   configRead: () => Promise<any>;
   configWrite: (config: object) => Promise<void>;
   latencyCheck: (req: { providerId: string; mode: string; credentialId: string }) => Promise<void>;

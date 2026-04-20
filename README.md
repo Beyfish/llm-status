@@ -3,7 +3,7 @@
 > **One dashboard for all your LLM API keys.** Know which keys are alive, which are expiring, and how much you're spending — before production breaks.
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Tests](https://img.shields.io/badge/Tests-116%20passing-brightgreen.svg)](#)
+[![Tests](https://img.shields.io/badge/Tests-133%20passing-brightgreen.svg)](#)
 [![CI/CD](https://img.shields.io/badge/CI%2FCD-GitHub%20Actions-blue.svg)](https://github.com/Beyfish/llm-status/actions)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.9-blue.svg)](#)
 
@@ -45,7 +45,7 @@ LLM Status Manager gives you **one place to see every key's health** — with in
 ### UI/UX
 - **Sidebar-Detail Architecture** — Focused provider detail view, no duplicate information
 - **Responsive Design** — Works on any window size (375px to ultrawide)
-- **Dark/Light/System Themes** — Apple-quality design system with smooth transitions
+- **Dark/Light/System Themes** — Apple-quality design system with smooth transitions, plus a refined Settings UI and warmer packaged light theme surfaces
 - **i18n** — Chinese (zh-CN) and English (en-US) with complete coverage
 - **Accessibility** — Keyboard navigation, ARIA roles, 44px touch targets, focus-visible rings
 
@@ -72,7 +72,7 @@ LLM Status Manager gives you **one place to see every key's health** — with in
 | **Charts** | Chart.js + react-chartjs-2 |
 | **Encryption** | Electron safeStorage + Node.js crypto (AES-256-GCM) |
 | **i18n** | i18next + react-i18next |
-| **Testing** | Vitest (116 tests) |
+| **Testing** | Vitest (133 tests) |
 | **Packaging** | electron-builder |
 
 ## Quick Start
@@ -149,7 +149,7 @@ llm-status/
 │   ├── types/                  # TypeScript type definitions
 │   ├── utils/                  # Utility functions (key validation, etc.)
 │   ├── i18n/                   # Internationalization (zh-CN, en-US)
-│   ├── __tests__/              # Test suite (116 tests)
+│   ├── __tests__/              # Test suite (133 tests)
 │   ├── App.tsx                 # Root component (sidebar-detail layout)
 │   └── main.tsx                # React entry point
 ├── public/

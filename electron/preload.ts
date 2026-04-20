@@ -1,8 +1,8 @@
-import { contextBridge, ipcRenderer, process as electronProcess } from 'electron';
+import { contextBridge, ipcRenderer } from 'electron';
 
 const electronAPI = {
   // Platform info (renderer-safe)
-  isMac: electronProcess.platform === 'darwin',
+  isMac: process.platform === 'darwin',
 
   // Config
   configRead: () => ipcRenderer.invoke('config:read'),

@@ -221,12 +221,11 @@ const App: React.FC = () => {
       <main className="app-main">
         <aside className="app-sidebar">
           <nav className="app-sidebar__nav">
-            <div style={{ display: 'flex', gap: '4px', marginBottom: '8px', flexWrap: 'wrap' }}>
+            <div className="app-sidebar__filters">
               {(['all', 'personal', 'work', 'production', 'staging'] as const).map((env) => (
                 <button
                   key={env}
-                  className={`btn ${envFilter === env ? 'btn--primary' : 'btn--ghost'}`}
-                  style={{ fontSize: '10px', padding: '2px 6px', height: '22px' }}
+                  className={`app-sidebar__filter btn ${envFilter === env ? 'btn--primary' : 'btn--ghost'}`}
                   onClick={() => setEnvFilter(env)}
                 >
                   {env === 'all' ? 'All' : env.charAt(0).toUpperCase() + env.slice(1)}
