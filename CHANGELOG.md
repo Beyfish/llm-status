@@ -1,7 +1,17 @@
-# Changelog
+﻿# Changelog
 
 All notable changes to this project will be documented in this file.
 
+## [0.2.0.9] - 2026-04-20
+
+### Changed
+- SettingsModal 的可读性、中文文案和 light 模式底色进一步收口，界面在打包 EXE 中与本地开发态更一致
+- 主界面环境筛选按钮改为语义化布局，两列排列更稳定，不再贴边拥挤
+
+### Fixed
+- 打包 EXE 中打开 Settings Advanced 不再黑屏，配置路径显示改为真实 bridge 读取路径
+- 凭证导入/导出在 bridge 可用时不再误报“当前版本暂不支持”，fallback 文案也更准确
+- Settings 相关回归护栏补强，覆盖 packaged behavior、preload 约束和关键 UI contract
 ## [0.2.0.8] - 2026-04-05
 
 ### Fixed
@@ -97,3 +107,4 @@ All notable changes to this project will be documented in this file.
 - Latency chart range filter ignored (always showed 24h)
 - Dead code (ipc-listeners.ts) removed
 - Export push stops on first failure without partial success reporting
+
