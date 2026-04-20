@@ -249,6 +249,7 @@ const enUS = {
       passphraseTooShort: 'Passphrase must be at least 8 characters',
       unavailableExport: 'Desktop bridge is unavailable, so credentials cannot be exported',
       unavailableImport: 'Desktop bridge is unavailable, so credentials cannot be imported',
+      exportSuccess: 'Export completed',
       exportFailed: 'Export failed',
       importFailed: 'Import failed',
       importedCount: 'Imported {{count}} providers',

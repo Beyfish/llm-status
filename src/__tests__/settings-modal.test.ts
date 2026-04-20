@@ -182,7 +182,8 @@ describe('SettingsModal UI polish guardrails', () => {
     const globalCss = readFileSync(GLOBAL_STYLES, 'utf-8');
 
     const getRule = (selector: string) => {
-      const match = globalCss.match(new RegExp(`${selector}\\s*\\{[\\s\\S]*?\\}`));
+      const escapedSelector = selector.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      const match = globalCss.match(new RegExp(`${escapedSelector}\\s*\\{[\\s\\S]*?\\}`));
 
       expect(match, `missing CSS rule for ${selector}`).not.toBeNull();
 
@@ -246,12 +247,13 @@ describe('SettingsModal UI polish guardrails', () => {
     expect(slideUpBlock).not.toMatch(/translate\(-50%,\s*0\)/);
   });
 
-  it('must keep advanced tab renderable when the desktop bridge is missing', async () => {
-    delete (window as any).electronAPI;
+  it('must keep advanced tab renderable when configRead is unavailable', async () => {
+    delete (window as any).electronAPI.configRead;
 
     const { getByRole, getByText } = await renderSettingsModal();
     fireEvent.click(getByRole('tab', { name: 'settings.advanced' }));
 
+    expect(getByText('settings.configPathUnavailable')).not.toBeNull();
     expect(getByText('credentialBackup.title')).not.toBeNull();
   });
 });
