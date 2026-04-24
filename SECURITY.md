@@ -81,7 +81,7 @@ OAuth tokens (access tokens, refresh tokens) are stored with the same safeStorag
 |--------|------|------------|
 | **Spoofing** — Malicious renderer process | Medium | `sandbox: true`, `contextIsolation: true` |
 | **Tampering** — Config file modification | Low | safeStorage encryption prevents meaningful tampering |
-| **Repudiation** — No audit trail | Medium | Not implemented yet (see Known Limitations) |
+| **Repudiation** — No audit trail | Low | Audit logging implemented (v0.2.0.2) |
 | **Information Disclosure** — Clipboard leak | Low | Clipboard export redacts secrets |
 | **Denial of Service** — Rate limiting | Low | Not applicable (local app) |
 | **Elevation of Privilege** — IPC handler abuse | Medium | Preload bridge exposes only specific handlers |
@@ -110,12 +110,12 @@ OAuth tokens (access tokens, refresh tokens) are stored with the same safeStorag
 
 ### Known Limitations
 
-| # | Severity | Issue | Planned Fix |
-|---|----------|-------|-------------|
-| 1 | **MEDIUM** | No audit logging for credential access | v0.3.0 |
-| 2 | **LOW** | Memory not zeroed after decryption | v0.3.0 (Node.js limitation) |
-| 3 | **LOW** | No screen recording protection (macOS) | v0.3.0 |
-| 4 | **LOW** | Clipboard not auto-cleared after copy | v0.3.0 |
+| # | Severity | Issue | Status |
+|---|----------|-------|--------|
+| 1 | ~~MEDIUM~~ | ~~No audit logging for credential access~~ | **Resolved** (v0.2.0.2) — `electron/ipc/audit.ts` |
+| 2 | LOW | Memory not zeroed after decryption | v0.3.0 (Node.js limitation) |
+| 3 | ~~LOW~~ | ~~No screen recording protection (macOS)~~ | **Resolved** (v0.2.0.3) |
+| 4 | ~~LOW~~ | ~~Clipboard not auto-cleared after copy~~ | **Resolved** (v0.2.0.2) — `electron/ipc/clipboard.ts` |
 
 ## Dependency Security
 

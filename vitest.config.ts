@@ -14,6 +14,7 @@ export default defineConfig({
       '**/node_modules/**',
       '**/llm-status/**',
       '**/.worktrees/**',
+      '**/e2e/**',
     ],
   },
   resolve: {

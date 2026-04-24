@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.2.0.9] - 2026-04-24
+
+### Added
+- Playwright E2E test suite (5 tests): app launch, window visibility, title verification, black screen regression, settings modal, provider sidebar
+- Build artifact regression test: detects localhost:5173/3000 leakage, VITE_DEV_SERVER_URL placeholders, and unreplaced import.meta.env.DEV in dist-electron/main.js
+- `npm run test:e2e:after-build` script for one-command build + E2E validation
+
+### Fixed
+- Vitest no longer picks up Playwright E2E tests (added `**/e2e/**` to exclude list)
+- Playwright config now uses correct executable path (`LLM Status.exe` instead of `llm-status.exe`)
+- package.json version aligned to 0.2.0.9 to match VERSION file
+
 ## [0.2.0.9] - 2026-04-20
 
 ### Changed

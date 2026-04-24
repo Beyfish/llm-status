@@ -3,7 +3,7 @@
 > **One dashboard for all your LLM API keys.** Know which keys are alive, which are expiring, and how much you're spending — before production breaks.
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Tests](https://img.shields.io/badge/Tests-133%20passing-brightgreen.svg)](#)
+[![Tests](https://img.shields.io/badge/Tests-137%20passing-brightgreen.svg)](#)
 [![CI/CD](https://img.shields.io/badge/CI%2FCD-GitHub%20Actions-blue.svg)](https://github.com/Beyfish/llm-status/actions)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.9-blue.svg)](#)
 
@@ -72,7 +72,7 @@ LLM Status Manager gives you **one place to see every key's health** — with in
 | **Charts** | Chart.js + react-chartjs-2 |
 | **Encryption** | Electron safeStorage + Node.js crypto (AES-256-GCM) |
 | **i18n** | i18next + react-i18next |
-| **Testing** | Vitest (133 tests) |
+| **Testing** | Vitest (137 tests) + Playwright E2E (5 tests) |
 | **Packaging** | electron-builder |
 
 ## Quick Start
@@ -149,11 +149,15 @@ llm-status/
 │   ├── types/                  # TypeScript type definitions
 │   ├── utils/                  # Utility functions (key validation, etc.)
 │   ├── i18n/                   # Internationalization (zh-CN, en-US)
-│   ├── __tests__/              # Test suite (133 tests)
+│   ├── __tests__/              # Unit tests (137 tests, Vitest)
 │   ├── App.tsx                 # Root component (sidebar-detail layout)
 │   └── main.tsx                # React entry point
+├── e2e/
+│   └── app-launch.spec.ts      # Playwright E2E tests (5 tests)
 ├── public/
 │   └── index.html              # HTML entry point
+├── playwright.config.ts        # Playwright E2E configuration
+├── vitest.config.ts            # Vitest unit test configuration
 ├── DESIGN.md                   # Design system documentation
 ├── TODOS.md                    # Work tracking
 ├── CHANGELOG.md                # Version history

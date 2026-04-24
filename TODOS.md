@@ -75,14 +75,7 @@ Updated: 2026-04-04
 
 ### TODO #12: Add audit logging for credential access
 
-**What:** Log when credentials are accessed, modified, or exported
-**Why:** Security compliance and incident investigation
-**Pros:** Trace credential access, detect unauthorized access, compliance readiness
-**Cons:** Adds storage overhead, needs log rotation
-**Context:** Identified in SECURITY.md as a known limitation.
-**Effort:** M (human: ~2 days / CC: ~30 min)
-**Priority:** P2
-**Depends on:** None
+**Completed:** v0.2.0.2 (2026-04-04) — Implemented in `electron/ipc/audit.ts` with `audit:record`, `audit:fetch`, and `audit:clear` handlers. Tracks providerId, action, and detail for all credential access events.
 
 ---
 
