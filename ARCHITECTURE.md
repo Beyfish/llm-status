@@ -149,10 +149,12 @@ Response → Zustand Store → React Re-render
 | `latency.ts` | `latency:check`, `latency:checkAll` | Provider latency detection |
 | `sync.ts` | `sync:upload`, `sync:download`, `sync:test`, `sync:checkConflict` | Cloud sync with conflict detection |
 | `export.ts` | `export:push`, `export:file`, `export:clipboard` | Export to third-party tools |
-| `oauth.ts` | `oauth:start` | OAuth 2.0 authorization code flow |
+| `oauth.ts` | `oauth:start`, `oauth:refresh` | OAuth 2.0 authorization code flow |
 | `usage.ts` | `usage:fetch`, `usage:record`, `usage:summary` | Usage tracking and cost estimation |
-| `webhook.ts` | `webhook:notify`, `webhook:test` | Webhook notifications |
+| `webhook.ts` | `webhook:send`, `webhook:test`, `notify:desktop`, `notify:all` | Webhook notifications |
 | `promptTest.ts` | `prompt:test` | Live prompt testing |
+| `audit.ts` | `audit:record`, `audit:fetch`, `audit:clear` | Credential access audit logging |
+| `clipboard.ts` | `clipboard:writeAndClear` | Clipboard auto-clear after credential copy |
 
 ## Data Model
 
@@ -258,7 +260,7 @@ electron-vite build
     │
     ▼
 electron-builder
-    └── release/LLM Status-0.1.0.exe (portable)
+    └── release/LLM Status-0.2.0.9.exe (portable)
 ```
 
 ## Design Decisions
