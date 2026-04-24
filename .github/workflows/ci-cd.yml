@@ -135,14 +135,16 @@ jobs:
         if: steps.version_change.outputs.changed == 'true'
         shell: bash
         run: |
-          VERSION=$(tr -d '\n' < VERSION)
+          VERSION=$(sed '1s/^\xEF\xBB\xBF//' VERSION)
+          VERSION=${VERSION%$'\r'}
           bun scripts/release/print-release-notes.ts "$VERSION" > release-notes.md
           test -s release-notes.md
       - name: Create GitHub Release
         if: steps.version_change.outputs.changed == 'true'
         shell: bash
         run: |
-          VERSION=$(tr -d '\n' < VERSION)
+          VERSION=$(sed '1s/^\xEF\xBB\xBF//' VERSION)
+          VERSION=${VERSION%$'\r'}
           TAG="v$VERSION"
           gh release create "$TAG" dist/**/* --title "$TAG" --notes-file release-notes.md
         env:
