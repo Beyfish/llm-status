@@ -1,6 +1,6 @@
 {
   "name": "llm-status",
-  "version": "0.2.0.9",
+  "version": "0.2.0",
   "description": "LLM API Status Manager - Monitor and manage all your LLM API providers in one place",
   "main": "dist-electron/main.js",
   "author": "LLM Status Team",
