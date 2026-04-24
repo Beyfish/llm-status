@@ -13,3 +13,5 @@ dist-electron/
 docs/
 llm-status/
 
+
+.context/
