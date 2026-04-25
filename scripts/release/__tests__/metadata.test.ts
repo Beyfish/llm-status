@@ -1,4 +1,6 @@
 import { describe, expect, it } from 'vitest';
+import { readFileSync } from 'fs';
+import { resolve } from 'path';
 
 import {
   extractReleaseNotes,
@@ -73,5 +75,26 @@ describe('release metadata', () => {
     const notes = extractReleaseNotes(changelog, '0.2.0.2');
     expect(notes).toContain('first');
     expect(notes).not.toContain('second');
+  });
+});
+
+describe('VERSION file BOM guard', () => {
+  const WORKTREE_ROOT = resolve(__dirname, '../../..');
+  const VERSION_PATH = resolve(WORKTREE_ROOT, 'VERSION');
+
+  it('must NOT start with UTF-8 BOM', () => {
+    const raw = readFileSync(VERSION_PATH);
+    const hasBOM = raw[0] === 0xEF && raw[1] === 0xBB && raw[2] === 0xBF;
+    expect(hasBOM).toBe(false);
+  });
+
+  it('must match release version format (X.Y.Z or X.Y.Z.W)', () => {
+    const content = readFileSync(VERSION_PATH, 'utf-8').trim();
+    expect(content).toMatch(/^\d+\.\d+\.\d+(\.\d+)?$/);
+  });
+
+  it('must not contain whitespace or newlines', () => {
+    const content = readFileSync(VERSION_PATH, 'utf-8');
+    expect(content).not.toMatch(/[\s]/);
   });
 });

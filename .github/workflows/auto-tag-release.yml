@@ -46,8 +46,28 @@ jobs:
         if: steps.version_change.outputs.changed == 'true'
         shell: bash
         run: |
-          VERSION=$(tr -d '\n' < VERSION)
+          # Read VERSION, strip only a leading UTF-8 BOM and a single trailing CR from CRLF.
+          # Command substitution already removes trailing newlines; reject any other whitespace.
+          VERSION=$(sed '1s/^\xEF\xBB\xBF//' VERSION)
+          VERSION=${VERSION%$'\r'}
+
+          if [[ "$VERSION" =~ [[:space:]] ]]; then
+            echo "ERROR: VERSION contains unexpected whitespace"
+            echo "Normalized VERSION value: '$VERSION'"
+            echo "Normalized VERSION value (hex):"
+            printf '%s' "$VERSION" | xxd -p -c 32
+            exit 1
+          fi
+
           TAG="v$VERSION"
+
+          # Validate tag format: must be vX.Y.Z or vX.Y.Z.W
+          if ! echo "$TAG" | grep -qE '^v[0-9]+\.[0-9]+\.[0-9]+(\.[0-9]+)?$'; then
+            echo "ERROR: Invalid tag format: '$TAG'"
+            echo "Normalized VERSION value (hex):"
+            printf '%s' "$VERSION" | xxd -p -c 32
+            exit 1
+          fi
 
           git fetch --tags
 
